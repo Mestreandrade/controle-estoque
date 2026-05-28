@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>Controle de Estoque</title>
+
+  <style>
+
+    body{
+      font-family: Arial;
+      background: #f4f4f4;
+      padding: 30px;
+    }
+
+    h1{
+      color: #333;
+    }
+
+    .card{
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 700px;
+    }
+
+    input{
+      padding: 10px;
+      margin: 5px;
+      width: 200px;
+    }
+
+    button{
+      padding: 10px 20px;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    .btn-add{
+      background: green;
+      color: white;
+    }
+
+    .btn-delete{
+      background: red;
+      color: white;
+    }
+
+    table{
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+
+    table th{
+      background: #333;
+      color: white;
+      padding: 10px;
+    }
+
+    table td{
+      padding: 10px;
+      border-bottom: 1px solid #ddd;
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <div class="card">
+
+    <h1>Controle de Estoque</h1>
+
+    <input
+      type="text"
+      id="produto"
+      placeholder="Nome do Produto"
+    >
+
+    <input
+      type="number"
+      id="quantidade"
+      placeholder="Quantidade"
+    >
+
+    <button
+      class="btn-add"
+      onclick="adicionarProduto()"
+    >
+      Adicionar
+    </button>
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Quantidade</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+
+      <tbody id="tabelaProdutos">
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+  <script>
+
+    carregarProdutos();
+
+
+
+    async function adicionarProduto(){
+
+      let produto =
+        document.getElementById("produto").value;
+
+      let quantidade =
+        document.getElementById("quantidade").value;
+
+      if(produto == "" || quantidade == ""){
+
+        alert("Preencha os campos");
+
+        return;
+
+      }
+
+      const resposta = await fetch("/produtos", {
+
+        method: "POST",
+
+        headers: {
+          "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+
+          nome: produto,
+          quantidade: quantidade
+
+        })
+
+      });
+
+      const resultado = await resposta.text();
+
+      alert(resultado);
+
+      document.getElementById("produto").value = "";
+
+      document.getElementById("quantidade").value = "";
+
+      carregarProdutos();
+
+    }
+
+
+
+    async function carregarProdutos(){
+
+      const resposta =
+        await fetch("/produtos");
+
+      const produtos =
+        await resposta.json();
+
+      let tabela =
+        document.getElementById("tabelaProdutos");
+
+      tabela.innerHTML = "";
+
+      produtos.forEach((item) => {
+
+        tabela.innerHTML += `
+          <tr>
+            <td>${item.nome}</td>
+            <td>${item.quantidade}</td>
+            <td>
+              <button
+                class="btn-delete"
+                onclick="excluirProduto(${item.id})"
+              >
+                Excluir
+              </button>
+            </td>
+          </tr>
+        `;
+
+      });
+
+    }
+
+
+
+    async function excluirProduto(id){
+
+      const resposta = await fetch(
+
+        "/produtos/" + id,
+
+        {
+          method: "DELETE"
+        }
+
+      );
+
+      const resultado = await resposta.text();
+
+      alert(resultado);
+
+      carregarProdutos();
+
+    }
+
+  </script>
+
+</body>
+</html>
