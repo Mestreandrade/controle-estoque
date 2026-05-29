@@ -128,6 +128,28 @@
   <button id="btnSalvarRack" class="btn-azul" onclick="salvarRack()">Cadastrar Rack</button>
   <button class="btn-cinza" onclick="limparFormularioRack()">Limpar</button>
 
+<hr>
+
+<h3>Cadastro Rápido de Racks</h3>
+
+<input type="text" id="rackRua" placeholder="Rua Ex: R1">
+<input type="number" id="rackNivelInicial" placeholder="Nível inicial Ex: 1">
+<input type="number" id="rackNivelFinal" placeholder="Nível final Ex: 3">
+<input type="number" id="rackPosicaoInicial" placeholder="Posição inicial Ex: 1">
+<input type="number" id="rackPosicaoFinal" placeholder="Posição final Ex: 72">
+
+<br>
+
+<button class="btn-verde" onclick="cadastrarRacksRapido()">
+  Gerar e Cadastrar Racks
+</button>
+
+
+
+
+
+
+
   <table>
     <thead>
       <tr>
@@ -755,6 +777,66 @@ async function carregarRacks(){
   carregarRacksEntrada();
   carregarRacksSaida();
   atualizarDashboard();
+}
+
+async function cadastrarRacksRapido(){
+
+  const rua = document.getElementById("rackRua").value;
+  const nivelInicial = Number(document.getElementById("rackNivelInicial").value);
+  const nivelFinal = Number(document.getElementById("rackNivelFinal").value);
+  const posicaoInicial = Number(document.getElementById("rackPosicaoInicial").value);
+  const posicaoFinal = Number(document.getElementById("rackPosicaoFinal").value);
+
+  if(
+    rua == "" ||
+    nivelInicial <= 0 ||
+    nivelFinal <= 0 ||
+    posicaoInicial <= 0 ||
+    posicaoFinal <= 0
+  ){
+    alert("Preencha todos os campos do cadastro rápido");
+    return;
+  }
+
+  let total = 0;
+  let erros = 0;
+
+  for(let nivel = nivelInicial; nivel <= nivelFinal; nivel++){
+
+    for(let posicao = posicaoInicial; posicao <= posicaoFinal; posicao++){
+
+      const nivelFormatado = String(nivel).padStart(3, "0");
+      const posicaoFormatada = String(posicao).padStart(3, "0");
+
+      const endereco = `${rua}.${nivelFormatado}.${posicaoFormatada}`;
+
+      const resposta = await fetch("/racks", {
+        method: "POST",
+        headers: headersComPerfil(),
+        body: JSON.stringify({endereco})
+      });
+
+      const resultado = await resposta.text();
+
+      if(resultado.includes("sucesso")){
+        total++;
+      } else {
+        erros++;
+      }
+
+    }
+
+  }
+
+  alert(`Cadastro concluído. Racks cadastrados: ${total}. Erros/duplicados: ${erros}`);
+
+  document.getElementById("rackRua").value = "";
+  document.getElementById("rackNivelInicial").value = "";
+  document.getElementById("rackNivelFinal").value = "";
+  document.getElementById("rackPosicaoInicial").value = "";
+  document.getElementById("rackPosicaoFinal").value = "";
+
+  carregarRacks();
 }
 
 /* ENTRADA E SAÍDA */
