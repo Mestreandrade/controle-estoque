@@ -1,228 +1,1201 @@
 <!DOCTYPE html>
 <html lang="pt-br">
-
 <head>
-
   <meta charset="UTF-8">
-
   <title>Controle de Estoque</title>
 
   <style>
+    body{font-family:Arial;margin:0;background:#f4f4f4;}
+    header{background:#1f2937;color:white;padding:20px;text-align:center;}
+    nav{background:#111827;padding:10px;text-align:center;}
+    nav button{background:#374151;color:white;border:none;padding:12px 18px;margin:5px;cursor:pointer;border-radius:5px;}
+    nav button:hover{background:#2563eb;}
+    .container{padding:25px;}
+    .tela{display:none;background:white;padding:20px;border-radius:10px;}
+    .ativa{display:block;}
+    input, select{padding:10px;margin:6px;width:230px;}
+    button{padding:10px 18px;border:none;border-radius:5px;cursor:pointer;margin:4px;}
+    .btn-azul{background:#2563eb;color:white;}
+    .btn-verde{background:green;color:white;}
+    .btn-vermelho{background:#c0392b;color:white;}
+    .btn-cinza{background:#6b7280;color:white;}
+    .btn-amarelo{background:#f59e0b;color:white;}
+    table{width:100%;margin-top:20px;border-collapse:collapse;}
+    th{background:#333;color:white;padding:10px;}
+    td{padding:10px;border-bottom:1px solid #ddd;text-align:center;}
+    .descricao{font-weight:bold;color:#2563eb;margin-left:10px;}
+    img{max-width:60px;max-height:60px;border-radius:6px;}
+    .cards-dashboard{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px;}
+    .card-indicador{background:#f9fafb;padding:20px;border-radius:10px;min-width:180px;text-align:center;border:1px solid #ddd;}
+    .card-indicador h3{margin:0;color:#333;}
+    .card-indicador p{font-size:24px;font-weight:bold;color:#2563eb;}
+    .barra{background:#ddd;height:22px;border-radius:10px;overflow:hidden;}
+    .barra div{background:#2563eb;height:22px;color:white;text-align:center;font-size:12px;line-height:22px;}
 
-    body{
-      font-family: Arial;
-      background: #f4f4f4;
-      padding: 30px;
+    #loginBox{
+      max-width:400px;
+      margin:80px auto;
+      background:white;
+      padding:30px;
+      border-radius:10px;
+      text-align:center;
     }
 
-    h1{
-      color: #333;
+    #sistema{
+      display:none;
     }
 
-    .card{
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 700px;
+    .usuario-logado{
+      background:#e5e7eb;
+      padding:10px;
+      text-align:right;
+      font-weight:bold;
     }
-
-    input{
-      padding: 10px;
-      margin: 5px;
-      width: 200px;
-    }
-
-    button{
-      padding: 10px 20px;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .btn-add{
-      background: green;
-      color: white;
-    }
-
-    .btn-delete{
-      background: red;
-      color: white;
-    }
-
-    table{
-      width: 100%;
-      margin-top: 20px;
-      border-collapse: collapse;
-    }
-
-    table th{
-      background: #333;
-      color: white;
-      padding: 10px;
-    }
-
-    table td{
-      padding: 10px;
-      border-bottom: 1px solid #ddd;
-    }
-
   </style>
-
 </head>
 
 <body>
 
-  <div class="card">
+<div id="loginBox">
+  <h2>Login do Sistema</h2>
 
-    <h1>Controle de Estoque</h1>
+  <input type="text" id="loginUsuario" placeholder="Usuário">
+  <br>
+  <input type="password" id="loginSenha" placeholder="Senha">
+  <br>
 
-    <input
-      type="text"
-      id="produto"
-      placeholder="Nome do Produto"
-    >
+  <button class="btn-azul" onclick="fazerLogin()">Entrar</button>
 
-    <input
-      type="number"
-      id="quantidade"
-      placeholder="Quantidade"
-    >
+  <p>Usuário inicial: <b>admin</b> | Senha: <b>123</b></p>
+</div>
 
-    <button
-      class="btn-add"
-      onclick="adicionarProduto()"
-    >
-      Adicionar
-    </button>
+<div id="sistema">
 
-    <table>
+<header>
+  <h1>Controle de Estoque</h1>
+</header>
 
-      <thead>
-        <tr>
-          <th>Produto</th>
-          <th>Quantidade</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
+<div class="usuario-logado">
+  Usuário: <span id="nomeUsuarioLogado"></span> |
+  Perfil: <span id="perfilUsuarioLogado"></span>
+  <button class="btn-vermelho" onclick="sairSistema()">Sair</button>
+</div>
 
-      <tbody id="tabelaProdutos">
+<nav>
+  <button class="menu-admin" onclick="abrirTela('produtos')">Produtos</button>
+  <button class="menu-admin" onclick="abrirTela('racks')">Racks</button>
+  <button class="menu-admin" onclick="abrirTela('usuarios')">Usuários</button>
+  <button class="menu-operador" onclick="abrirTela('entrada')">Entrada</button>
+  <button class="menu-operador" onclick="abrirTela('saida')">Saída</button>
+  <button onclick="abrirTela('consulta')">Consulta</button>
+  <button onclick="abrirTela('saldo')">Saldo Geral</button>
+  <button onclick="abrirTela('dashboard')">Dashboard</button>
+  <button onclick="abrirTela('historico')">Histórico</button>
+</nav>
 
-      </tbody>
+<div class="container">
 
-    </table>
+<section id="produtos" class="tela ativa">
+  <h2>Cadastro de Produtos</h2>
 
+  <input type="hidden" id="produtoId">
+
+  <input type="text" id="codigoProduto" placeholder="Código">
+  <input type="text" id="nomeProduto" placeholder="Nome do Produto">
+  <input type="file" id="imagemProduto" accept="image/*">
+
+  <button id="btnSalvarProduto" class="btn-azul" onclick="salvarProduto()">Cadastrar Produto</button>
+  <button class="btn-cinza" onclick="limparFormularioProduto()">Limpar</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Imagem</th>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaProdutos"></tbody>
+  </table>
+</section>
+
+<section id="racks" class="tela">
+  <h2>Cadastro de Racks</h2>
+
+  <input type="hidden" id="rackId">
+  <input type="text" id="enderecoRack" placeholder="Ex: R01.002.24">
+
+  <button id="btnSalvarRack" class="btn-azul" onclick="salvarRack()">Cadastrar Rack</button>
+  <button class="btn-cinza" onclick="limparFormularioRack()">Limpar</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Rack</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaRacks"></tbody>
+  </table>
+</section>
+
+<section id="usuarios" class="tela">
+
+  <h2>Cadastro de Usuários</h2>
+
+  <input type="hidden" id="usuarioId">
+
+  <input
+    type="text"
+    id="nomeUsuario"
+    placeholder="Nome"
+  >
+
+  <input
+    type="text"
+    id="loginUsuarioNovo"
+    placeholder="Usuário"
+  >
+
+  <input
+    type="password"
+    id="senhaUsuario"
+    placeholder="Senha"
+  >
+
+  <select id="perfilUsuario">
+    <option value="ADMIN">ADMIN</option>
+    <option value="OPERADOR">OPERADOR</option>
+    <option value="CONSULTA">CONSULTA</option>
+  </select>
+
+  <button
+    id="btnSalvarUsuario"
+    class="btn-azul"
+    onclick="salvarUsuario()"
+  >
+    Cadastrar Usuário
+  </button>
+
+  <button
+    class="btn-cinza"
+    onclick="limparFormularioUsuario()"
+  >
+    Limpar
+  </button>
+
+  <table>
+
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Usuário</th>
+        <th>Perfil</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+
+    <tbody id="tabelaUsuarios"></tbody>
+
+  </table>
+
+</section>
+
+
+<section id="entrada" class="tela">
+  <h2>Entrada de Estoque</h2>
+
+  <input type="text" id="entradaCodigo" placeholder="Código do Produto" onblur="buscarProdutoEntrada()">
+  <span id="descricaoEntrada" class="descricao"></span>
+  <br>
+
+  <input type="text" id="entradaLote" placeholder="Lote">
+  <select id="entradaRack"></select>
+  <input type="number" id="entradaQuantidade" placeholder="Quantidade">
+
+  <button class="btn-azul" onclick="adicionarEntradaLista()">Adicionar à Lista</button>
+  <button class="btn-verde" onclick="processarEntradas()">Processar Entradas</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Lote</th>
+        <th>Rack</th>
+        <th>Quantidade</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaEntradaLista"></tbody>
+  </table>
+</section>
+
+<section id="saida" class="tela">
+  <h2>Saída de Estoque</h2>
+
+  <input type="text" id="saidaCodigo" placeholder="Código do Produto" onblur="buscarProdutoSaida()">
+  <span id="descricaoSaida" class="descricao"></span>
+  <br>
+
+  <input type="text" id="saidaLote" placeholder="Lote">
+  <select id="saidaRack"></select>
+  <input type="number" id="saidaQuantidade" placeholder="Quantidade">
+
+  <button class="btn-azul" onclick="adicionarSaidaLista()">Adicionar à Lista</button>
+  <button class="btn-vermelho" onclick="processarSaidas()">Processar Saídas</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Lote</th>
+        <th>Rack</th>
+        <th>Quantidade</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaSaidaLista"></tbody>
+  </table>
+</section>
+
+<section id="consulta" class="tela">
+  <h2>Consulta de Estoque</h2>
+
+  <input type="text" id="filtroConsulta" placeholder="Buscar código, produto, lote ou rack" onkeyup="filtrarEstoque()">
+
+  <button class="btn-cinza" onclick="imprimirTabela('tabelaEstoque')">Imprimir</button>
+  <button class="btn-cinza" onclick="exportarCSV('tabelaEstoque','estoque.csv')">Exportar CSV</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Imagem</th>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Lote</th>
+        <th>Rack</th>
+        <th>Quantidade</th>
+        <th>Data Entrada</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaEstoque"></tbody>
+  </table>
+</section>
+
+<section id="saldo" class="tela">
+  <h2>Saldo Geral por Produto</h2>
+
+  <div class="card-indicador">
+    <h3>Estoque Total Geral</h3>
+    <p id="estoqueTotalGeral">0</p>
   </div>
 
-  <script>
+  <input type="text" id="filtroSaldo" placeholder="Buscar por código ou produto" onkeyup="filtrarSaldo()">
 
-    carregarProdutos();
+  <button class="btn-cinza" onclick="imprimirTabela('tabelaSaldo')">Imprimir</button>
+  <button class="btn-cinza" onclick="exportarCSV('tabelaSaldo','saldo-geral.csv')">Exportar CSV</button>
 
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Saldo Total</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaSaldo"></tbody>
+  </table>
+</section>
 
+<section id="dashboard" class="tela">
+  <h2>Dashboard de Ocupação</h2>
 
-    async function adicionarProduto(){
+  <div class="cards-dashboard">
+    <div class="card-indicador"><h3>Total de Racks</h3><p id="dashTotalRacks">0</p></div>
+    <div class="card-indicador"><h3>Racks Ocupados</h3><p id="dashRacksOcupados">0</p></div>
+    <div class="card-indicador"><h3>Racks Livres</h3><p id="dashRacksLivres">0</p></div>
+    <div class="card-indicador"><h3>Ocupação Geral</h3><p id="dashOcupacao">0%</p></div>
+    <div class="card-indicador"><h3>Estoque Total</h3><p id="dashEstoqueTotal">0</p></div>
+  </div>
 
-      let produto =
-        document.getElementById("produto").value;
+  <h3>Ocupação por Produto</h3>
 
-      let quantidade =
-        document.getElementById("quantidade").value;
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Racks Ocupados</th>
+        <th>% Ocupação</th>
+        <th>Gráfico</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaDashboardProduto"></tbody>
+  </table>
+</section>
 
-      if(produto == "" || quantidade == ""){
+<section id="historico" class="tela">
+  <h2>Histórico de Movimentações</h2>
 
-        alert("Preencha os campos");
+  <input type="text" id="filtroHistorico" placeholder="Buscar histórico" onkeyup="filtrarHistorico()">
 
-        return;
+  <button class="btn-cinza" onclick="imprimirTabela('tabelaMovimentacoes')">Imprimir</button>
+  <button class="btn-cinza" onclick="exportarCSV('tabelaMovimentacoes','historico.csv')">Exportar CSV</button>
 
-      }
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Lote</th>
+        <th>Rack</th>
+        <th>Tipo</th>
+        <th>Quantidade</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaMovimentacoes"></tbody>
+  </table>
+</section>
 
-      const resposta = await fetch("/produtos", {
+</div>
+</div>
 
-        method: "POST",
+<script>
+let usuarioLogado = null;
+let listaProdutos = [];
+let listaRacks = [];
+let listaEstoque = [];
+let listaHistorico = [];
+let listaSaldo = [];
+let listaEntrada = [];
+let listaSaida = [];
+let listaUsuarios = [];
 
-        headers: {
-          "Content-Type": "application/json"
-        },
+function perfilAtual(){
+  return usuarioLogado ? usuarioLogado.perfil : "";
+}
 
-        body: JSON.stringify({
+function headersComPerfil(){
+  return {
+    "Content-Type": "application/json",
+    "perfil": perfilAtual()
+  };
+}
 
-          nome: produto,
-          quantidade: quantidade
+async function fazerLogin(){
+  const usuario = document.getElementById("loginUsuario").value;
+  const senha = document.getElementById("loginSenha").value;
 
-        })
+  const resposta = await fetch("/login", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({usuario, senha})
+  });
 
-      });
+  const dados = await resposta.json();
 
-      const resultado = await resposta.text();
+  if(!dados.sucesso){
+    alert(dados.mensagem);
+    return;
+  }
 
-      alert(resultado);
+  usuarioLogado = dados.usuario;
 
-      document.getElementById("produto").value = "";
+  document.getElementById("loginBox").style.display = "none";
+  document.getElementById("sistema").style.display = "block";
 
-      document.getElementById("quantidade").value = "";
+  document.getElementById("nomeUsuarioLogado").innerText = usuarioLogado.nome;
+  document.getElementById("perfilUsuarioLogado").innerText = usuarioLogado.perfil;
 
-      carregarProdutos();
+  aplicarPermissoes();
+  carregarTudo();
+}
 
+function sairSistema(){
+  usuarioLogado = null;
+  location.reload();
+}
+
+function aplicarPermissoes(){
+  const perfil = perfilAtual();
+
+  document.querySelectorAll(".menu-admin").forEach(botao => {
+    botao.style.display = perfil === "ADMIN" ? "inline-block" : "none";
+  });
+
+  document.querySelectorAll(".menu-operador").forEach(botao => {
+    botao.style.display = (perfil === "ADMIN" || perfil === "OPERADOR") ? "inline-block" : "none";
+  });
+
+  if(perfil === "ADMIN"){
+    abrirTela("produtos");
+  } else if(perfil === "OPERADOR"){
+    abrirTela("entrada");
+  } else {
+    abrirTela("consulta");
+  }
+}
+
+function carregarTudo(){
+  carregarProdutos();
+  carregarRacks();
+  carregarEstoque();
+  carregarMovimentacoes();
+  carregarUsuarios();
+}
+
+function abrirTela(tela){
+  document.querySelectorAll(".tela").forEach(secao => secao.classList.remove("ativa"));
+  document.getElementById(tela).classList.add("ativa");
+
+  carregarProdutos();
+  carregarRacks();
+  carregarEstoque();
+  carregarMovimentacoes();
+  carregarUsuarios();
+}
+
+function converterImagemBase64(input){
+  return new Promise((resolve) => {
+    const arquivo = input.files[0];
+
+    if(!arquivo){
+      resolve(null);
+      return;
     }
 
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result);
+    leitor.readAsDataURL(arquivo);
+  });
+}
 
 
-    async function carregarProdutos(){
+/* USUÁRIOS */
 
-      const resposta =
-        await fetch("/produtos");
+async function salvarUsuario(){
 
-      const produtos =
-        await resposta.json();
+  const id = document.getElementById("usuarioId").value;
+  const nome = document.getElementById("nomeUsuario").value;
+  const usuario = document.getElementById("loginUsuarioNovo").value;
+  const senha = document.getElementById("senhaUsuario").value;
+  const perfil = document.getElementById("perfilUsuario").value;
 
-      let tabela =
-        document.getElementById("tabelaProdutos");
+  if(nome == "" || usuario == "" || perfil == ""){
+    alert("Preencha nome, usuário e perfil");
+    return;
+  }
 
-      tabela.innerHTML = "";
+  if(id == "" && senha == ""){
+    alert("Informe uma senha para novo usuário");
+    return;
+  }
 
-      produtos.forEach((item) => {
+  let url = "/usuarios";
+  let metodo = "POST";
 
-        tabela.innerHTML += `
-          <tr>
-            <td>${item.nome}</td>
-            <td>${item.quantidade}</td>
-            <td>
-              <button
-                class="btn-delete"
-                onclick="excluirProduto(${item.id})"
-              >
-                Excluir
-              </button>
-            </td>
-          </tr>
-        `;
+  if(id !== ""){
+    url = "/usuarios/" + id;
+    metodo = "PUT";
+  }
 
-      });
+  const resposta = await fetch(url, {
+    method: metodo,
+    headers: headersComPerfil(),
+    body: JSON.stringify({
+      nome,
+      usuario,
+      senha,
+      perfil
+    })
+  });
 
+  alert(await resposta.text());
+
+  limparFormularioUsuario();
+  carregarUsuarios();
+}
+
+async function carregarUsuarios(){
+
+  if(perfilAtual() !== "ADMIN"){
+    return;
+  }
+
+  const resposta = await fetch("/usuarios", {
+    headers: {
+      "perfil": perfilAtual()
+    }
+  });
+
+  listaUsuarios = await resposta.json();
+
+  const tabela = document.getElementById("tabelaUsuarios");
+  tabela.innerHTML = "";
+
+  listaUsuarios.forEach(item => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.nome}</td>
+        <td>${item.usuario}</td>
+        <td>${item.perfil}</td>
+        <td>
+          <button
+            class="btn-amarelo"
+            onclick="editarUsuario(${item.id})"
+          >
+            Editar
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function editarUsuario(id){
+
+  const usuario = listaUsuarios.find(u => u.id === id);
+
+  if(!usuario){
+    alert("Usuário não encontrado");
+    return;
+  }
+
+  document.getElementById("usuarioId").value = usuario.id;
+  document.getElementById("nomeUsuario").value = usuario.nome;
+  document.getElementById("loginUsuarioNovo").value = usuario.usuario;
+  document.getElementById("senhaUsuario").value = "";
+  document.getElementById("perfilUsuario").value = usuario.perfil;
+
+  document.getElementById("btnSalvarUsuario").innerText = "Atualizar Usuário";
+  document.getElementById("btnSalvarUsuario").className = "btn-amarelo";
+
+  window.scrollTo(0, 0);
+}
+
+function limparFormularioUsuario(){
+
+  document.getElementById("usuarioId").value = "";
+  document.getElementById("nomeUsuario").value = "";
+  document.getElementById("loginUsuarioNovo").value = "";
+  document.getElementById("senhaUsuario").value = "";
+  document.getElementById("perfilUsuario").value = "ADMIN";
+
+  document.getElementById("btnSalvarUsuario").innerText = "Cadastrar Usuário";
+  document.getElementById("btnSalvarUsuario").className = "btn-azul";
+}
+
+
+
+/* PRODUTO */
+
+async function salvarProduto(){
+  const id = document.getElementById("produtoId").value;
+  const codigo = document.getElementById("codigoProduto").value;
+  const nome = document.getElementById("nomeProduto").value;
+  const imagem = await converterImagemBase64(document.getElementById("imagemProduto"));
+
+  if(codigo == "" || nome == ""){
+    alert("Preencha código e nome");
+    return;
+  }
+
+  let url = "/produtos";
+  let metodo = "POST";
+
+  if(id !== ""){
+    url = "/produtos/" + id;
+    metodo = "PUT";
+  }
+
+  const resposta = await fetch(url, {
+    method: metodo,
+    headers: headersComPerfil(),
+    body: JSON.stringify({codigo, nome, imagem})
+  });
+
+  alert(await resposta.text());
+
+  limparFormularioProduto();
+  carregarProdutos();
+  carregarEstoque();
+}
+
+function editarProduto(id){
+  const produto = listaProdutos.find(p => p.id === id);
+
+  if(!produto){
+    alert("Produto não encontrado");
+    return;
+  }
+
+  document.getElementById("produtoId").value = produto.id;
+  document.getElementById("codigoProduto").value = produto.codigo;
+  document.getElementById("nomeProduto").value = produto.nome;
+  document.getElementById("imagemProduto").value = "";
+
+  document.getElementById("btnSalvarProduto").innerText = "Atualizar Produto";
+  document.getElementById("btnSalvarProduto").className = "btn-amarelo";
+
+  window.scrollTo(0, 0);
+}
+
+function limparFormularioProduto(){
+  document.getElementById("produtoId").value = "";
+  document.getElementById("codigoProduto").value = "";
+  document.getElementById("nomeProduto").value = "";
+  document.getElementById("imagemProduto").value = "";
+
+  document.getElementById("btnSalvarProduto").innerText = "Cadastrar Produto";
+  document.getElementById("btnSalvarProduto").className = "btn-azul";
+}
+
+async function carregarProdutos(){
+  const resposta = await fetch("/produtos");
+  listaProdutos = await resposta.json();
+
+  const tabela = document.getElementById("tabelaProdutos");
+  tabela.innerHTML = "";
+
+  listaProdutos.forEach(item => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.imagem ? `<img src="${item.imagem}">` : ""}</td>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td><button class="btn-amarelo" onclick="editarProduto(${item.id})">Editar</button></td>
+      </tr>
+    `;
+  });
+}
+
+/* RACK */
+
+async function salvarRack(){
+  const id = document.getElementById("rackId").value;
+  const endereco = document.getElementById("enderecoRack").value;
+
+  if(endereco == ""){
+    alert("Informe o endereço do rack");
+    return;
+  }
+
+  let url = "/racks";
+  let metodo = "POST";
+
+  if(id !== ""){
+    url = "/racks/" + id;
+    metodo = "PUT";
+  }
+
+  const resposta = await fetch(url, {
+    method: metodo,
+    headers: headersComPerfil(),
+    body: JSON.stringify({endereco})
+  });
+
+  alert(await resposta.text());
+
+  limparFormularioRack();
+  carregarRacks();
+  carregarEstoque();
+}
+
+function editarRack(id){
+  const rack = listaRacks.find(r => r.id === id);
+
+  if(!rack){
+    alert("Rack não encontrado");
+    return;
+  }
+
+  document.getElementById("rackId").value = rack.id;
+  document.getElementById("enderecoRack").value = rack.endereco;
+
+  document.getElementById("btnSalvarRack").innerText = "Atualizar Rack";
+  document.getElementById("btnSalvarRack").className = "btn-amarelo";
+
+  window.scrollTo(0, 0);
+}
+
+function limparFormularioRack(){
+  document.getElementById("rackId").value = "";
+  document.getElementById("enderecoRack").value = "";
+
+  document.getElementById("btnSalvarRack").innerText = "Cadastrar Rack";
+  document.getElementById("btnSalvarRack").className = "btn-azul";
+}
+
+async function carregarRacks(){
+  const resposta = await fetch("/racks");
+  listaRacks = await resposta.json();
+
+  const estoqueResp = await fetch("/estoque");
+  const estoque = await estoqueResp.json();
+
+  const tabela = document.getElementById("tabelaRacks");
+  tabela.innerHTML = "";
+
+  listaRacks.forEach(item => {
+    const ocupado = estoque.some(e => e.rack === item.endereco);
+
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.endereco}</td>
+        <td>${ocupado ? "OCUPADO" : "LIVRE"}</td>
+        <td><button class="btn-amarelo" onclick="editarRack(${item.id})">Editar</button></td>
+      </tr>
+    `;
+  });
+
+  carregarRacksEntrada();
+  carregarRacksSaida();
+  atualizarDashboard();
+}
+
+/* ENTRADA E SAÍDA */
+
+async function carregarRacksEntrada(){
+  const resposta = await fetch("/racks-livres");
+  const racks = await resposta.json();
+
+  const select = document.getElementById("entradaRack");
+  select.innerHTML = "<option value=''>Selecione Rack Livre</option>";
+
+  racks.forEach(item => {
+    select.innerHTML += `<option value="${item.endereco}">${item.endereco}</option>`;
+  });
+}
+
+async function carregarRacksSaida(){
+  const resposta = await fetch("/racks-ocupados");
+  const racks = await resposta.json();
+
+  const select = document.getElementById("saidaRack");
+  select.innerHTML = "<option value=''>Selecione Rack Ocupado</option>";
+
+  racks.forEach(item => {
+    select.innerHTML += `<option value="${item.rack}">${item.rack}</option>`;
+  });
+}
+
+async function buscarProdutoEntrada(){
+  const codigo = document.getElementById("entradaCodigo").value;
+
+  if(codigo == ""){
+    document.getElementById("descricaoEntrada").innerText = "";
+    return;
+  }
+
+  const resposta = await fetch("/produtos/" + codigo);
+  const produto = await resposta.json();
+
+  document.getElementById("descricaoEntrada").innerText =
+    produto ? produto.nome : "Produto não encontrado";
+}
+
+async function buscarProdutoSaida(){
+  const codigo = document.getElementById("saidaCodigo").value;
+
+  if(codigo == ""){
+    document.getElementById("descricaoSaida").innerText = "";
+    return;
+  }
+
+  const resposta = await fetch("/produtos/" + codigo);
+  const produto = await resposta.json();
+
+  document.getElementById("descricaoSaida").innerText =
+    produto ? produto.nome : "Produto não encontrado";
+}
+
+function adicionarEntradaLista(){
+  const codigo = document.getElementById("entradaCodigo").value;
+  const produto = document.getElementById("descricaoEntrada").innerText;
+  const lote = document.getElementById("entradaLote").value;
+  const rack = document.getElementById("entradaRack").value;
+  const quantidade = Number(document.getElementById("entradaQuantidade").value);
+
+  if(codigo == "" || lote == "" || rack == "" || quantidade <= 0 || produto == "Produto não encontrado"){
+    alert("Preencha corretamente a entrada");
+    return;
+  }
+
+  listaEntrada.push({codigo, produto, lote, rack, quantidade});
+  renderizarListaEntrada();
+
+  document.getElementById("entradaCodigo").value = "";
+  document.getElementById("entradaLote").value = "";
+  document.getElementById("entradaRack").value = "";
+  document.getElementById("entradaQuantidade").value = "";
+  document.getElementById("descricaoEntrada").innerText = "";
+}
+
+function renderizarListaEntrada(){
+  const tabela = document.getElementById("tabelaEntradaLista");
+  tabela.innerHTML = "";
+
+  listaEntrada.forEach((item, index) => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.produto}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.quantidade}</td>
+        <td><button class="btn-vermelho" onclick="removerEntrada(${index})">Remover</button></td>
+      </tr>
+    `;
+  });
+}
+
+function removerEntrada(index){
+  listaEntrada.splice(index, 1);
+  renderizarListaEntrada();
+}
+
+async function processarEntradas(){
+  if(listaEntrada.length == 0){
+    alert("Nenhuma entrada na lista");
+    return;
+  }
+
+  for(const item of listaEntrada){
+    const resposta = await fetch("/entrada", {
+      method: "POST",
+      headers: headersComPerfil(),
+      body: JSON.stringify(item)
+    });
+
+    const resultado = await resposta.text();
+
+    if(resultado.includes("Erro") || resultado.includes("ocupado") || resultado.includes("não") || resultado.includes("negado")){
+      alert("Erro no item " + item.codigo + ": " + resultado);
+      return;
+    }
+  }
+
+  alert("Entradas processadas com sucesso");
+
+  listaEntrada = [];
+  renderizarListaEntrada();
+
+  carregarEstoque();
+  carregarMovimentacoes();
+  carregarRacks();
+}
+
+function adicionarSaidaLista(){
+  const codigo = document.getElementById("saidaCodigo").value;
+  const produto = document.getElementById("descricaoSaida").innerText;
+  const lote = document.getElementById("saidaLote").value;
+  const rack = document.getElementById("saidaRack").value;
+  const quantidade = Number(document.getElementById("saidaQuantidade").value);
+
+  if(codigo == "" || lote == "" || rack == "" || quantidade <= 0 || produto == "Produto não encontrado"){
+    alert("Preencha corretamente a saída");
+    return;
+  }
+
+  listaSaida.push({codigo, produto, lote, rack, quantidade});
+  renderizarListaSaida();
+
+  document.getElementById("saidaCodigo").value = "";
+  document.getElementById("saidaLote").value = "";
+  document.getElementById("saidaRack").value = "";
+  document.getElementById("saidaQuantidade").value = "";
+  document.getElementById("descricaoSaida").innerText = "";
+}
+
+function renderizarListaSaida(){
+  const tabela = document.getElementById("tabelaSaidaLista");
+  tabela.innerHTML = "";
+
+  listaSaida.forEach((item, index) => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.produto}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.quantidade}</td>
+        <td><button class="btn-vermelho" onclick="removerSaida(${index})">Remover</button></td>
+      </tr>
+    `;
+  });
+}
+
+function removerSaida(index){
+  listaSaida.splice(index, 1);
+  renderizarListaSaida();
+}
+
+async function processarSaidas(){
+  if(listaSaida.length == 0){
+    alert("Nenhuma saída na lista");
+    return;
+  }
+
+  for(const item of listaSaida){
+    const resposta = await fetch("/saida", {
+      method: "POST",
+      headers: headersComPerfil(),
+      body: JSON.stringify(item)
+    });
+
+    const resultado = await resposta.text();
+
+    if(resultado.includes("Erro") || resultado.includes("insuficiente") || resultado.includes("não") || resultado.includes("negado")){
+      alert("Erro no item " + item.codigo + ": " + resultado);
+      return;
+    }
+  }
+
+  alert("Saídas processadas com sucesso");
+
+  listaSaida = [];
+  renderizarListaSaida();
+
+  carregarEstoque();
+  carregarMovimentacoes();
+  carregarRacks();
+}
+
+/* CONSULTAS */
+
+async function carregarEstoque(){
+  const resposta = await fetch("/estoque");
+  listaEstoque = await resposta.json();
+
+  renderizarEstoque(listaEstoque);
+  gerarSaldoGeral();
+  atualizarDashboard();
+}
+
+function renderizarEstoque(lista){
+  const tabela = document.getElementById("tabelaEstoque");
+  tabela.innerHTML = "";
+
+  lista.forEach(item => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.imagem ? `<img src="${item.imagem}">` : ""}</td>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.quantidade}</td>
+        <td>${item.data_entrada}</td>
+      </tr>
+    `;
+  });
+}
+
+function filtrarEstoque(){
+  const filtro = document.getElementById("filtroConsulta").value.toLowerCase();
+
+  const resultado = listaEstoque.filter(item =>
+    item.codigo.toLowerCase().includes(filtro) ||
+    item.nome.toLowerCase().includes(filtro) ||
+    item.lote.toLowerCase().includes(filtro) ||
+    item.rack.toLowerCase().includes(filtro)
+  );
+
+  renderizarEstoque(resultado);
+}
+
+function gerarSaldoGeral(){
+  const agrupado = {};
+
+  listaEstoque.forEach(item => {
+    if(!agrupado[item.codigo]){
+      agrupado[item.codigo] = {
+        codigo: item.codigo,
+        nome: item.nome,
+        quantidade: 0
+      };
     }
 
+    agrupado[item.codigo].quantidade += Number(item.quantidade);
+  });
 
+  listaSaldo = Object.values(agrupado);
+  renderizarSaldo(listaSaldo);
 
-    async function excluirProduto(id){
+  const total = listaSaldo.reduce((soma, item) => soma + Number(item.quantidade), 0);
 
-      const resposta = await fetch(
+  document.getElementById("estoqueTotalGeral").innerText = total;
+  document.getElementById("dashEstoqueTotal").innerText = total;
+}
 
-        "/produtos/" + id,
+function renderizarSaldo(lista){
+  const tabela = document.getElementById("tabelaSaldo");
+  tabela.innerHTML = "";
 
-        {
-          method: "DELETE"
-        }
+  lista.forEach(item => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td>${item.quantidade}</td>
+      </tr>
+    `;
+  });
+}
 
-      );
+function filtrarSaldo(){
+  const filtro = document.getElementById("filtroSaldo").value.toLowerCase();
 
-      const resultado = await resposta.text();
+  const resultado = listaSaldo.filter(item =>
+    item.codigo.toLowerCase().includes(filtro) ||
+    item.nome.toLowerCase().includes(filtro)
+  );
 
-      alert(resultado);
+  renderizarSaldo(resultado);
+}
 
-      carregarProdutos();
+async function carregarMovimentacoes(){
+  const resposta = await fetch("/movimentacoes");
+  listaHistorico = await resposta.json();
 
+  renderizarHistorico(listaHistorico);
+}
+
+function renderizarHistorico(lista){
+  const tabela = document.getElementById("tabelaMovimentacoes");
+  tabela.innerHTML = "";
+
+  lista.forEach(item => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.tipo}</td>
+        <td>${item.quantidade}</td>
+        <td>${item.data_movimentacao}</td>
+      </tr>
+    `;
+  });
+}
+
+function filtrarHistorico(){
+  const filtro = document.getElementById("filtroHistorico").value.toLowerCase();
+
+  const resultado = listaHistorico.filter(item =>
+    item.codigo.toLowerCase().includes(filtro) ||
+    item.nome.toLowerCase().includes(filtro) ||
+    item.lote.toLowerCase().includes(filtro) ||
+    item.rack.toLowerCase().includes(filtro) ||
+    item.tipo.toLowerCase().includes(filtro)
+  );
+
+  renderizarHistorico(resultado);
+}
+
+/* DASHBOARD */
+
+function atualizarDashboard(){
+  const totalRacks = listaRacks.length;
+  const racksOcupados = [...new Set(listaEstoque.map(item => item.rack))].length;
+  const racksLivres = totalRacks - racksOcupados;
+  const ocupacao = totalRacks > 0 ? ((racksOcupados / totalRacks) * 100).toFixed(1) : 0;
+
+  document.getElementById("dashTotalRacks").innerText = totalRacks;
+  document.getElementById("dashRacksOcupados").innerText = racksOcupados;
+  document.getElementById("dashRacksLivres").innerText = racksLivres;
+  document.getElementById("dashOcupacao").innerText = ocupacao + "%";
+
+  const agrupado = {};
+
+  listaEstoque.forEach(item => {
+    if(!agrupado[item.codigo]){
+      agrupado[item.codigo] = {
+        codigo: item.codigo,
+        nome: item.nome,
+        racks: new Set()
+      };
     }
 
-  </script>
+    agrupado[item.codigo].racks.add(item.rack);
+  });
+
+  const tabela = document.getElementById("tabelaDashboardProduto");
+  tabela.innerHTML = "";
+
+  Object.values(agrupado).forEach(item => {
+    const qtdRacks = item.racks.size;
+    const perc = totalRacks > 0 ? ((qtdRacks / totalRacks) * 100).toFixed(1) : 0;
+
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td>${qtdRacks}</td>
+        <td>${perc}%</td>
+        <td>
+          <div class="barra">
+            <div style="width:${perc}%">${perc}%</div>
+          </div>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+/* EXPORTAR E IMPRIMIR */
+
+function imprimirTabela(idTabela){
+  const conteudo = document.getElementById(idTabela).parentElement.outerHTML;
+  const janela = window.open("", "", "width=900,height=700");
+
+  janela.document.write(`
+    <html>
+    <head>
+      <title>Impressão</title>
+      <style>
+        table{width:100%;border-collapse:collapse;}
+        th{background:#333;color:white;padding:8px;}
+        td{padding:8px;border-bottom:1px solid #ddd;text-align:center;}
+      </style>
+    </head>
+    <body>${conteudo}</body>
+    </html>
+  `);
+
+  janela.document.close();
+  janela.print();
+}
+
+function exportarCSV(idTabela, nomeArquivo){
+  const tabela = document.getElementById(idTabela).parentElement;
+  let csv = [];
+
+  tabela.querySelectorAll("tr").forEach(linha => {
+    let dados = [];
+
+    linha.querySelectorAll("th, td").forEach(coluna => {
+      dados.push(coluna.innerText);
+    });
+
+    csv.push(dados.join(";"));
+  });
+
+  const arquivo = new Blob([csv.join("\n")], {type:"text/csv"});
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(arquivo);
+  link.download = nomeArquivo;
+  link.click();
+}
+
+</script>
 
 </body>
 </html>
