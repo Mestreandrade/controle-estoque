@@ -276,6 +276,109 @@ app.put("/racks/:id", somenteAdmin, (req, res) => {
     );
 });
 
+app.delete("/racks/:id", somenteAdmin, (req, res) => {
+    const id = req.params.id;
+
+app.post("/racks-excluir-lote", somenteAdmin, (req, res) => {
+    const { ids } = req.body;
+
+    if(!ids || ids.length === 0){
+        return res.send("Nenhum rack selecionado");
+    }
+
+    let excluidos = 0;
+    let bloqueados = 0;
+    let processados = 0;
+
+    ids.forEach(id => {
+        db.get(
+            "SELECT endereco FROM racks WHERE id = ?",
+            [id],
+            (err, rackAtual) => {
+
+                if(err || !rackAtual){
+                    bloqueados++;
+                    finalizar();
+                    return;
+                }
+
+                db.get(
+                    "SELECT * FROM estoque WHERE rack = ?",
+                    [rackAtual.endereco],
+                    (err, estoque) => {
+
+                        if(estoque){
+                            bloqueados++;
+                            finalizar();
+                            return;
+                        }
+
+                        db.run(
+                            "DELETE FROM racks WHERE id = ?",
+                            [id],
+                            function(err){
+                                if(err){
+                                    bloqueados++;
+                                } else {
+                                    excluidos++;
+                                }
+
+                                finalizar();
+                            }
+                        );
+                    }
+                );
+            }
+        );
+    });
+
+    function finalizar(){
+        processados++;
+
+        if(processados === ids.length){
+            res.send(`Excluídos: ${excluidos}. Não excluídos/ocupados: ${bloqueados}`);
+        }
+    }
+});
+
+
+
+    db.get(
+        "SELECT endereco FROM racks WHERE id = ?",
+        [id],
+        (err, rackAtual) => {
+
+            if(err || !rackAtual){
+                return res.send("Rack não encontrado");
+            }
+
+            db.get(
+                "SELECT * FROM estoque WHERE rack = ?",
+                [rackAtual.endereco],
+                (err, estoque) => {
+
+                    if(estoque){
+                        return res.send("Não é permitido excluir rack ocupado");
+                    }
+
+                    db.run(
+                        "DELETE FROM racks WHERE id = ?",
+                        [id],
+                        function(err){
+                            if(err){
+                                res.send("Erro ao excluir rack");
+                            } else {
+                                res.send("Rack excluído com sucesso");
+                            }
+                        }
+                    );
+
+                }
+            );
+        }
+    );
+});
+
 app.get("/racks", (req, res) => {
     db.all("SELECT * FROM racks ORDER BY endereco", [], (err, rows) => {
         if(err){

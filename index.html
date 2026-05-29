@@ -146,17 +146,27 @@
 
 
 
+<br>
 
+<button class="btn-cinza" onclick="selecionarTodosRacks()">
+  Selecionar Todos
+</button>
+
+<button class="btn-vermelho" onclick="excluirRacksSelecionados()">
+  Excluir Selecionados
+</button>
 
 
 
   <table>
     <thead>
+
       <tr>
-        <th>Rack</th>
-        <th>Status</th>
-        <th>Ação</th>
-      </tr>
+  <th>Selecionar</th>
+  <th>Rack</th>
+  <th>Status</th>
+  <th>Ação</th>
+</tr>
     </thead>
     <tbody id="tabelaRacks"></tbody>
   </table>
@@ -766,12 +776,22 @@ async function carregarRacks(){
     const ocupado = estoque.some(e => e.rack === item.endereco);
 
     tabela.innerHTML += `
-      <tr>
-        <td>${item.endereco}</td>
-        <td>${ocupado ? "OCUPADO" : "LIVRE"}</td>
-        <td><button class="btn-amarelo" onclick="editarRack(${item.id})">Editar</button></td>
-      </tr>
-    `;
+     
+
+ <tr>
+  <td>
+    <input type="checkbox" class="checkRack" value="${item.id}">
+  </td>
+  <td>${item.endereco}</td>
+  <td>${ocupado ? "OCUPADO" : "LIVRE"}</td>
+  <td>
+    <button class="btn-amarelo" onclick="editarRack(${item.id})">Editar</button>
+    <button class="btn-vermelho" onclick="excluirRack(${item.id})">Excluir</button>
+  </td>
+</tr> 
+
+
+   `;
   });
 
   carregarRacksEntrada();
@@ -838,6 +858,67 @@ async function cadastrarRacksRapido(){
 
   carregarRacks();
 }
+
+
+async function excluirRack(id){
+
+  if(!confirm("Tem certeza que deseja excluir este rack?")){
+    return;
+  }
+
+  const resposta = await fetch("/racks/" + id, {
+    method: "DELETE",
+    headers: headersComPerfil()
+  });
+
+  alert(await resposta.text());
+
+  carregarRacks();
+  carregarEstoque();
+}
+
+
+
+function selecionarTodosRacks(){
+
+  const checks = document.querySelectorAll(".checkRack");
+
+  checks.forEach(check => {
+    check.checked = true;
+  });
+
+}
+
+async function excluirRacksSelecionados(){
+
+  const checks = document.querySelectorAll(".checkRack:checked");
+
+  if(checks.length === 0){
+    alert("Selecione pelo menos um rack");
+    return;
+  }
+
+  if(!confirm("Tem certeza que deseja excluir os racks selecionados?")){
+    return;
+  }
+
+  const ids = Array.from(checks).map(check => check.value);
+
+  const resposta = await fetch("/racks-excluir-lote", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({ ids })
+  });
+
+  alert(await resposta.text());
+
+  carregarRacks();
+  carregarEstoque();
+
+}
+
+
+
 
 /* ENTRADA E SAÍDA */
 
@@ -1275,6 +1356,53 @@ function exportarCSV(idTabela, nomeArquivo){
   link.download = nomeArquivo;
   link.click();
 }
+
+
+function selecionarTodosRacks(){
+
+  const checks = document.querySelectorAll(".checkRack");
+
+  if(checks.length === 0){
+    alert("Nenhuma caixa de seleção encontrada nos racks");
+    return;
+  }
+
+  checks.forEach(check => {
+    check.checked = true;
+  });
+
+}
+
+async function excluirRacksSelecionados(){
+
+  const checks = document.querySelectorAll(".checkRack:checked");
+
+  if(checks.length === 0){
+    alert("Selecione pelo menos um rack");
+    return;
+  }
+
+  if(!confirm("Tem certeza que deseja excluir os racks selecionados?")){
+    return;
+  }
+
+  const ids = Array.from(checks).map(check => check.value);
+
+  const resposta = await fetch("/racks-excluir-lote", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({ ids })
+  });
+
+  alert(await resposta.text());
+
+  carregarRacks();
+  carregarEstoque();
+
+}
+
+
+
 
 </script>
 
