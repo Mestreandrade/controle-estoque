@@ -32,6 +32,25 @@
     .barra{background:#ddd;height:22px;border-radius:10px;overflow:hidden;}
     .barra div{background:#2563eb;height:22px;color:white;text-align:center;font-size:12px;line-height:22px;}
 
+.linha-livre{
+  background:#dcfce7;
+}
+
+.linha-ocupado{
+  background:#fee2e2;
+}
+
+.status-livre{
+  color:green;
+  font-weight:bold;
+}
+
+.status-ocupado{
+  color:red;
+  font-weight:bold;
+}
+
+
     #loginBox{
       max-width:400px;
       margin:80px auto;
@@ -86,7 +105,7 @@
   <button class="menu-admin" onclick="abrirTela('usuarios')">Usuários</button>
   <button class="menu-operador" onclick="abrirTela('entrada')">Entrada</button>
   <button class="menu-operador" onclick="abrirTela('saida')">Saída</button>
-  <button onclick="abrirTela('consulta')">Consulta</button>
+  <button onclick="abrirTela('consulta')">Rastreamento de Lotes</button>
   <button onclick="abrirTela('saldo')">Saldo Geral</button>
   <button onclick="abrirTela('dashboard')">Dashboard</button>
   <button onclick="abrirTela('historico')">Histórico</button>
@@ -235,66 +254,95 @@
 </section>
 
 
+
+
+
 <section id="entrada" class="tela">
-  <h2>Entrada de Estoque</h2>
+  <h2>Entrada por Endereço</h2>
 
-  <input type="text" id="entradaCodigo" placeholder="Código do Produto" onblur="buscarProdutoEntrada()">
-  <span id="descricaoEntrada" class="descricao"></span>
-  <br>
+  <input
+    type="text"
+    id="filtroEntradaRack"
+    placeholder="Buscar rack, produto ou lote"
+    onkeyup="filtrarMapaEntrada()"
+  >
 
-  <input type="text" id="entradaLote" placeholder="Lote">
-  <select id="entradaRack"></select>
-  <input type="number" id="entradaQuantidade" placeholder="Quantidade">
-
-  <button class="btn-azul" onclick="adicionarEntradaLista()">Adicionar à Lista</button>
-  <button class="btn-verde" onclick="processarEntradas()">Processar Entradas</button>
+  <button class="btn-cinza" onclick="carregarMapaEntrada()">
+    Atualizar Racks
+  </button>
 
   <table>
     <thead>
       <tr>
+        <th>Rack</th>
+        <th>Status</th>
         <th>Código</th>
         <th>Produto</th>
         <th>Lote</th>
-        <th>Rack</th>
-        <th>Quantidade</th>
+        <th>Saldo</th>
+        <th>Validade</th>
         <th>Ação</th>
       </tr>
     </thead>
-    <tbody id="tabelaEntradaLista"></tbody>
+
+    <tbody id="tabelaMapaEntrada"></tbody>
   </table>
 </section>
+
+
+
 
 <section id="saida" class="tela">
   <h2>Saída de Estoque</h2>
 
-  <input type="text" id="saidaCodigo" placeholder="Código do Produto" onblur="buscarProdutoSaida()">
-  <span id="descricaoSaida" class="descricao"></span>
-  <br>
+  <label>
+    <input type="radio" name="tipoBuscaSaida" value="produto" checked>
+    Produto
+  </label>
 
-  <input type="text" id="saidaLote" placeholder="Lote">
-  <select id="saidaRack"></select>
-  <input type="number" id="saidaQuantidade" placeholder="Quantidade">
+  <label>
+    <input type="radio" name="tipoBuscaSaida" value="lote">
+    Lote
+  </label>
 
-  <button class="btn-azul" onclick="adicionarSaidaLista()">Adicionar à Lista</button>
-  <button class="btn-vermelho" onclick="processarSaidas()">Processar Saídas</button>
+  <br><br>
+
+  <input type="text" id="termoBuscaSaida" placeholder="Digite código do produto ou lote">
+
+  <button class="btn-azul" onclick="buscarEstoqueSaida()">
+    Buscar
+  </button>
+
+  <button class="btn-vermelho" onclick="confirmarSaidaSelecionada()">
+    Confirmar Saída dos Itens
+  </button>
 
   <table>
     <thead>
       <tr>
-        <th>Código</th>
-        <th>Produto</th>
-        <th>Lote</th>
-        <th>Rack</th>
-        <th>Quantidade</th>
-        <th>Ação</th>
+
+
+ <th>Código</th>
+<th>Produto</th>
+<th>Lote</th>
+<th>Rack</th>
+<th>Quantidade</th>
+<th>Validade</th>
+<th>Ação</th>
+
+
+
       </tr>
     </thead>
-    <tbody id="tabelaSaidaLista"></tbody>
+
+    <tbody id="tabelaSaidaBusca"></tbody>
   </table>
 </section>
 
+
 <section id="consulta" class="tela">
-  <h2>Consulta de Estoque</h2>
+<h2>Rastreamento de Lotes</h2>
+
 
   <input type="text" id="filtroConsulta" placeholder="Buscar código, produto, lote ou rack" onkeyup="filtrarEstoque()">
 
@@ -310,6 +358,7 @@
         <th>Lote</th>
         <th>Rack</th>
         <th>Quantidade</th>
+        <th>Validade</th>
         <th>Data Entrada</th>
       </tr>
     </thead>
@@ -489,6 +538,10 @@ function abrirTela(tela){
   carregarEstoque();
   carregarMovimentacoes();
   carregarUsuarios();
+
+  if(tela === "entrada"){
+    carregarMapaEntrada();
+  }
 }
 
 function converterImagemBase64(input){
@@ -919,6 +972,169 @@ async function excluirRacksSelecionados(){
 
 
 
+let listaMapaEntrada = [];
+
+async function carregarMapaEntrada(){
+
+  const racksResp = await fetch("/racks");
+  const racks = await racksResp.json();
+
+  const estoqueResp = await fetch("/estoque");
+  const estoque = await estoqueResp.json();
+
+  listaMapaEntrada = racks.map(rack => {
+
+    const itemEstoque = estoque.find(e => e.rack === rack.endereco);
+
+    if(itemEstoque){
+      return {
+        rack: rack.endereco,
+        status: "OCUPADO",
+        codigo: itemEstoque.codigo,
+        produto: itemEstoque.nome,
+        lote: itemEstoque.lote,
+        quantidade: itemEstoque.quantidade,
+        validade: itemEstoque.validade || ""
+      };
+    }
+
+    return {
+      rack: rack.endereco,
+      status: "LIVRE",
+      codigo: "",
+      produto: "",
+      lote: "",
+      quantidade: "",
+      validade: ""
+    };
+
+  });
+
+  renderizarMapaEntrada(listaMapaEntrada);
+}
+
+function renderizarMapaEntrada(lista){
+
+  const tabela = document.getElementById("tabelaMapaEntrada");
+
+  if(!tabela){
+    return;
+  }
+
+  tabela.innerHTML = "";
+
+  lista.forEach(item => {
+
+    const classeLinha = item.status === "LIVRE" ? "linha-livre" : "linha-ocupado";
+    const classeStatus = item.status === "LIVRE" ? "status-livre" : "status-ocupado";
+
+    tabela.innerHTML += `
+      <tr class="${classeLinha}">
+        <td>${item.rack}</td>
+        <td class="${classeStatus}">${item.status}</td>
+        <td>${item.codigo}</td>
+        <td>${item.produto}</td>
+        <td>${item.lote}</td>
+        <td>${item.quantidade}</td>
+        <td>${item.validade}</td>
+        <td>
+          ${
+            item.status === "LIVRE"
+            ? `<button class="btn-verde" onclick="abrirEntradaRack('${item.rack}')">Dar Entrada</button>`
+            : `<button class="btn-cinza" disabled>Bloqueado</button>`
+          }
+        </td>
+      </tr>
+    `;
+
+  });
+}
+
+function filtrarMapaEntrada(){
+
+  const filtro = document.getElementById("filtroEntradaRack").value.toLowerCase();
+
+  const resultado = listaMapaEntrada.filter(item =>
+    item.rack.toLowerCase().includes(filtro) ||
+    item.codigo.toLowerCase().includes(filtro) ||
+    item.produto.toLowerCase().includes(filtro) ||
+    item.lote.toLowerCase().includes(filtro)
+  );
+
+  renderizarMapaEntrada(resultado);
+}
+
+async function abrirEntradaRack(rack){
+
+  const codigo = prompt("Informe o código do produto:");
+
+  if(!codigo){
+    return;
+  }
+
+  const produtoResp = await fetch("/produtos/" + codigo);
+  const produto = await produtoResp.json();
+
+  if(!produto){
+    alert("Produto não encontrado");
+    return;
+  }
+
+  const lote = prompt("Produto: " + produto.nome + "\nInforme o lote:");
+
+  if(!lote){
+    return;
+  }
+
+  const quantidade = prompt("Informe a quantidade:");
+
+  if(!quantidade || Number(quantidade) <= 0){
+    alert("Quantidade inválida");
+    return;
+  }
+
+  const validade = prompt("Informe a validade no formato AAAA-MM-DD:");
+
+  const entrada = {
+    codigo: codigo,
+    produto: produto.nome,
+    lote: lote,
+    rack: rack,
+    quantidade: Number(quantidade),
+    validade: validade || ""
+  };
+
+  const resposta = await fetch("/entrada", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify(entrada)
+  });
+
+  const resultado = await resposta.text();
+
+  if(
+    resultado.toLowerCase().includes("sucesso") ||
+    resultado.toLowerCase().includes("realizada") ||
+    resultado.toLowerCase().includes("adicionada")
+  ){
+
+    alert(resultado);
+
+    await carregarMapaEntrada();
+    await carregarEstoque();
+    await carregarMovimentacoes();
+    await carregarRacks();
+
+    imprimirEntrada([entrada]);
+
+  } else {
+
+    alert(resultado);
+
+  }
+
+}
+
 
 /* ENTRADA E SAÍDA */
 
@@ -982,19 +1198,25 @@ function adicionarEntradaLista(){
   const lote = document.getElementById("entradaLote").value;
   const rack = document.getElementById("entradaRack").value;
   const quantidade = Number(document.getElementById("entradaQuantidade").value);
+  const validade = document.getElementById("entradaValidade") ? document.getElementById("entradaValidade").value : "";
 
   if(codigo == "" || lote == "" || rack == "" || quantidade <= 0 || produto == "Produto não encontrado"){
     alert("Preencha corretamente a entrada");
     return;
   }
 
-  listaEntrada.push({codigo, produto, lote, rack, quantidade});
+  listaEntrada.push({codigo, produto, lote, rack, quantidade, validade});
   renderizarListaEntrada();
 
   document.getElementById("entradaCodigo").value = "";
   document.getElementById("entradaLote").value = "";
   document.getElementById("entradaRack").value = "";
   document.getElementById("entradaQuantidade").value = "";
+
+if(document.getElementById("entradaValidade")){
+  document.getElementById("entradaValidade").value = "";
+}
+
   document.getElementById("descricaoEntrada").innerText = "";
 }
 
@@ -1010,7 +1232,9 @@ function renderizarListaEntrada(){
         <td>${item.lote}</td>
         <td>${item.rack}</td>
         <td>${item.quantidade}</td>
+        <td>${item.validade || ""}</td>
         <td><button class="btn-vermelho" onclick="removerEntrada(${index})">Remover</button></td>
+
       </tr>
     `;
   });
@@ -1021,11 +1245,19 @@ function removerEntrada(index){
   renderizarListaEntrada();
 }
 
+
+
+
+
+
+
 async function processarEntradas(){
   if(listaEntrada.length == 0){
     alert("Nenhuma entrada na lista");
     return;
   }
+
+  const entradasParaImprimir = [...listaEntrada];
 
   for(const item of listaEntrada){
     const resposta = await fetch("/entrada", {
@@ -1044,6 +1276,8 @@ async function processarEntradas(){
 
   alert("Entradas processadas com sucesso");
 
+  imprimirEntrada(entradasParaImprimir);
+
   listaEntrada = [];
   renderizarListaEntrada();
 
@@ -1051,6 +1285,12 @@ async function processarEntradas(){
   carregarMovimentacoes();
   carregarRacks();
 }
+
+
+
+
+
+
 
 function adicionarSaidaLista(){
   const codigo = document.getElementById("saidaCodigo").value;
@@ -1128,6 +1368,185 @@ async function processarSaidas(){
   carregarRacks();
 }
 
+
+
+
+
+
+
+let listaSaidaBusca = [];
+
+async function buscarEstoqueSaida(){
+
+  const tipo = document.querySelector("input[name='tipoBuscaSaida']:checked").value;
+  const termo = document.getElementById("termoBuscaSaida").value;
+
+  if(termo == ""){
+    alert("Informe o código do produto ou lote para buscar");
+    return;
+  }
+
+  const resposta = await fetch(`/estoque-busca?tipo=${tipo}&termo=${termo}`);
+  listaSaidaBusca = await resposta.json();
+
+  const tabela = document.getElementById("tabelaSaidaBusca");
+  tabela.innerHTML = "";
+
+  if(listaSaidaBusca.length === 0){
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="7">Nenhum estoque encontrado</td>
+      </tr>
+    `;
+    return;
+  }
+
+  listaSaidaBusca.forEach(item => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.quantidade}</td>
+        <td>${item.validade || ""}</td>
+        <td>
+          <input
+            type="number"
+            min="0"
+            max="${item.quantidade}"
+            id="qtd_saida_${item.id}"
+            placeholder="Qtd"
+          >
+        </td>
+      </tr>
+    `;
+  });
+}
+
+async function confirmarSaidaSelecionada(){
+
+  const itens = [];
+
+  listaSaidaBusca.forEach(item => {
+    const campo = document.getElementById("qtd_saida_" + item.id);
+
+    if(campo && Number(campo.value) > 0){
+      
+if(Number(campo.value) > Number(item.quantidade)){
+  alert(
+    "Saldo insuficiente para o rack " + item.rack +
+    "\nProduto: " + item.codigo +
+    "\nSaldo disponível: " + item.quantidade +
+    "\nQuantidade solicitada: " + campo.value
+  );
+  return;
+}
+
+
+
+
+
+itens.push({
+        estoque_id: item.id,
+        quantidade_saida: Number(campo.value)
+      });
+    }
+  });
+
+  if(itens.length === 0){
+    alert("Informe quantidade de saída em pelo menos um item");
+    return;
+  }
+
+  if(!confirm("Confirmar saída dos itens informados?")){
+    return;
+  }
+
+  const resposta = await fetch("/saida-lote", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({ itens })
+  });
+
+  alert(await resposta.text());
+
+  document.getElementById("termoBuscaSaida").value = "";
+  document.getElementById("tabelaSaidaBusca").innerHTML = "";
+  listaSaidaBusca = [];
+
+  carregarEstoque();
+  carregarMovimentacoes();
+  carregarRacks();
+}
+
+
+/* IMPRIMIR DOCUMENTO PARA ENDEREÇAMENTO */
+
+
+function imprimirEntrada(lista){
+
+  let linhas = "";
+
+  lista.forEach(item => {
+    linhas += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.produto}</td>
+        <td>${item.lote}</td>
+        <td>${item.quantidade}</td>
+        <td>${item.validade || ""}</td>
+        <td>${item.rack}</td>
+      </tr>
+    `;
+  });
+
+  const janela = window.open("", "", "width=900,height=700");
+
+  janela.document.write(`
+    <html>
+    <head>
+      <title>Comprovante de Entrada</title>
+      <style>
+        body{font-family:Arial;padding:20px;}
+        h2{text-align:center;}
+        table{width:100%;border-collapse:collapse;margin-top:20px;}
+        th{background:#333;color:white;padding:8px;}
+        td{padding:8px;border:1px solid #ddd;text-align:center;}
+      </style>
+    </head>
+    <body>
+      <h2>Comprovante de Entrada de Estoque</h2>
+      <p><b>Data:</b> ${new Date().toLocaleString("pt-BR")}</p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Produto</th>
+            <th>Lote</th>
+            <th>Quantidade</th>
+            <th>Validade</th>
+            <th>Endereço</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${linhas}
+        </tbody>
+      </table>
+    </body>
+    </html>
+  `);
+
+  janela.document.close();
+  janela.print();
+}
+
+
+
+
+
+
 /* CONSULTAS */
 
 async function carregarEstoque(){
@@ -1152,6 +1571,7 @@ function renderizarEstoque(lista){
         <td>${item.lote}</td>
         <td>${item.rack}</td>
         <td>${item.quantidade}</td>
+        <td>${item.validade || ""}</td>
         <td>${item.data_entrada}</td>
       </tr>
     `;

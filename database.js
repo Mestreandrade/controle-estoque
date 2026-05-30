@@ -28,10 +28,21 @@ db.serialize(() => {
             lote TEXT NOT NULL,
             rack TEXT UNIQUE NOT NULL,
             quantidade INTEGER DEFAULT 0,
+            validade TEXT,
             data_entrada TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (produto_id) REFERENCES produtos(id)
         )
     `);
+
+    db.all(`PRAGMA table_info(estoque)`, [], (err, colunas) => {
+        if (!err) {
+            const existeValidade = colunas.some(coluna => coluna.name === "validade");
+
+            if (!existeValidade) {
+                db.run(`ALTER TABLE estoque ADD COLUMN validade TEXT`);
+            }
+        }
+    });
 
     db.run(`
         CREATE TABLE IF NOT EXISTS movimentacoes (

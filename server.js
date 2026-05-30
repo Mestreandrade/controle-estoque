@@ -11,9 +11,7 @@ app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-/* ============================= */
 /* LOGIN */
-/* ============================= */
 
 app.post("/login", (req, res) => {
     const { usuario, senha } = req.body;
@@ -23,23 +21,15 @@ app.post("/login", (req, res) => {
         [usuario, senha],
         (err, row) => {
             if(err || !row){
-                res.json({
-                    sucesso: false,
-                    mensagem: "Usuário ou senha inválidos"
-                });
+                res.json({ sucesso: false, mensagem: "Usuário ou senha inválidos" });
             } else {
-                res.json({
-                    sucesso: true,
-                    usuario: row
-                });
+                res.json({ sucesso: true, usuario: row });
             }
         }
     );
 });
 
-/* ============================= */
 /* PERMISSÕES */
-/* ============================= */
 
 function somenteAdmin(req, res, next){
     const perfil = req.headers["perfil"];
@@ -61,9 +51,7 @@ function adminOuOperador(req, res, next){
     next();
 }
 
-/* ============================= */
 /* USUÁRIOS */
-/* ============================= */
 
 app.post("/usuarios", somenteAdmin, (req, res) => {
     const { nome, usuario, senha, perfil } = req.body;
@@ -143,9 +131,7 @@ app.get("/usuarios", somenteAdmin, (req, res) => {
     );
 });
 
-/* ============================= */
 /* PRODUTOS */
-/* ============================= */
 
 app.post("/produtos", somenteAdmin, (req, res) => {
     const { codigo, nome, imagem } = req.body;
@@ -212,9 +198,7 @@ app.get("/produtos/:codigo", (req, res) => {
     );
 });
 
-/* ============================= */
 /* RACKS */
-/* ============================= */
 
 app.post("/racks", somenteAdmin, (req, res) => {
     const { endereco } = req.body;
@@ -279,6 +263,42 @@ app.put("/racks/:id", somenteAdmin, (req, res) => {
 app.delete("/racks/:id", somenteAdmin, (req, res) => {
     const id = req.params.id;
 
+    db.get(
+        "SELECT endereco FROM racks WHERE id = ?",
+        [id],
+        (err, rackAtual) => {
+
+            if(err || !rackAtual){
+                return res.send("Rack não encontrado");
+            }
+
+            db.get(
+                "SELECT * FROM estoque WHERE rack = ?",
+                [rackAtual.endereco],
+                (err, estoque) => {
+
+                    if(estoque){
+                        return res.send("Não é permitido excluir rack ocupado");
+                    }
+
+                    db.run(
+                        "DELETE FROM racks WHERE id = ?",
+                        [id],
+                        function(err){
+                            if(err){
+                                res.send("Erro ao excluir rack");
+                            } else {
+                                res.send("Rack excluído com sucesso");
+                            }
+                        }
+                    );
+
+                }
+            );
+        }
+    );
+});
+
 app.post("/racks-excluir-lote", somenteAdmin, (req, res) => {
     const { ids } = req.body;
 
@@ -341,44 +361,6 @@ app.post("/racks-excluir-lote", somenteAdmin, (req, res) => {
     }
 });
 
-
-
-    db.get(
-        "SELECT endereco FROM racks WHERE id = ?",
-        [id],
-        (err, rackAtual) => {
-
-            if(err || !rackAtual){
-                return res.send("Rack não encontrado");
-            }
-
-            db.get(
-                "SELECT * FROM estoque WHERE rack = ?",
-                [rackAtual.endereco],
-                (err, estoque) => {
-
-                    if(estoque){
-                        return res.send("Não é permitido excluir rack ocupado");
-                    }
-
-                    db.run(
-                        "DELETE FROM racks WHERE id = ?",
-                        [id],
-                        function(err){
-                            if(err){
-                                res.send("Erro ao excluir rack");
-                            } else {
-                                res.send("Rack excluído com sucesso");
-                            }
-                        }
-                    );
-
-                }
-            );
-        }
-    );
-});
-
 app.get("/racks", (req, res) => {
     db.all("SELECT * FROM racks ORDER BY endereco", [], (err, rows) => {
         if(err){
@@ -418,7 +400,8 @@ app.get("/racks-ocupados", (req, res) => {
             produtos.codigo,
             produtos.nome,
             estoque.lote,
-            estoque.quantidade
+            estoque.quantidade,
+            estoque.validade
         FROM estoque
         INNER JOIN produtos
         ON produtos.id = estoque.produto_id
@@ -435,12 +418,10 @@ app.get("/racks-ocupados", (req, res) => {
     );
 });
 
-/* ============================= */
 /* ENTRADA */
-/* ============================= */
 
 app.post("/entrada", adminOuOperador, (req, res) => {
-    const { codigo, lote, rack, quantidade } = req.body;
+    const { codigo, lote, rack, quantidade, validade } = req.body;
 
     db.get(
         "SELECT * FROM produtos WHERE codigo = ?",
@@ -472,8 +453,13 @@ app.post("/entrada", adminOuOperador, (req, res) => {
                                     endereco.lote === lote
                                 ){
                                     db.run(
-                                        "UPDATE estoque SET quantidade = quantidade + ? WHERE rack = ?",
-                                        [quantidade, rack],
+                                        `
+                                        UPDATE estoque
+                                        SET quantidade = quantidade + ?,
+                                            validade = COALESCE(?, validade)
+                                        WHERE rack = ?
+                                        `,
+                                        [quantidade, validade || null, rack],
                                         function(err){
                                             if(err){
                                                 return res.send("Erro ao atualizar estoque");
@@ -492,10 +478,10 @@ app.post("/entrada", adminOuOperador, (req, res) => {
                                 db.run(
                                     `
                                     INSERT INTO estoque
-                                    (produto_id, lote, rack, quantidade)
-                                    VALUES (?, ?, ?, ?)
+                                    (produto_id, lote, rack, quantidade, validade)
+                                    VALUES (?, ?, ?, ?, ?)
                                     `,
-                                    [produto.id, lote, rack, quantidade],
+                                    [produto.id, lote, rack, quantidade, validade || null],
                                     function(err){
                                         if(err){
                                             return res.send("Erro ao dar entrada no estoque");
@@ -516,9 +502,7 @@ app.post("/entrada", adminOuOperador, (req, res) => {
     );
 });
 
-/* ============================= */
 /* SAÍDA */
-/* ============================= */
 
 app.post("/saida", adminOuOperador, (req, res) => {
     const { codigo, lote, rack, quantidade } = req.body;
@@ -528,7 +512,7 @@ app.post("/saida", adminOuOperador, (req, res) => {
         [codigo],
         (err, produto) => {
 
-            if(!produto){
+            if(!produto){	
                 return res.send("Produto não encontrado");
             }
 
@@ -586,9 +570,181 @@ app.post("/saida", adminOuOperador, (req, res) => {
     );
 });
 
-/* ============================= */
+
+/* BLOCO 1 — Buscar estoque para saída  */
+
+
+
+app.get("/estoque-busca", (req, res) => {
+    const tipo = req.query.tipo;
+    const termo = req.query.termo;
+
+    let sql = `
+        SELECT 
+            estoque.id,
+            produtos.codigo,
+            produtos.nome,
+            estoque.lote,
+            estoque.rack,
+            estoque.quantidade,
+            estoque.validade
+        FROM estoque
+        INNER JOIN produtos
+        ON produtos.id = estoque.produto_id
+        WHERE 1 = 1
+    `;
+
+    let params = [];
+
+    if(tipo === "produto"){
+        sql += " AND produtos.codigo LIKE ?";
+        params.push(`%${termo}%`);
+    }
+
+    if(tipo === "lote"){
+        sql += " AND estoque.lote LIKE ?";
+        params.push(`%${termo}%`);
+    }
+
+    sql += " ORDER BY estoque.validade, estoque.rack";
+
+    db.all(sql, params, (err, rows) => {
+        if(err){
+            res.send("Erro ao buscar estoque");
+        } else {
+            res.json(rows);
+        }
+    });
+});
+
+
+
+
+/* BLOCO 2 — Saída em lote por vários endereços */
+
+
+
+app.post("/saida-lote", adminOuOperador, (req, res) => {
+    const { itens } = req.body;
+
+    if(!itens || itens.length === 0){
+        return res.send("Nenhum item informado para saída");
+    }
+
+    let processados = 0;
+    let sucesso = 0;
+    let erros = 0;
+
+    itens.forEach(item => {
+
+        const { estoque_id, quantidade_saida } = item;
+
+        db.get(
+            `
+            SELECT 
+                estoque.*,
+                produtos.id AS produto_id,
+                produtos.codigo,
+                produtos.nome
+            FROM estoque
+            INNER JOIN produtos
+            ON produtos.id = estoque.produto_id
+            WHERE estoque.id = ?
+            `,
+            [estoque_id],
+            (err, estoque) => {
+
+                if(err || !estoque){
+                    erros++;
+                    finalizar();
+                    return;
+                }
+
+                if(Number(quantidade_saida) <= 0){
+                    erros++;
+                    finalizar();
+                    return;
+                }
+
+                if(estoque.quantidade < Number(quantidade_saida)){
+                    erros++;
+                    finalizar();
+                    return;
+                }
+
+                const novaQuantidade = estoque.quantidade - Number(quantidade_saida);
+
+                if(novaQuantidade === 0){
+
+                    db.run(
+                        "DELETE FROM estoque WHERE id = ?",
+                        [estoque_id],
+                        function(err){
+
+                            if(err){
+                                erros++;
+                            } else {
+                                registrarMovimentacao(
+                                    estoque.produto_id,
+                                    estoque.lote,
+                                    estoque.rack,
+                                    "SAIDA",
+                                    quantidade_saida
+                                );
+
+                                sucesso++;
+                            }
+
+                            finalizar();
+                        }
+                    );
+
+                } else {
+
+                    db.run(
+                        "UPDATE estoque SET quantidade = ? WHERE id = ?",
+                        [novaQuantidade, estoque_id],
+                        function(err){
+
+                            if(err){
+                                erros++;
+                            } else {
+                                registrarMovimentacao(
+                                    estoque.produto_id,
+                                    estoque.lote,
+                                    estoque.rack,
+                                    "SAIDA",
+                                    quantidade_saida
+                                );
+
+                                sucesso++;
+                            }
+
+                            finalizar();
+                        }
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+    function finalizar(){
+        processados++;
+
+        if(processados === itens.length){
+            res.send(`Saídas realizadas: ${sucesso}. Erros: ${erros}`);
+        }
+    }
+});
+
+
+
+
+
 /* CONSULTAS */
-/* ============================= */
 
 app.get("/estoque", (req, res) => {
     db.all(
@@ -601,6 +757,7 @@ app.get("/estoque", (req, res) => {
             estoque.lote,
             estoque.rack,
             estoque.quantidade,
+            estoque.validade,
             estoque.data_entrada
         FROM estoque
         INNER JOIN produtos
@@ -646,9 +803,7 @@ app.get("/movimentacoes", (req, res) => {
     );
 });
 
-/* ============================= */
 /* FUNÇÃO AUXILIAR */
-/* ============================= */
 
 function registrarMovimentacao(produto_id, lote, rack, tipo, quantidade){
     db.run(
@@ -661,9 +816,7 @@ function registrarMovimentacao(produto_id, lote, rack, tipo, quantidade){
     );
 }
 
-/* ============================= */
 /* INICIAR SERVIDOR */
-/* ============================= */
 
 const PORT = process.env.PORT || 3000;
 
