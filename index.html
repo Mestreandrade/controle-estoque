@@ -29,6 +29,37 @@
     .card-indicador{background:#f9fafb;padding:20px;border-radius:10px;min-width:180px;text-align:center;border:1px solid #ddd;}
     .card-indicador h3{margin:0;color:#333;}
     .card-indicador p{font-size:24px;font-weight:bold;color:#2563eb;}
+
+/* PEPS - STATUS */
+
+.status-normal{
+    background:#dcfce7;
+    color:#166534;
+    font-weight:bold;
+    border-radius:6px;
+    padding:5px;
+}
+
+.status-30{
+    background:#fef3c7;
+    color:#b45309;
+    font-weight:bold;
+    border-radius:6px;
+    padding:5px;
+}
+
+.status-60{
+    background:#fee2e2;
+    color:#b91c1c;
+    font-weight:bold;
+    border-radius:6px;
+    padding:5px;
+}
+
+
+
+
+
     .barra{background:#ddd;height:22px;border-radius:10px;overflow:hidden;}
     .barra div{background:#2563eb;height:22px;color:white;text-align:center;font-size:12px;line-height:22px;}
 
@@ -107,6 +138,7 @@
   <button class="menu-operador" onclick="abrirTela('saida')">Saída</button>
   <button onclick="abrirTela('consulta')">Rastreamento de Lotes</button>
   <button onclick="abrirTela('saldo')">Saldo Geral</button>
+  <button onclick="abrirTela('peps')">PEPS / Fabricação</button>
   <button onclick="abrirTela('dashboard')">Dashboard</button>
   <button onclick="abrirTela('historico')">Histórico</button>
 </nav>
@@ -391,6 +423,96 @@
   </table>
 </section>
 
+
+
+/* TELA DE INDICADOR DO PEPS*/
+
+
+<section id="peps" class="tela">
+  <h2>PEPS / Controle de Fabricação</h2>
+
+  
+<!-- CARDS PEPS -->
+
+<div class="cards-dashboard">
+
+  <div class="card-indicador">
+    <h3>Itens em Estoque</h3>
+    <p id="pepsTotalItens">0</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>Acima de 30 dias</h3>
+    <p id="pepsAcima30">0</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>% Acima de 30 dias</h3>
+    <p id="pepsPercentual30">0%</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>Acima de 60 dias</h3>
+    <p id="pepsAcima60">0</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>% Acima de 60 dias</h3>
+    <p id="pepsPercentual60">0%</p>
+  </div>
+
+</div>
+
+
+/* TELA DE FILTRO PEPS*/
+
+  <input
+    type="text"
+    id="filtroPeps"
+    placeholder="Buscar código, produto, lote ou rack"
+    onkeyup="filtrarPeps()"
+  >
+
+
+<button class="btn-cinza" onclick="renderizarPeps(listaPeps)">
+  Todos
+</button>
+
+<button class="btn-amarelo" onclick="filtrarPeps30()">
+  Acima de 30 dias
+</button>
+
+<button class="btn-vermelho" onclick="filtrarPeps60()">
+  Acima de 60 dias
+</button>
+
+
+  <button class="btn-cinza" onclick="imprimirTabela('tabelaPeps')">Imprimir</button>
+  <button class="btn-cinza" onclick="exportarCSV('tabelaPeps','peps-fabricacao.csv')">Exportar CSV</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Lote</th>
+        <th>Rack</th>
+        <th>Saldo</th>
+        <th>Fabricação</th>
+        <th>Dias em Estoque</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="tabelaPeps"></tbody>
+  </table>
+</section>
+
+
+
+
+
+
 <section id="dashboard" class="tela">
   <h2>Dashboard de Ocupação</h2>
 
@@ -455,6 +577,7 @@ let listaSaldo = [];
 let listaEntrada = [];
 let listaSaida = [];
 let listaUsuarios = [];
+let listaPeps = [];
 
 function perfilAtual(){
   return usuarioLogado ? usuarioLogado.perfil : "";
@@ -1064,6 +1187,32 @@ function filtrarMapaEntrada(){
   renderizarMapaEntrada(resultado);
 }
 
+
+
+function converterDataBRparaISO(dataBR){
+  if(!dataBR){
+    return "";
+  }
+
+  const somenteNumeros = dataBR.replace(/\D/g, "");
+
+  if(somenteNumeros.length !== 8){
+    alert("Data inválida. Use o formato DD/MM/AAAA");
+    return "";
+  }
+
+  const dia = somenteNumeros.substring(0, 2);
+  const mes = somenteNumeros.substring(2, 4);
+  const ano = somenteNumeros.substring(4, 8);
+
+  return `${ano}-${mes}-${dia}`;
+}
+
+
+
+
+
+
 async function abrirEntradaRack(rack){
 
   const codigo = prompt("Informe o código do produto:");
@@ -1093,7 +1242,8 @@ async function abrirEntradaRack(rack){
     return;
   }
 
-  const validade = prompt("Informe a validade no formato AAAA-MM-DD:");
+  const validadeDigitada = prompt("Informe a fabricação no formato DD/MM/AAAA:");
+const validade = converterDataBRparaISO(validadeDigitada);
 
   const entrada = {
     codigo: codigo,
@@ -1555,6 +1705,7 @@ async function carregarEstoque(){
 
   renderizarEstoque(listaEstoque);
   gerarSaldoGeral();
+  gerarPeps();
   atualizarDashboard();
 }
 
@@ -1681,6 +1832,186 @@ function filtrarHistorico(){
   renderizarHistorico(resultado);
 }
 
+
+function formatarDataBR(dataISO){
+
+  if(!dataISO){
+    return "";
+  }
+
+  const partes = dataISO.split("-");
+
+  if(partes.length !== 3){
+    return dataISO;
+  }
+
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+
+
+
+function calcularDiasFabricacao(dataISO){
+
+  if(!dataISO){
+    return 0;
+  }
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+
+  const fabricacao = new Date(dataISO + "T00:00:00");
+
+  const diferenca = hoje - fabricacao;
+
+  const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
+
+  return dias < 0 ? 0 : dias;
+}
+
+
+
+
+function gerarPeps(){
+
+  listaPeps = listaEstoque.map(item => {
+
+    const dias = calcularDiasFabricacao(item.validade);
+
+    let status = "NORMAL";
+
+    if(dias > 60){
+      status = "ACIMA DE 60 DIAS";
+    } else if(dias > 30){
+      status = "ACIMA DE 30 DIAS";
+    }
+
+
+
+
+
+
+
+    return {
+      codigo: item.codigo,
+      nome: item.nome,
+      lote: item.lote,
+      rack: item.rack,
+      quantidade: item.quantidade,
+      fabricacao: item.validade,
+      dias: dias,
+      status: status
+    };
+
+  });
+
+  renderizarPeps(listaPeps);
+  atualizarIndicadoresPeps();
+}
+
+function renderizarPeps(lista){
+
+  const tabela = document.getElementById("tabelaPeps");
+
+  if(!tabela){
+    return;
+  }
+
+  tabela.innerHTML = "";
+
+  lista.forEach(item => {
+
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.nome}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.quantidade}</td>
+        <td>${formatarDataBR(item.fabricacao)}</td>
+        <td>${item.dias}</td>
+
+        <td>
+    ${
+        item.status === "NORMAL"
+        ? `<span class="status-normal">${item.status}</span>`
+        : item.status === "ACIMA DE 30 DIAS"
+        ? `<span class="status-30">${item.status}</span>`
+        : `<span class="status-60">${item.status}</span>`
+    }
+</td>
+
+
+
+
+      </tr>
+    `;
+
+  });
+}
+
+
+
+
+function atualizarIndicadoresPeps(){
+
+  const totalItens = listaPeps.reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const acima30 = listaPeps
+    .filter(item => item.dias >= 30)
+    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const acima60 = listaPeps
+    .filter(item => item.dias >= 60)
+    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const percentual30 = totalItens > 0
+    ? ((acima30 / totalItens) * 100).toFixed(1)
+    : 0;
+
+  const percentual60 = totalItens > 0
+    ? ((acima60 / totalItens) * 100).toFixed(1)
+    : 0;
+
+  document.getElementById("pepsTotalItens").innerText = totalItens;
+  document.getElementById("pepsAcima30").innerText = acima30;
+  document.getElementById("pepsAcima60").innerText = acima60;
+  document.getElementById("pepsPercentual30").innerText = percentual30 + "%";
+  document.getElementById("pepsPercentual60").innerText = percentual60 + "%";
+}
+
+
+
+
+
+function filtrarPeps(){
+
+  const filtro = document.getElementById("filtroPeps").value.toLowerCase();
+
+  const resultado = listaPeps.filter(item =>
+    item.codigo.toLowerCase().includes(filtro) ||
+    item.nome.toLowerCase().includes(filtro) ||
+    item.lote.toLowerCase().includes(filtro) ||
+    item.rack.toLowerCase().includes(filtro)
+  );
+
+  renderizarPeps(resultado);
+}
+
+
+
+
+function filtrarPeps30(){
+  const resultado = listaPeps.filter(item => item.dias >= 30);
+  renderizarPeps(resultado);
+}
+
+function filtrarPeps60(){
+  const resultado = listaPeps.filter(item => item.dias >= 60);
+  renderizarPeps(resultado);
+}
+
+
+
 /* DASHBOARD */
 
 function atualizarDashboard(){
@@ -1707,6 +2038,8 @@ function atualizarDashboard(){
 
     agrupado[item.codigo].racks.add(item.rack);
   });
+
+
 
   const tabela = document.getElementById("tabelaDashboardProduto");
   tabela.innerHTML = "";
