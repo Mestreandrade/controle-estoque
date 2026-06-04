@@ -30,6 +30,10 @@
     .card-indicador h3{margin:0;color:#333;}
     .card-indicador p{font-size:24px;font-weight:bold;color:#2563eb;}
 
+
+
+
+
 /* PEPS - STATUS */
 
 .status-normal{
@@ -102,6 +106,10 @@
       font-weight:bold;
     }
   </style>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode"></script>
+
 </head>
 
 <body>
@@ -131,16 +139,19 @@
 </div>
 
 <nav>
-  <button class="menu-admin" onclick="abrirTela('produtos')">Produtos</button>
-  <button class="menu-admin" onclick="abrirTela('racks')">Racks</button>
-  <button class="menu-admin" onclick="abrirTela('usuarios')">Usuários</button>
-  <button class="menu-operador" onclick="abrirTela('entrada')">Entrada</button>
-  <button class="menu-operador" onclick="abrirTela('saida')">Saída</button>
-  <button onclick="abrirTela('consulta')">Rastreamento de Lotes</button>
-  <button onclick="abrirTela('saldo')">Saldo Geral</button>
-  <button onclick="abrirTela('peps')">PEPS / Fabricação</button>
-  <button onclick="abrirTela('dashboard')">Dashboard</button>
-  <button onclick="abrirTela('historico')">Histórico</button>
+  <button class="menu-admin" onclick="abrirTela('produtos')">📦 Produtos</button>
+  <button class="menu-admin" onclick="abrirTela('racks')">🏷️ Racks</button>
+  <button class="menu-admin" onclick="abrirTela('usuarios')">👤 Usuários</button>
+  <button class="menu-admin" onclick="abrirTela('etiquetas')">🏷️ Etiquetas</button>
+  <button class="menu-operador" onclick="abrirTela('entrada')">⬇️ Entrada</button>
+  <button class="menu-operador" onclick="abrirTela('saida')">⬆️ Saída</button>
+  <button class="menu-operador" onclick="abrirTela('leitor')">📷 Leitor</button>
+  <button onclick="abrirTela('consulta')">🔎 Rastreamento de Lotes</button>
+  <button onclick="abrirTela('saldo')">📊 Saldo Geral</button>
+  <button onclick="abrirTela('peps')">⏳ PEPS / Fabricação</button>
+  <button onclick="abrirTela('inventario')">📋 Inventário</button>
+  <button onclick="abrirTela('dashboard')">📈 Dashboard</button>
+  <button onclick="abrirTela('historico')">📋 Histórico</button>
 </nav>
 
 <div class="container">
@@ -150,9 +161,10 @@
 
   <input type="hidden" id="produtoId">
 
-  <input type="text" id="codigoProduto" placeholder="Código">
-  <input type="text" id="nomeProduto" placeholder="Nome do Produto">
-  <input type="file" id="imagemProduto" accept="image/*">
+  <input type="text" id="codigoProduto" placeholder="Código Interno">
+<input type="text" id="nomeProduto" placeholder="Nome do Produto">
+<input type="text" id="codigoBarrasProduto" placeholder="Código de Barras">
+<input type="file" id="imagemProduto" accept="image/*">
 
   <button id="btnSalvarProduto" class="btn-azul" onclick="salvarProduto()">Cadastrar Produto</button>
   <button class="btn-cinza" onclick="limparFormularioProduto()">Limpar</button>
@@ -160,10 +172,15 @@
   <table>
     <thead>
       <tr>
+
+
         <th>Imagem</th>
-        <th>Código</th>
-        <th>Produto</th>
-        <th>Ação</th>
+         <th>Código</th>
+           <th>Produto</th>
+              <th>Código Barras</th>
+                  <th>Ação</th>
+
+
       </tr>
     </thead>
     <tbody id="tabelaProdutos"></tbody>
@@ -292,6 +309,28 @@
 <section id="entrada" class="tela">
   <h2>Entrada por Endereço</h2>
 
+
+
+
+
+<!-- ENTRADA EM MASSA POR RACKS SELECIONADOS -->
+
+<div class="card-indicador" style="max-width:100%; text-align:left;">
+
+  <h3>Entrada em Massa por Racks Selecionados</h3>
+
+  <input type="text" id="entradaMassaCodigo" placeholder="Código do Produto">
+  <input type="text" id="entradaMassaLote" placeholder="Lote">
+  <input type="number" id="entradaMassaQuantidade" placeholder="Quantidade por Rack">
+  <input type="date" id="entradaMassaValidade">
+
+  <button class="btn-verde" onclick="processarEntradaMassa()">
+Lançar em Todos os Racks Marcados  
+</button>
+
+</div>
+
+
   <input
     type="text"
     id="filtroEntradaRack"
@@ -392,6 +431,7 @@
         <th>Quantidade</th>
         <th>Validade</th>
         <th>Data Entrada</th>
+       <th>Ação</th>
       </tr>
     </thead>
     <tbody id="tabelaEstoque"></tbody>
@@ -401,11 +441,47 @@
 <section id="saldo" class="tela">
   <h2>Saldo Geral por Produto</h2>
 
+
+
+<!-- INDICADORES SALDO GERAL -->
+
+<div class="cards-dashboard">
+
   <div class="card-indicador">
-    <h3>Estoque Total Geral</h3>
-    <p id="estoqueTotalGeral">0</p>
+    <h3>📦 Produtos</h3>
+    <p id="indicadorProdutos">0</p>
   </div>
 
+  <div class="card-indicador">
+    <h3>🟢 Livres</h3>
+    <p id="indicadorLivres">0</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>🔴 Ocupados</h3>
+    <p id="indicadorOcupados">0</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>⚠️ >60 Dias</h3>
+    <p id="indicador60Dias">0</p>
+  </div>
+
+  <div class="card-indicador">
+    <h3>💾 Último Backup</h3>
+    <p id="dashUltimoBackup">-</p>
+    <small id="dashUsuarioBackup"></small>
+  </div>
+
+</div>
+
+
+
+
+
+
+
+ 
   <input type="text" id="filtroSaldo" placeholder="Buscar por código ou produto" onkeyup="filtrarSaldo()">
 
   <button class="btn-cinza" onclick="imprimirTabela('tabelaSaldo')">Imprimir</button>
@@ -425,7 +501,7 @@
 
 
 
-/* TELA DE INDICADOR DO PEPS*/
+<!-- TELA DE INDICADOR DO PEPS -->
 
 
 <section id="peps" class="tela">
@@ -463,8 +539,8 @@
 
 </div>
 
+<!-- TELA DE FILTRO PEPS -->
 
-/* TELA DE FILTRO PEPS*/
 
   <input
     type="text"
@@ -512,6 +588,155 @@
 
 
 
+<!-- TELA INVENTÁRIO -->
+
+<section id="inventario" class="tela">
+  <h2>📋 Inventário</h2>
+
+  <div class="cards-dashboard">
+
+    <div class="card-indicador">
+      <h3>Total Inventariado</h3>
+      <p id="invTotal">0</p>
+    </div>
+
+    <div class="card-indicador">
+      <h3>Sem Divergência</h3>
+      <p id="invSemDivergencia">0</p>
+    </div>
+
+    <div class="card-indicador">
+      <h3>Com Divergência</h3>
+      <p id="invComDivergencia">0</p>
+    </div>
+
+    <div class="card-indicador">
+      <h3>Acuracidade</h3>
+      <p id="invAcuracidade">0%</p>
+    </div>
+
+  </div>
+
+  <input
+    type="text"
+    id="filtroInventario"
+    placeholder="Buscar código, produto, lote ou rack"
+    onkeyup="filtrarInventario()"
+  >
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Produto</th>
+        <th>Lote</th>
+        <th>Rack</th>
+        <th>Sistema</th>
+        <th>Contado</th>
+        <th>Divergência</th>
+        <th>Usuário</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+
+    <tbody id="tabelaInventario"></tbody>
+  </table>
+</section>
+
+
+
+
+<!-- TELA MOVIMENTAÇÃO POR LEITOR -->
+
+<section id="leitor" class="tela">
+  <h2>📷 Movimentação por Leitor</h2>
+
+  <select id="leitorTipo">
+    <option value="ENTRADA">Entrada</option>
+    <option value="SAIDA">Saída</option>
+  </select>
+
+  <br>
+
+  <input type="text" id="leitorRack" placeholder="Bipe o Rack">
+
+  <button class="btn-azul" onclick="abrirCameraRack()">
+    📷 Ler Rack
+  </button>
+
+  <div id="cameraRack" style="width:300px; margin-top:10px; display:none;"></div>
+
+  <br>
+
+  <input type="text" id="leitorProduto" placeholder="Bipe o Produto" onblur="buscarProdutoLeitor()">
+
+  <button class="btn-azul" onclick="abrirCameraProduto()">
+    📷 Ler Produto
+  </button>
+
+  <span id="descricaoLeitor" class="descricao"></span>
+
+  <div id="cameraProduto" style="width:300px; margin-top:10px; display:none;"></div>
+
+  <br>
+
+<input type="text" id="leitorLote" placeholder="Bipe o Lote">
+
+<button class="btn-azul" onclick="abrirCameraLote()">
+  📷 Ler Lote
+</button>
+
+<div id="cameraLote" style="width:300px; margin-top:10px; display:none;"></div>
+
+
+  <input type="number" id="leitorQuantidade" placeholder="Quantidade">
+  <input type="date" id="leitorValidade">
+
+  <br>
+
+  <button class="btn-verde" onclick="confirmarMovimentacaoLeitor()">
+    Confirmar Movimentação
+  </button>
+
+  <button class="btn-cinza" onclick="limparLeitor()">
+    Limpar
+  </button>
+</section>
+
+
+
+<!-- TELA ETIQUETAS -->
+
+<section id="etiquetas" class="tela">
+  <h2>🏷️ Etiquetas de Racks</h2>
+
+  <input
+    type="text"
+    id="filtroEtiquetaRack"
+    placeholder="Digite o rack. Ex: R1.001.001 ou R1"
+  >
+
+  <button class="btn-azul" onclick="gerarEtiquetasRacksFiltradas()">
+    Gerar QR
+  </button>
+
+  <button class="btn-cinza" onclick="imprimirEtiquetasRacks()">
+    🖨️ Imprimir Etiquetas
+  </button>
+
+  <button class="btn-vermelho" onclick="limparEtiquetasRacks()">
+    Limpar
+  </button>
+
+  <div id="areaEtiquetasRacks" style="display:flex; flex-wrap:wrap; gap:15px; margin-top:20px;"></div>
+</section>
+
+
+
+
+
+
 
 <section id="dashboard" class="tela">
   <h2>Dashboard de Ocupação</h2>
@@ -545,8 +770,17 @@
 
   <input type="text" id="filtroHistorico" placeholder="Buscar histórico" onkeyup="filtrarHistorico()">
 
-  <button class="btn-cinza" onclick="imprimirTabela('tabelaMovimentacoes')">Imprimir</button>
-  <button class="btn-cinza" onclick="exportarCSV('tabelaMovimentacoes','historico.csv')">Exportar CSV</button>
+  <button class="btn-cinza" onclick="imprimirTabela('tabelaMovimentacoes')">
+  🖨️ Imprimir
+</button>
+
+<button class="btn-cinza" onclick="exportarCSV('tabelaMovimentacoes','historico.csv')">
+  📊 Exportar CSV
+</button>
+
+<button class="btn-amarelo" onclick="baixarBackup()">
+  🔒 Backup do Banco
+</button>
 
   <table>
     <thead>
@@ -557,6 +791,7 @@
         <th>Rack</th>
         <th>Tipo</th>
         <th>Quantidade</th>
+        <th>Usuário</th>
         <th>Data</th>
       </tr>
     </thead>
@@ -567,7 +802,136 @@
 </div>
 </div>
 
+
+
+
 <script>
+
+
+/* LEITURA QR - RACK */
+
+let leitorCameraRack = null;
+
+function abrirCameraRack(){
+
+  const areaCamera = document.getElementById("cameraRack");
+  areaCamera.style.display = "block";
+
+  if(leitorCameraRack){
+    leitorCameraRack.clear();
+  }
+
+  leitorCameraRack = new Html5Qrcode("cameraRack");
+
+  leitorCameraRack.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: 250
+    },
+    function(resultado){
+
+      document.getElementById("leitorRack").value = resultado;
+
+      leitorCameraRack.stop().then(async () => {
+        areaCamera.style.display = "none";
+
+        const tipo = document.getElementById("leitorTipo").value;
+
+        if(tipo === "SAIDA"){
+          await carregarDadosRackParaSaida(resultado);
+        } else {
+          document.getElementById("leitorProduto").focus();
+        }
+
+      });
+
+    },
+    function(erro){
+      // leitura em andamento
+    }
+  ).catch(function(err){
+    alert("Não foi possível abrir a câmera. Verifique a permissão do navegador.");
+  });
+}
+
+/* SAÍDA POR RACK */
+
+async function carregarDadosRackParaSaida(rack){
+
+  const resposta = await fetch("/estoque-rack/" + encodeURIComponent(rack));
+  const item = await resposta.json();
+
+  if(!item){
+    alert("Nenhum estoque encontrado neste rack");
+    document.getElementById("leitorProduto").value = "";
+    document.getElementById("leitorLote").value = "";
+    document.getElementById("descricaoLeitor").innerText = "";
+    return;
+  }
+
+  document.getElementById("leitorProduto").value = item.codigo;
+  document.getElementById("leitorLote").value = item.lote;
+  document.getElementById("leitorValidade").value = item.validade || "";
+  
+document.getElementById("descricaoLeitor").innerText =
+  item.nome + " | Saldo: " + item.quantidade;
+
+/* BLOQUEAR CAMPOS NA SAÍDA */
+
+document.getElementById("leitorRack").readOnly = true;
+document.getElementById("leitorProduto").readOnly = true;
+document.getElementById("leitorLote").readOnly = true;
+document.getElementById("leitorValidade").readOnly = true;
+
+document.getElementById("leitorQuantidade").readOnly = false;
+
+document.getElementById("leitorQuantidade").focus();
+
+}
+
+
+
+
+
+
+/* BACKUP DO BANCO */
+
+async function baixarBackup(){
+
+  const resposta = await fetch("/backup", {
+    method: "GET",
+    headers: {
+      "perfil": perfilAtual(),
+      "usuario": usuarioLogado ? usuarioLogado.nome : "Sistema"
+    }
+  });
+
+  if(!resposta.ok){
+    alert("Erro ao baixar backup");
+    return;
+  }
+
+  const blob = await resposta.blob();
+
+  const data = new Date().toISOString().slice(0,10);
+  const link = document.createElement("a");
+
+  link.href = URL.createObjectURL(blob);
+  link.download = `backup-estoque-${data}.db`;
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  URL.revokeObjectURL(link.href);
+}
+
+
+
+
+
+let listaInventario = [];
 let usuarioLogado = null;
 let listaProdutos = [];
 let listaRacks = [];
@@ -583,12 +947,18 @@ function perfilAtual(){
   return usuarioLogado ? usuarioLogado.perfil : "";
 }
 
+
+
+/* HEADERS */
+
 function headersComPerfil(){
   return {
     "Content-Type": "application/json",
-    "perfil": perfilAtual()
+    "perfil": perfilAtual(),
+    "usuario": usuarioLogado ? usuarioLogado.nome : "Sistema"
   };
 }
+
 
 async function fazerLogin(){
   const usuario = document.getElementById("loginUsuario").value;
@@ -652,6 +1022,8 @@ function carregarTudo(){
   carregarUsuarios();
 }
 
+/* ABRIR TELAS */
+
 function abrirTela(tela){
   document.querySelectorAll(".tela").forEach(secao => secao.classList.remove("ativa"));
   document.getElementById(tela).classList.add("ativa");
@@ -665,7 +1037,16 @@ function abrirTela(tela){
   if(tela === "entrada"){
     carregarMapaEntrada();
   }
+
+  if(tela === "dashboard"){
+    carregarUltimoBackup();
+  }
+
+  if(tela === "inventario"){
+    carregarInventario();
+  }
 }
+
 
 function converterImagemBase64(input){
   return new Promise((resolve) => {
@@ -805,6 +1186,7 @@ async function salvarProduto(){
   const id = document.getElementById("produtoId").value;
   const codigo = document.getElementById("codigoProduto").value;
   const nome = document.getElementById("nomeProduto").value;
+  const codigo_barras = document.getElementById("codigoBarrasProduto").value;
   const imagem = await converterImagemBase64(document.getElementById("imagemProduto"));
 
   if(codigo == "" || nome == ""){
@@ -823,7 +1205,12 @@ async function salvarProduto(){
   const resposta = await fetch(url, {
     method: metodo,
     headers: headersComPerfil(),
-    body: JSON.stringify({codigo, nome, imagem})
+    body: JSON.stringify({
+      codigo,
+      nome,
+      imagem,
+      codigo_barras
+    })
   });
 
   alert(await resposta.text());
@@ -844,6 +1231,7 @@ function editarProduto(id){
   document.getElementById("produtoId").value = produto.id;
   document.getElementById("codigoProduto").value = produto.codigo;
   document.getElementById("nomeProduto").value = produto.nome;
+  document.getElementById("codigoBarrasProduto").value = produto.codigo_barras || "";
   document.getElementById("imagemProduto").value = "";
 
   document.getElementById("btnSalvarProduto").innerText = "Atualizar Produto";
@@ -856,6 +1244,7 @@ function limparFormularioProduto(){
   document.getElementById("produtoId").value = "";
   document.getElementById("codigoProduto").value = "";
   document.getElementById("nomeProduto").value = "";
+  document.getElementById("codigoBarrasProduto").value = "";
   document.getElementById("imagemProduto").value = "";
 
   document.getElementById("btnSalvarProduto").innerText = "Cadastrar Produto";
@@ -875,11 +1264,15 @@ async function carregarProdutos(){
         <td>${item.imagem ? `<img src="${item.imagem}">` : ""}</td>
         <td>${item.codigo}</td>
         <td>${item.nome}</td>
+        <td>${item.codigo_barras || ""}</td>
         <td><button class="btn-amarelo" onclick="editarProduto(${item.id})">Editar</button></td>
       </tr>
     `;
   });
 }
+
+
+
 
 /* RACK */
 
@@ -1153,20 +1546,37 @@ function renderizarMapaEntrada(lista){
 
     tabela.innerHTML += `
       <tr class="${classeLinha}">
-        <td>${item.rack}</td>
+
+
+<td>
+  ${
+    item.status === "LIVRE"
+    ? `<input type="checkbox" class="checkEntradaRack" value="${item.rack}"> ${item.rack}`
+    : item.rack
+  }
+</td>
+
+
+
+
         <td class="${classeStatus}">${item.status}</td>
         <td>${item.codigo}</td>
         <td>${item.produto}</td>
         <td>${item.lote}</td>
         <td>${item.quantidade}</td>
         <td>${item.validade}</td>
-        <td>
-          ${
-            item.status === "LIVRE"
-            ? `<button class="btn-verde" onclick="abrirEntradaRack('${item.rack}')">Dar Entrada</button>`
-            : `<button class="btn-cinza" disabled>Bloqueado</button>`
-          }
-        </td>
+        
+
+       <td>
+  ${
+    item.status === "LIVRE"
+    ? `<span class="status-livre">Selecionar na caixa</span>`
+    : `<button class="btn-cinza" disabled>Bloqueado</button>`
+  }
+</td>
+
+
+
       </tr>
     `;
 
@@ -1284,6 +1694,308 @@ const validade = converterDataBRparaISO(validadeDigitada);
   }
 
 }
+
+
+
+/* ENTRADA EM MASSA */
+
+async function processarEntradaMassa(){
+
+  const codigo = document.getElementById("entradaMassaCodigo").value;
+  const lote = document.getElementById("entradaMassaLote").value;
+  const quantidade = Number(document.getElementById("entradaMassaQuantidade").value);
+  const validade = document.getElementById("entradaMassaValidade").value;
+
+  const checksMarcados = document.querySelectorAll(".checkEntradaRack:checked");
+
+  const racksSelecionados = Array.from(checksMarcados).map(check => check.value);
+
+  if(codigo === "" || lote === "" || quantidade <= 0){
+    alert("Preencha código, lote e quantidade");
+    return;
+  }
+
+  if(racksSelecionados.length === 0){
+    alert("Selecione pelo menos um rack livre");
+    return;
+  }
+
+  const produtoResp = await fetch("/produtos/" + codigo);
+  const produto = await produtoResp.json();
+
+  if(!produto){
+    alert("Produto não encontrado");
+    return;
+  }
+
+  if(!confirm(`Confirmar entrada do produto ${produto.nome} em ${racksSelecionados.length} racks?`)){
+    return;
+  }
+
+  const entradasImpressao = [];
+  const erros = [];
+
+  for(let i = 0; i < racksSelecionados.length; i++){
+
+    const rack = racksSelecionados[i];
+
+    const entrada = {
+      codigo: codigo,
+      produto: produto.nome,
+      lote: lote,
+      rack: rack,
+      quantidade: quantidade,
+      validade: validade || ""
+    };
+
+    const resposta = await fetch("/entrada", {
+      method: "POST",
+      headers: headersComPerfil(),
+      body: JSON.stringify(entrada)
+    });
+
+    const resultado = await resposta.text();
+
+    if(
+      resultado.includes("Erro") ||
+      resultado.includes("ocupado") ||
+      resultado.includes("não") ||
+      resultado.includes("negado")
+    ){
+      erros.push(`Rack ${rack}: ${resultado}`);
+    } else {
+      entradasImpressao.push(entrada);
+    }
+  }
+
+  if(entradasImpressao.length > 0){
+    imprimirEntrada(entradasImpressao);
+  }
+
+  alert(
+    "Entrada em massa finalizada.\n" +
+    "Racks lançados: " + entradasImpressao.length + "\n" +
+    "Erros: " + erros.length
+  );
+
+  if(erros.length > 0){
+    console.log("Erros na entrada em massa:", erros);
+  }
+
+  document.getElementById("entradaMassaCodigo").value = "";
+  document.getElementById("entradaMassaLote").value = "";
+  document.getElementById("entradaMassaQuantidade").value = "";
+  document.getElementById("entradaMassaValidade").value = "";
+
+  await carregarEstoque();
+  await carregarMapaEntrada();
+  await carregarMovimentacoes();
+  await carregarRacks();
+}
+
+
+
+/* LEITURA QR / CÓDIGO DE BARRAS - PRODUTO */
+
+let leitorCameraProduto = null;
+
+function abrirCameraProduto(){
+
+  const areaCamera = document.getElementById("cameraProduto");
+  areaCamera.style.display = "block";
+
+  if(leitorCameraProduto){
+    leitorCameraProduto.clear();
+  }
+
+  leitorCameraProduto = new Html5Qrcode("cameraProduto");
+
+  leitorCameraProduto.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: 250
+    },
+    function(resultado){
+
+      document.getElementById("leitorProduto").value = resultado;
+
+      leitorCameraProduto.stop().then(async () => {
+        areaCamera.style.display = "none";
+
+        await buscarProdutoLeitor();
+
+        document.getElementById("leitorLote").focus();
+      });
+
+    },
+    function(erro){
+      // leitura em andamento
+    }
+  ).catch(function(err){
+    alert("Não foi possível abrir a câmera do produto. Verifique a permissão do navegador.");
+  });
+}
+
+
+
+/* LEITURA QR / CÓDIGO DE BARRAS - LOTE */
+
+let leitorCameraLote = null;
+
+function abrirCameraLote(){
+
+  const areaCamera = document.getElementById("cameraLote");
+  areaCamera.style.display = "block";
+
+  if(leitorCameraLote){
+    leitorCameraLote.clear();
+  }
+
+  leitorCameraLote = new Html5Qrcode("cameraLote");
+
+  leitorCameraLote.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: 250
+    },
+    function(resultado){
+
+      document.getElementById("leitorLote").value = resultado;
+
+      leitorCameraLote.stop().then(() => {
+        areaCamera.style.display = "none";
+        document.getElementById("leitorQuantidade").focus();
+      });
+
+    },
+    function(erro){
+      // leitura em andamento
+    }
+  ).catch(function(err){
+    alert("Não foi possível abrir a câmera do lote. Verifique a permissão do navegador.");
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* MOVIMENTAÇÃO POR LEITOR */
+
+async function buscarProdutoLeitor(){
+
+  const codigo = document.getElementById("leitorProduto").value;
+
+  if(codigo === ""){
+    document.getElementById("descricaoLeitor").innerText = "";
+    return;
+  }
+
+  const resposta = await fetch("/produtos/" + codigo);
+  const produto = await resposta.json();
+
+  document.getElementById("descricaoLeitor").innerText =
+    produto ? produto.nome : "Produto não encontrado";
+}
+
+async function confirmarMovimentacaoLeitor(){
+
+  const tipo = document.getElementById("leitorTipo").value;
+  const rack = document.getElementById("leitorRack").value;
+  const codigo = document.getElementById("leitorProduto").value;
+  const lote = document.getElementById("leitorLote").value;
+  const quantidade = Number(document.getElementById("leitorQuantidade").value);
+  const validade = document.getElementById("leitorValidade").value;
+  const produto = document.getElementById("descricaoLeitor").innerText;
+
+  if(rack === "" || codigo === "" || lote === "" || quantidade <= 0){
+    alert("Preencha rack, produto, lote e quantidade");
+    return;
+  }
+
+  if(produto === "Produto não encontrado"){
+    alert("Produto não encontrado");
+    return;
+  }
+
+  let url = "/entrada";
+
+  const dados = {
+    codigo,
+    lote,
+    rack,
+    quantidade
+  };
+
+  if(tipo === "ENTRADA"){
+    dados.validade = validade || "";
+  }
+
+  if(tipo === "SAIDA"){
+    url = "/saida";
+  }
+
+  const confirmar = confirm(
+    "Confirmar " + tipo + "?\n\n" +
+    "Produto: " + codigo + " - " + produto + "\n" +
+    "Lote: " + lote + "\n" +
+    "Rack: " + rack + "\n" +
+    "Quantidade: " + quantidade
+  );
+
+  if(!confirmar){
+    return;
+  }
+
+  const resposta = await fetch(url, {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify(dados)
+  });
+
+  const resultado = await resposta.text();
+
+  alert(resultado);
+
+  if(
+    resultado.toLowerCase().includes("sucesso") ||
+    resultado.toLowerCase().includes("realizada") ||
+    resultado.toLowerCase().includes("liberado")
+  ){
+    limparLeitor();
+    carregarEstoque();
+    carregarMovimentacoes();
+    carregarRacks();
+    carregarMapaEntrada();
+  }
+}
+
+function limparLeitor(){
+
+  document.getElementById("leitorRack").value = "";
+  document.getElementById("leitorProduto").value = "";
+  document.getElementById("leitorLote").value = "";
+  document.getElementById("leitorQuantidade").value = "";
+  document.getElementById("leitorValidade").value = "";
+  document.getElementById("descricaoLeitor").innerText = "";
+
+  document.getElementById("leitorRack").focus();
+}
+
+
+
 
 
 /* ENTRADA E SAÍDA */
@@ -1709,6 +2421,12 @@ async function carregarEstoque(){
   atualizarDashboard();
 }
 
+
+
+
+
+/* RASTREAMENTO DE LOTES */
+
 function renderizarEstoque(lista){
   const tabela = document.getElementById("tabelaEstoque");
   tabela.innerHTML = "";
@@ -1724,10 +2442,21 @@ function renderizarEstoque(lista){
         <td>${item.quantidade}</td>
         <td>${item.validade || ""}</td>
         <td>${item.data_entrada}</td>
+        <td>
+          <button class="btn-amarelo" onclick="abrirInventarioItem(${item.id})">
+            📋 Inventariar
+          </button>
+        </td>
       </tr>
     `;
   });
 }
+
+
+
+
+
+
 
 function filtrarEstoque(){
   const filtro = document.getElementById("filtroConsulta").value.toLowerCase();
@@ -1741,6 +2470,9 @@ function filtrarEstoque(){
 
   renderizarEstoque(resultado);
 }
+
+
+/* SALDO GERAL */
 
 function gerarSaldoGeral(){
   const agrupado = {};
@@ -1762,8 +2494,34 @@ function gerarSaldoGeral(){
 
   const total = listaSaldo.reduce((soma, item) => soma + Number(item.quantidade), 0);
 
-  document.getElementById("estoqueTotalGeral").innerText = total;
-  document.getElementById("dashEstoqueTotal").innerText = total;
+  if(document.getElementById("dashEstoqueTotal")){
+    document.getElementById("dashEstoqueTotal").innerText = total;
+  }
+
+  /* INDICADORES SALDO GERAL */
+
+  if(document.getElementById("indicadorProdutos")){
+    document.getElementById("indicadorProdutos").innerText = listaProdutos.length;
+  }
+
+  if(document.getElementById("indicadorLivres")){
+    const ocupados = new Set(listaEstoque.map(item => item.rack));
+    const livres = listaRacks.filter(rack => !ocupados.has(rack.endereco)).length;
+
+    document.getElementById("indicadorLivres").innerText = livres;
+  }
+
+  if(document.getElementById("indicadorOcupados")){
+    const ocupados = new Set(listaEstoque.map(item => item.rack));
+
+    document.getElementById("indicadorOcupados").innerText = ocupados.size;
+  }
+
+  if(document.getElementById("indicador60Dias")){
+    const acima60 = listaPeps.filter(item => item.dias >= 60).length;
+
+    document.getElementById("indicador60Dias").innerText = acima60;
+  }
 }
 
 function renderizarSaldo(lista){
@@ -1780,6 +2538,7 @@ function renderizarSaldo(lista){
     `;
   });
 }
+
 
 function filtrarSaldo(){
   const filtro = document.getElementById("filtroSaldo").value.toLowerCase();
@@ -1799,6 +2558,8 @@ async function carregarMovimentacoes(){
   renderizarHistorico(listaHistorico);
 }
 
+/* HISTÓRICO */
+
 function renderizarHistorico(lista){
   const tabela = document.getElementById("tabelaMovimentacoes");
   tabela.innerHTML = "";
@@ -1812,11 +2573,13 @@ function renderizarHistorico(lista){
         <td>${item.rack}</td>
         <td>${item.tipo}</td>
         <td>${item.quantidade}</td>
+        <td>${item.usuario || "Sistema"}</td>
         <td>${item.data_movimentacao}</td>
       </tr>
     `;
   });
 }
+
 
 function filtrarHistorico(){
   const filtro = document.getElementById("filtroHistorico").value.toLowerCase();
@@ -2012,6 +2775,319 @@ function filtrarPeps60(){
 
 
 
+
+
+/* ÚLTIMO BACKUP */
+
+async function carregarUltimoBackup(){
+
+  const resposta = await fetch("/ultimo-backup");
+  const backup = await resposta.json();
+
+  if(!backup || !backup.data_backup){
+    document.getElementById("dashUltimoBackup").innerText = "Nenhum";
+    document.getElementById("dashUsuarioBackup").innerText = "";
+    return;
+  }
+
+  const partes = backup.data_backup.split(" ");
+  const dataPartes = partes[0].split("-");
+  const horaPartes = partes[1].split(":");
+
+  const data = new Date(
+    Number(dataPartes[0]),
+    Number(dataPartes[1]) - 1,
+    Number(dataPartes[2]),
+    Number(horaPartes[0]) - 3,
+    Number(horaPartes[1])
+  );
+
+  document.getElementById("dashUltimoBackup").innerText =
+    data.toLocaleDateString("pt-BR") + " " +
+    data.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+  document.getElementById("dashUsuarioBackup").innerText =
+    backup.usuario || "Sistema";
+}
+
+
+
+/* LANÇAR INVENTÁRIO */
+
+async function abrirInventarioItem(estoqueId){
+
+  const item = listaEstoque.find(e => e.id === estoqueId);
+
+  if(!item){
+    alert("Item não encontrado");
+    return;
+  }
+
+  const contado = prompt(
+    "Inventário\n\n" +
+    "Produto: " + item.codigo + " - " + item.nome + "\n" +
+    "Lote: " + item.lote + "\n" +
+    "Rack: " + item.rack + "\n" +
+    "Saldo sistema: " + item.quantidade + "\n\n" +
+    "Informe a quantidade contada:"
+  );
+
+  if(contado === null){
+    return;
+  }
+
+  if(contado === "" || Number(contado) < 0){
+    alert("Quantidade contada inválida");
+    return;
+  }
+
+  const resposta = await fetch("/inventario", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({
+      estoque_id: estoqueId,
+      quantidade_contada: Number(contado)
+    })
+  });
+
+  alert(await resposta.text());
+
+  carregarInventario();
+  carregarEstoque();
+}
+
+
+
+
+
+
+/* INVENTÁRIO */
+
+async function carregarInventario(){
+
+  const resposta = await fetch("/inventario");
+  listaInventario = await resposta.json();
+
+  renderizarInventario(listaInventario);
+  atualizarIndicadoresInventario();
+}
+
+function renderizarInventario(lista){
+
+  const tabela = document.getElementById("tabelaInventario");
+
+  if(!tabela){
+    return;
+  }
+
+  tabela.innerHTML = "";
+
+  lista.forEach(item => {
+
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.codigo}</td>
+        <td>${item.produto}</td>
+        <td>${item.lote}</td>
+        <td>${item.rack}</td>
+        <td>${item.quantidade_sistema}</td>
+        <td>${item.quantidade_contada}</td>
+        <td>${item.divergencia}</td>
+        <td>${item.usuario || "Sistema"}</td>
+        <td>${item.status}</td>
+        <td>
+          ${
+            item.status !== "AJUSTADO" && perfilAtual() === "ADMIN"
+            ? `<button class="btn-amarelo" onclick="ajustarInventario(${item.id})">Ajustar</button>`
+            : "-"
+          }
+        </td>
+      </tr>
+    `;
+
+  });
+}
+
+function atualizarIndicadoresInventario(){
+
+  const total = listaInventario.length;
+  const semDivergencia = listaInventario.filter(item => Number(item.divergencia) === 0).length;
+  const comDivergencia = listaInventario.filter(item => Number(item.divergencia) !== 0).length;
+
+  const acuracidade = total > 0
+    ? ((semDivergencia / total) * 100).toFixed(1)
+    : 0;
+
+  document.getElementById("invTotal").innerText = total;
+  document.getElementById("invSemDivergencia").innerText = semDivergencia;
+  document.getElementById("invComDivergencia").innerText = comDivergencia;
+  document.getElementById("invAcuracidade").innerText = acuracidade + "%";
+}
+
+function filtrarInventario(){
+
+  const filtro = document.getElementById("filtroInventario").value.toLowerCase();
+
+  const resultado = listaInventario.filter(item =>
+    item.codigo.toLowerCase().includes(filtro) ||
+    item.produto.toLowerCase().includes(filtro) ||
+    item.lote.toLowerCase().includes(filtro) ||
+    item.rack.toLowerCase().includes(filtro)
+  );
+
+  renderizarInventario(resultado);
+}
+
+async function ajustarInventario(id){
+
+  if(perfilAtual() !== "ADMIN"){
+    alert("Somente administrador pode ajustar estoque");
+    return;
+  }
+
+  if(!confirm("Confirmar ajuste do estoque conforme inventário?")){
+    return;
+  }
+
+  const resposta = await fetch("/inventario/ajustar/" + id, {
+    method: "POST",
+    headers: headersComPerfil()
+  });
+
+  alert(await resposta.text());
+
+  carregarInventario();
+  carregarEstoque();
+  carregarMovimentacoes();
+}
+
+
+
+/* ETIQUETAS DE RACKS */
+
+function criarEtiquetaRack(rack){
+
+  const area = document.getElementById("areaEtiquetasRacks");
+
+  const div = document.createElement("div");
+  div.style.width = "160px";
+  div.style.border = "1px solid #ddd";
+  div.style.borderRadius = "8px";
+  div.style.padding = "10px";
+  div.style.textAlign = "center";
+  div.style.background = "#fff";
+
+  const titulo = document.createElement("strong");
+  titulo.innerText = rack.endereco;
+  titulo.style.fontSize = "18px";
+
+  const qr = document.createElement("div");
+  qr.style.marginTop = "8px";
+
+  div.appendChild(titulo);
+  div.appendChild(qr);
+  area.appendChild(div);
+
+  new QRCode(qr, {
+    text: rack.endereco,
+    width: 100,
+    height: 100
+  });
+}
+
+function gerarEtiquetasRacksFiltradas(){
+
+  const filtro = document
+    .getElementById("filtroEtiquetaRack")
+    .value
+    .trim()
+    .toLowerCase();
+
+  const area = document.getElementById("areaEtiquetasRacks");
+  area.innerHTML = "";
+
+  if(filtro === ""){
+    alert("Digite o rack que deseja gerar. Ex: R1.001.001 ou R1");
+    return;
+  }
+
+  const resultado = listaRacks.filter(rack =>
+    rack.endereco.toLowerCase().startsWith(filtro)
+  );
+
+  if(resultado.length === 0){
+    alert("Nenhum rack encontrado para esse filtro");
+    return;
+  }
+
+  resultado.forEach(rack => {
+    criarEtiquetaRack(rack);
+  });
+}
+
+function limparEtiquetasRacks(){
+  document.getElementById("filtroEtiquetaRack").value = "";
+  document.getElementById("areaEtiquetasRacks").innerHTML = "";
+}
+
+
+
+
+
+function imprimirEtiquetasRacks(){
+
+  const conteudo = document.getElementById("areaEtiquetasRacks").innerHTML;
+
+  if(conteudo.trim() === ""){
+    alert("Gere as etiquetas antes de imprimir");
+    return;
+  }
+
+  const janela = window.open("", "", "width=900,height=700");
+
+  janela.document.write(`
+    <html>
+    <head>
+      <title>Etiquetas de Racks</title>
+      <style>
+        body{font-family:Arial;padding:20px;}
+        h2{text-align:center;}
+        .grade{display:flex;flex-wrap:wrap;gap:15px;}
+        .grade > div{
+          width:160px;
+          border:1px solid #ddd;
+          border-radius:8px;
+          padding:10px;
+          text-align:center;
+          page-break-inside:avoid;
+        }
+      </style>
+    </head>
+    <body>
+      <h2>Etiquetas de Racks</h2>
+      <div class="grade">${conteudo}</div>
+    </body>
+    </html>
+  `);
+
+  janela.document.close();
+  janela.print();
+}
+
+
+
+
+
+
+
+
+
+
+
+
 /* DASHBOARD */
 
 function atualizarDashboard(){
@@ -2109,6 +3185,14 @@ function exportarCSV(idTabela, nomeArquivo){
   link.download = nomeArquivo;
   link.click();
 }
+
+
+
+
+
+
+
+
 
 
 function selecionarTodosRacks(){
