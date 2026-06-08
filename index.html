@@ -2365,7 +2365,14 @@ function abrirCameraLote(){
 
 async function buscarProdutoLeitor(){
 
-  const codigo = document.getElementById("leitorProduto").value;
+let codigo = document.getElementById("leitorProduto").value.trim();
+
+codigo = codigo.replace("]C1", "");
+codigo = codigo.replace("]E0", "");
+codigo = codigo.replace("]Q3", "");
+
+document.getElementById("leitorProduto").value = codigo;
+
 
   if(codigo === ""){
     document.getElementById("descricaoLeitor").innerText = "";
