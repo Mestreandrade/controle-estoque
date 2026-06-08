@@ -4,33 +4,93 @@
   <meta charset="UTF-8">
   <title>Controle de Estoque</title>
 
+
   <style>
     body{font-family:Arial;margin:0;background:#f4f4f4;}
     header{background:#1f2937;color:white;padding:20px;text-align:center;}
     nav{background:#111827;padding:10px;text-align:center;}
     nav button{background:#374151;color:white;border:none;padding:12px 18px;margin:5px;cursor:pointer;border-radius:5px;}
     nav button:hover{background:#2563eb;}
-    .container{padding:25px;}
-    .tela{display:none;background:white;padding:20px;border-radius:10px;}
+    .container{padding:15px;}
+    .tela{display:none;background:white;padding:15px;border-radius:12px;}
     .ativa{display:block;}
-    input, select{padding:10px;margin:6px;width:230px;}
-    button{padding:10px 18px;border:none;border-radius:5px;cursor:pointer;margin:4px;}
+    input, select{
+  padding:8px;
+  margin:4px;
+  width:220px;
+  border:1px solid #d1d5db;
+  border-radius:6px;
+}
+
+    button{
+  padding:8px 14px;
+  border:none;
+  border-radius:6px;
+  cursor:pointer;
+  margin:3px;
+}
+
     .btn-azul{background:#2563eb;color:white;}
     .btn-verde{background:green;color:white;}
     .btn-vermelho{background:#c0392b;color:white;}
     .btn-cinza{background:#6b7280;color:white;}
     .btn-amarelo{background:#f59e0b;color:white;}
     table{width:100%;margin-top:20px;border-collapse:collapse;}
-    th{background:#333;color:white;padding:10px;}
-    td{padding:10px;border-bottom:1px solid #ddd;text-align:center;}
+    th{
+  background:#f3f4f6;
+  color:#374151;
+  padding:10px;
+}
+   td{
+  padding:8px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
     .descricao{font-weight:bold;color:#2563eb;margin-left:10px;}
     img{max-width:60px;max-height:60px;border-radius:6px;}
-    .cards-dashboard{display:flex;gap:15px;flex-wrap:wrap;margin-bottom:20px;}
-    .card-indicador{background:#f9fafb;padding:20px;border-radius:10px;min-width:180px;text-align:center;border:1px solid #ddd;}
+
+
+
+
+.cards-dashboard{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:25px;
+}
+
+
+   .card-indicador{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  min-width:170px;
+  min-height:100px;
+  border:none;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.card-indicador:hover{
+  transform:translateY(-3px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.12);
+}
+
+.card-indicador h3{
+  margin:0;
+  font-size:13px;
+  color:#64748b;
+}
+
+.card-indicador p{
+  margin-top:8px;
+  font-size:24px;
+  font-weight:bold;
+  color:#0f172a;
+}
+
+
+
     .card-indicador h3{margin:0;color:#333;}
     .card-indicador p{font-size:24px;font-weight:bold;color:#2563eb;}
-
-
 
 
 
@@ -105,6 +165,292 @@
       text-align:right;
       font-weight:bold;
     }
+
+
+/* LAYOUT PROFISSIONAL - ETAPA 1 */
+
+#sistema{
+  display:none;
+  min-height:100vh;
+}
+
+.layout-sistema{
+  display:flex;
+  min-height:100vh;
+}
+
+.sidebar{
+  width:240px;
+  background:#071a36;
+  color:white;
+  padding:15px;
+  box-sizing:border-box;
+}
+
+.logo-sistema{
+  font-size:26px;
+  font-weight:bold;
+  margin-bottom:25px;
+}
+
+.logo-sistema span{
+  color:#3b82f6;
+}
+
+.grupo-menu{
+  font-size:12px;
+  color:#9ca3af;
+  margin:22px 10px 8px;
+  text-transform:uppercase;
+  font-weight:bold;
+}
+
+.sidebar nav{
+  background:transparent;
+  padding:0;
+  text-align:left;
+}
+
+.sidebar nav button{
+  display:block;
+  width:100%;
+  text-align:left;
+  background:transparent;
+  color:white;
+  padding:12px 14px;
+  margin:4px 0;
+  border-radius:8px;
+  font-size:15px;
+}
+
+.sidebar nav button:hover{
+  background:#2563eb;
+}
+
+.conteudo-principal{
+  flex:1;
+  background:#f4f6fb;
+}
+
+.topbar{
+  height:64px;
+  background:#0f1f3a;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.12);
+}
+
+.busca-topo{
+  width:330px;
+  background:#1e2f4f;
+  border:1px solid #334155;
+  color:white;
+  border-radius:8px;
+  padding:10px;
+}
+
+.usuario-topo{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  font-weight:bold;
+}
+
+.data-topo{
+  background:white;
+  color:#374151;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:14px;
+}
+
+.container{
+  padding:25px;
+}
+
+.tela{
+  background:white;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+
+
+
+/* INDICADORES RASTREAMENTO */
+
+.indicadores-rastreio{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin:10px 0 16px;
+}
+
+
+.mini-indicador{
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:10px;
+  padding:10px 12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+  text-align:center;
+}
+
+
+
+.mini-indicador span{
+  display:block;
+  font-size:12px;
+  color:#64748b;
+  margin-bottom:5px;
+  text-align:center;
+}
+
+
+
+
+.mini-indicador strong{
+  display:block;
+  font-size:20px;
+  color:#2563eb;
+  text-align:center;
+}
+
+
+
+
+
+
+
+
+
+
+/* RASTREAMENTO COMPACTO */
+
+#consulta table{
+    font-size:13px;
+}
+
+#consulta th{
+    font-size:13px;
+    padding:8px;
+}
+
+#consulta td{
+    font-size:13px;
+    padding:6px;
+}
+
+#consulta img{
+    max-width:45px;
+    max-height:45px;
+}
+
+#consulta .btn-amarelo{
+    font-size:12px;
+    padding:6px 10px;
+}
+
+#consulta .status-normal,
+#consulta .status-30,
+#consulta .status-60{
+    font-size:11px;
+}
+
+
+
+
+/* DASHBOARD PREMIUM */
+
+#dashboard .dashboard-premium{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:18px;
+  margin-bottom:22px;
+}
+
+#dashboard .kpi-card{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:white;
+  padding:18px;
+  border-radius:16px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  min-height:110px;
+}
+
+#dashboard .kpi-icon{
+  width:54px;
+  height:54px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:26px;
+  color:white;
+}
+
+#dashboard .kpi-card h3{
+  margin:0;
+  font-size:14px;
+  color:#475569;
+}
+
+#dashboard .kpi-card p{
+  margin:6px 0;
+  font-size:30px;
+  font-weight:bold;
+  color:#0f172a;
+}
+
+#dashboard .kpi-card small{
+  color:#94a3b8;
+  font-size:12px;
+}
+
+.kpi-blue .kpi-icon{background:#2563eb;}
+.kpi-red .kpi-icon{background:#ef4444;}
+.kpi-green .kpi-icon{background:#16a34a;}
+.kpi-orange .kpi-icon{background:#f59e0b;}
+
+#dashboard .dashboard-secundario{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:14px;
+  margin-bottom:25px;
+}
+
+#dashboard .mini-card{
+  background:white;
+  padding:14px 16px;
+  border-radius:12px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.06);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+
+#dashboard .mini-card span{
+  font-size:13px;
+  color:#475569;
+}
+
+#dashboard .mini-card strong{
+  font-size:22px;
+  color:#2563eb;
+}
+
+
+
+
+
+
+
+
   </style>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
@@ -128,32 +474,80 @@
 
 <div id="sistema">
 
-<header>
-  <h1>Controle de Estoque</h1>
-</header>
+<div class="layout-sistema">
 
-<div class="usuario-logado">
-  Usuário: <span id="nomeUsuarioLogado"></span> |
-  Perfil: <span id="perfilUsuarioLogado"></span>
-  <button class="btn-vermelho" onclick="sairSistema()">Sair</button>
+  <aside class="sidebar">
+
+    <div class="logo-sistema">
+      📦 StockPro
+      <div style="font-size:11px;color:#94a3b8;">
+        Gestão de Estoque
+      </div>
+    </div>
+
+    <div class="grupo-menu">Cadastros</div>
+
+    <nav>
+      <button class="menu-admin" onclick="abrirTela('produtos')">📦 Produtos</button>
+      <button class="menu-admin" onclick="abrirTela('racks')">🏷️ Racks</button>
+      <button class="menu-admin" onclick="abrirTela('usuarios')">👤 Usuários</button>
+      <button class="menu-admin" onclick="abrirTela('etiquetas')">🏷️ Etiquetas</button>
+
+      <div class="grupo-menu">Movimentações</div>
+
+      <button class="menu-operador" onclick="abrirTela('entrada')">⬇️ Entrada</button>
+      <button class="menu-operador" onclick="abrirTela('saida')">⬆️ Saída</button>
+      <button class="menu-operador" onclick="abrirTela('leitor')">📷 Leitor</button>
+
+      <div class="grupo-menu">Controle</div>
+
+      <button onclick="abrirTela('consulta')">🔎 Rastreamento de Lotes</button>
+      <button onclick="abrirTela('saldo')">📊 Saldo Geral</button>
+      <button class="menu-admin" onclick="abrirTela('inventario')">📋 Inventário</button>
+      <button onclick="abrirTela('dashboard')">📈 Dashboard</button>
+      <button onclick="abrirTela('historico')">📋 Histórico</button>
+
+      <button
+        class="btn-vermelho"
+        onclick="sairSistema()"
+        style="width:100%;margin-top:20px;"
+      >
+        🚪 Sair do Sistema
+      </button>
+
+    </nav>
+
+  </aside>
+
+  <main class="conteudo-principal">
+
+
+
+
+
+
+    <div class="topbar">
+
+  <input
+    class="busca-topo"
+    type="text"
+    placeholder="Buscar (Ctrl + /)"
+  >
+
+  <div class="usuario-topo">
+    <div class="data-topo" id="dataTopo"></div>
+
+    <div>
+      Usuário: <span id="nomeUsuarioLogado"></span><br>
+      <small>Perfil: <span id="perfilUsuarioLogado"></span></small>
+    </div>
+  </div>
+
 </div>
 
-<nav>
-  <button class="menu-admin" onclick="abrirTela('produtos')">📦 Produtos</button>
-  <button class="menu-admin" onclick="abrirTela('racks')">🏷️ Racks</button>
-  <button class="menu-admin" onclick="abrirTela('usuarios')">👤 Usuários</button>
-  <button class="menu-admin" onclick="abrirTela('etiquetas')">🏷️ Etiquetas</button>
-  <button class="menu-operador" onclick="abrirTela('entrada')">⬇️ Entrada</button>
-  <button class="menu-operador" onclick="abrirTela('saida')">⬆️ Saída</button>
-  <button class="menu-operador" onclick="abrirTela('leitor')">📷 Leitor</button>
-  <button onclick="abrirTela('consulta')">🔎 Rastreamento de Lotes</button>
-  <button onclick="abrirTela('saldo')">📊 Saldo Geral</button>
-  <button onclick="abrirTela('peps')">⏳ PEPS / Fabricação</button>
-  <button onclick="abrirTela('inventario')">📋 Inventário</button>
-  <button onclick="abrirTela('dashboard')">📈 Dashboard</button>
-  <button onclick="abrirTela('historico')">📋 Histórico</button>
-</nav>
 
+
+    <div class="container">
 <div class="container">
 
 <section id="produtos" class="tela ativa">
@@ -415,7 +809,56 @@ Lançar em Todos os Racks Marcados
 <h2>Rastreamento de Lotes</h2>
 
 
+<div class="indicadores-rastreio">
+
+  <div class="mini-indicador">
+    <span>Itens em Estoque</span>
+    <strong id="rastTotalItens">0</strong>
+  </div>
+
+  <div class="mini-indicador">
+    <span>Acima de 30 dias</span>
+    <strong id="rastAcima30">0</strong>
+  </div>
+
+  <div class="mini-indicador">
+    <span>% Acima de 30 dias</span>
+    <strong id="rastPercentual30">0%</strong>
+  </div>
+
+  <div class="mini-indicador">
+    <span>Acima de 60 dias</span>
+    <strong id="rastAcima60">0</strong>
+  </div>
+
+  <div class="mini-indicador">
+    <span>% Acima de 60 dias</span>
+    <strong id="rastPercentual60">0%</strong>
+  </div>
+
+</div>
+
+
+
+
+
   <input type="text" id="filtroConsulta" placeholder="Buscar código, produto, lote ou rack" onkeyup="filtrarEstoque()">
+
+
+
+
+<button class="btn-cinza" onclick="renderizarEstoque(listaEstoque)">
+  Todos
+</button>
+
+<button class="btn-amarelo" onclick="filtrarRastreio30()">
+  Acima de 30 dias
+</button>
+
+<button class="btn-vermelho" onclick="filtrarRastreio60()">
+  Acima de 60 dias
+</button>
+
 
   <button class="btn-cinza" onclick="imprimirTabela('tabelaEstoque')">Imprimir</button>
   <button class="btn-cinza" onclick="exportarCSV('tabelaEstoque','estoque.csv')">Exportar CSV</button>
@@ -423,15 +866,16 @@ Lançar em Todos os Racks Marcados
   <table>
     <thead>
       <tr>
-        <th>Imagem</th>
-        <th>Código</th>
-        <th>Produto</th>
-        <th>Lote</th>
-        <th>Rack</th>
-        <th>Quantidade</th>
-        <th>Validade</th>
-        <th>Data Entrada</th>
-       <th>Ação</th>
+     <th>Imagem</th>
+    <th>Código</th>
+    <th>Produto</th>
+    <th>Lote</th>
+    <th>Rack</th>
+    <th>Saldo</th>
+    <th>Fabricação</th>
+    <th>Time</th>
+    <th>Status</th>
+    <th>Ação</th>
       </tr>
     </thead>
     <tbody id="tabelaEstoque"></tbody>
@@ -500,89 +944,6 @@ Lançar em Todos os Racks Marcados
 </section>
 
 
-
-<!-- TELA DE INDICADOR DO PEPS -->
-
-
-<section id="peps" class="tela">
-  <h2>PEPS / Controle de Fabricação</h2>
-
-  
-<!-- CARDS PEPS -->
-
-<div class="cards-dashboard">
-
-  <div class="card-indicador">
-    <h3>Itens em Estoque</h3>
-    <p id="pepsTotalItens">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>Acima de 30 dias</h3>
-    <p id="pepsAcima30">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>% Acima de 30 dias</h3>
-    <p id="pepsPercentual30">0%</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>Acima de 60 dias</h3>
-    <p id="pepsAcima60">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>% Acima de 60 dias</h3>
-    <p id="pepsPercentual60">0%</p>
-  </div>
-
-</div>
-
-<!-- TELA DE FILTRO PEPS -->
-
-
-  <input
-    type="text"
-    id="filtroPeps"
-    placeholder="Buscar código, produto, lote ou rack"
-    onkeyup="filtrarPeps()"
-  >
-
-
-<button class="btn-cinza" onclick="renderizarPeps(listaPeps)">
-  Todos
-</button>
-
-<button class="btn-amarelo" onclick="filtrarPeps30()">
-  Acima de 30 dias
-</button>
-
-<button class="btn-vermelho" onclick="filtrarPeps60()">
-  Acima de 60 dias
-</button>
-
-
-  <button class="btn-cinza" onclick="imprimirTabela('tabelaPeps')">Imprimir</button>
-  <button class="btn-cinza" onclick="exportarCSV('tabelaPeps','peps-fabricacao.csv')">Exportar CSV</button>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Código</th>
-        <th>Produto</th>
-        <th>Lote</th>
-        <th>Rack</th>
-        <th>Saldo</th>
-        <th>Fabricação</th>
-        <th>Dias em Estoque</th>
-        <th>Status</th>
-      </tr>
-    </thead>
-
-    <tbody id="tabelaPeps"></tbody>
-  </table>
-</section>
 
 
 
@@ -735,21 +1096,102 @@ Lançar em Todos os Racks Marcados
 
 
 
-
-
-
 <section id="dashboard" class="tela">
-  <h2>Dashboard de Ocupação</h2>
 
-  <div class="cards-dashboard">
-    <div class="card-indicador"><h3>Total de Racks</h3><p id="dashTotalRacks">0</p></div>
-    <div class="card-indicador"><h3>Racks Ocupados</h3><p id="dashRacksOcupados">0</p></div>
-    <div class="card-indicador"><h3>Racks Livres</h3><p id="dashRacksLivres">0</p></div>
-    <div class="card-indicador"><h3>Ocupação Geral</h3><p id="dashOcupacao">0%</p></div>
-    <div class="card-indicador"><h3>Estoque Total</h3><p id="dashEstoqueTotal">0</p></div>
+<h2>📈 Dashboard Executivo</h2>
+
+
+<!-- DASHBOARD PREMIUM - CARDS PRINCIPAIS -->
+
+<div class="dashboard-premium">
+
+  <div class="kpi-card kpi-blue">
+    <div class="kpi-icon">📥</div>
+    <div>
+      <h3>Entradas Hoje</h3>
+      <p id="dashEntradasHoje">0</p>
+      <small>Movimentações de entrada</small>
+    </div>
   </div>
 
-  <h3>Ocupação por Produto</h3>
+  <div class="kpi-card kpi-red">
+    <div class="kpi-icon">📤</div>
+    <div>
+      <h3>Saídas Hoje</h3>
+      <p id="dashSaidasHoje">0</p>
+      <small>Movimentações de saída</small>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-green">
+    <div class="kpi-icon">🎯</div>
+    <div>
+      <h3>Acuracidade</h3>
+      <p id="dashAcuracidade">0%</p>
+      <small>Resultado do inventário</small>
+    </div>
+  </div>
+
+  <div class="kpi-card kpi-orange">
+    <div class="kpi-icon">⚠️</div>
+    <div>
+      <h3>Alertas PEPS</h3>
+      <p id="dash60Dias">0</p>
+      <small>Itens acima de 60 dias</small>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- DASHBOARD PREMIUM - CARDS SECUNDÁRIOS -->
+
+<div class="dashboard-secundario">
+
+  <div class="mini-card">
+    <span>📦 Produtos</span>
+    <strong id="dashProdutos">0</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>🏷️ Total Racks</span>
+    <strong id="dashTotalRacks">0</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>🔴 Ocupados</span>
+    <strong id="dashRacksOcupados">0</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>🟢 Livres</span>
+    <strong id="dashRacksLivres">0</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>📊 Ocupação</span>
+    <strong id="dashOcupacao">0%</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>📋 Inventários</span>
+    <strong id="dashInventarios">0</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>📦 Estoque</span>
+    <strong id="dashEstoqueTotal">0</strong>
+  </div>
+
+  <div class="mini-card">
+    <span>💾 Último Backup</span>
+    <strong id="dashUltimoBackup">-</strong>
+  </div>
+
+</div>
+
+  
+  <h3>📦 Ocupação por Produto</h3>
 
   <table>
     <thead>
@@ -799,13 +1241,33 @@ Lançar em Todos os Racks Marcados
   </table>
 </section>
 
+    </div>
+  </main>
 </div>
 </div>
-
-
 
 
 <script>
+
+
+
+/* DATA DO TOPO */
+
+function atualizarDataTopo(){
+  const campo = document.getElementById("dataTopo");
+
+  if(!campo){
+    return;
+  }
+
+  campo.innerText = new Date().toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
+}
+
+
 
 
 /* LEITURA QR - RACK */
@@ -941,7 +1403,6 @@ let listaSaldo = [];
 let listaEntrada = [];
 let listaSaida = [];
 let listaUsuarios = [];
-let listaPeps = [];
 
 function perfilAtual(){
   return usuarioLogado ? usuarioLogado.perfil : "";
@@ -987,6 +1448,7 @@ async function fazerLogin(){
 
   aplicarPermissoes();
   carregarTudo();
+atualizarDataTopo();
 }
 
 function sairSistema(){
@@ -1025,6 +1487,13 @@ function carregarTudo(){
 /* ABRIR TELAS */
 
 function abrirTela(tela){
+
+if(tela === "inventario" && perfilAtual() !== "ADMIN"){
+  alert("Acesso permitido apenas para administrador");
+  return;
+}
+
+
   document.querySelectorAll(".tela").forEach(secao => secao.classList.remove("ativa"));
   document.getElementById(tela).classList.add("ativa");
 
@@ -1998,6 +2467,25 @@ function limparLeitor(){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ENTRADA E SAÍDA */
 
 async function carregarRacksEntrada(){
@@ -2408,7 +2896,6 @@ function imprimirEntrada(lista){
 
 
 
-
 /* CONSULTAS */
 
 async function carregarEstoque(){
@@ -2416,45 +2903,129 @@ async function carregarEstoque(){
   listaEstoque = await resposta.json();
 
   renderizarEstoque(listaEstoque);
+  atualizarIndicadoresRastreio();
+
   gerarSaldoGeral();
-  gerarPeps();
   atualizarDashboard();
 }
-
-
 
 
 
 /* RASTREAMENTO DE LOTES */
 
 function renderizarEstoque(lista){
-  const tabela = document.getElementById("tabelaEstoque");
-  tabela.innerHTML = "";
 
-  lista.forEach(item => {
-    tabela.innerHTML += `
-      <tr>
-        <td>${item.imagem ? `<img src="${item.imagem}">` : ""}</td>
-        <td>${item.codigo}</td>
-        <td>${item.nome}</td>
-        <td>${item.lote}</td>
-        <td>${item.rack}</td>
-        <td>${item.quantidade}</td>
-        <td>${item.validade || ""}</td>
-        <td>${item.data_entrada}</td>
-        <td>
-          <button class="btn-amarelo" onclick="abrirInventarioItem(${item.id})">
-            📋 Inventariar
-          </button>
-        </td>
-      </tr>
-    `;
-  });
+    const tabela = document.getElementById("tabelaEstoque");
+    tabela.innerHTML = "";
+
+    lista.forEach(item => {
+
+        const dias = calcularDiasFabricacao(item.validade);
+
+       
+
+      let status = "🟢 Normal";
+let classeStatus = "status-normal";
+
+if(dias > 60){
+    status = "🔴 60d+";
+    classeStatus = "status-60";
+}
+else if(dias > 30){
+    status = "🟡 30d+";
+    classeStatus = "status-30";
 }
 
 
 
 
+        tabela.innerHTML += `
+        <tr>
+
+            <td>
+                ${item.imagem ? `<img src="${item.imagem}">` : ""}
+            </td>
+
+            <td>${item.codigo}</td>
+
+            <td>${item.nome}</td>
+
+            <td>${item.lote}</td>
+
+            <td>${item.rack}</td>
+
+            <td>${item.quantidade}</td>
+
+            <td>
+                ${formatarDataBR(item.validade || "")}
+            </td>
+
+            <td>
+                <strong>${dias}d</strong>
+            </td>
+
+            <td>
+                <span class="${classeStatus}">
+                    ${status}
+                </span>
+            </td>
+
+            <td>
+                <button
+                    class="btn-amarelo"
+                    onclick="abrirInventarioItem(${item.id})">
+                    📋 Inventariar
+                </button>
+            </td>
+
+        </tr>
+        `;
+    });
+}
+
+
+/* INDICADORES RASTREAMENTO */
+
+function atualizarIndicadoresRastreio(){
+
+  const totalItens = listaEstoque.reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const acima30 = listaEstoque
+    .filter(item => calcularDiasFabricacao(item.validade) >= 30)
+    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const acima60 = listaEstoque
+    .filter(item => calcularDiasFabricacao(item.validade) >= 60)
+    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const percentual30 = totalItens > 0 ? ((acima30 / totalItens) * 100).toFixed(1) : 0;
+  const percentual60 = totalItens > 0 ? ((acima60 / totalItens) * 100).toFixed(1) : 0;
+
+  document.getElementById("rastTotalItens").innerText = totalItens;
+  document.getElementById("rastAcima30").innerText = acima30;
+  document.getElementById("rastPercentual30").innerText = percentual30 + "%";
+  document.getElementById("rastAcima60").innerText = acima60;
+  document.getElementById("rastPercentual60").innerText = percentual60 + "%";
+}
+
+
+
+function filtrarRastreio30(){
+  const resultado = listaEstoque.filter(item => {
+    const dias = calcularDiasFabricacao(item.validade);
+    return dias >= 30 && dias < 60;
+  });
+
+  renderizarEstoque(resultado);
+}
+
+
+
+
+function filtrarRastreio60(){
+  const resultado = listaEstoque.filter(item => calcularDiasFabricacao(item.validade) >= 60);
+  renderizarEstoque(resultado);
+}
 
 
 
@@ -2630,150 +3201,6 @@ function calcularDiasFabricacao(dataISO){
 
   return dias < 0 ? 0 : dias;
 }
-
-
-
-
-function gerarPeps(){
-
-  listaPeps = listaEstoque.map(item => {
-
-    const dias = calcularDiasFabricacao(item.validade);
-
-    let status = "NORMAL";
-
-    if(dias > 60){
-      status = "ACIMA DE 60 DIAS";
-    } else if(dias > 30){
-      status = "ACIMA DE 30 DIAS";
-    }
-
-
-
-
-
-
-
-    return {
-      codigo: item.codigo,
-      nome: item.nome,
-      lote: item.lote,
-      rack: item.rack,
-      quantidade: item.quantidade,
-      fabricacao: item.validade,
-      dias: dias,
-      status: status
-    };
-
-  });
-
-  renderizarPeps(listaPeps);
-  atualizarIndicadoresPeps();
-}
-
-function renderizarPeps(lista){
-
-  const tabela = document.getElementById("tabelaPeps");
-
-  if(!tabela){
-    return;
-  }
-
-  tabela.innerHTML = "";
-
-  lista.forEach(item => {
-
-    tabela.innerHTML += `
-      <tr>
-        <td>${item.codigo}</td>
-        <td>${item.nome}</td>
-        <td>${item.lote}</td>
-        <td>${item.rack}</td>
-        <td>${item.quantidade}</td>
-        <td>${formatarDataBR(item.fabricacao)}</td>
-        <td>${item.dias}</td>
-
-        <td>
-    ${
-        item.status === "NORMAL"
-        ? `<span class="status-normal">${item.status}</span>`
-        : item.status === "ACIMA DE 30 DIAS"
-        ? `<span class="status-30">${item.status}</span>`
-        : `<span class="status-60">${item.status}</span>`
-    }
-</td>
-
-
-
-
-      </tr>
-    `;
-
-  });
-}
-
-
-
-
-function atualizarIndicadoresPeps(){
-
-  const totalItens = listaPeps.reduce((soma, item) => soma + Number(item.quantidade), 0);
-
-  const acima30 = listaPeps
-    .filter(item => item.dias >= 30)
-    .reduce((soma, item) => soma + Number(item.quantidade), 0);
-
-  const acima60 = listaPeps
-    .filter(item => item.dias >= 60)
-    .reduce((soma, item) => soma + Number(item.quantidade), 0);
-
-  const percentual30 = totalItens > 0
-    ? ((acima30 / totalItens) * 100).toFixed(1)
-    : 0;
-
-  const percentual60 = totalItens > 0
-    ? ((acima60 / totalItens) * 100).toFixed(1)
-    : 0;
-
-  document.getElementById("pepsTotalItens").innerText = totalItens;
-  document.getElementById("pepsAcima30").innerText = acima30;
-  document.getElementById("pepsAcima60").innerText = acima60;
-  document.getElementById("pepsPercentual30").innerText = percentual30 + "%";
-  document.getElementById("pepsPercentual60").innerText = percentual60 + "%";
-}
-
-
-
-
-
-function filtrarPeps(){
-
-  const filtro = document.getElementById("filtroPeps").value.toLowerCase();
-
-  const resultado = listaPeps.filter(item =>
-    item.codigo.toLowerCase().includes(filtro) ||
-    item.nome.toLowerCase().includes(filtro) ||
-    item.lote.toLowerCase().includes(filtro) ||
-    item.rack.toLowerCase().includes(filtro)
-  );
-
-  renderizarPeps(resultado);
-}
-
-
-
-
-function filtrarPeps30(){
-  const resultado = listaPeps.filter(item => item.dias >= 30);
-  renderizarPeps(resultado);
-}
-
-function filtrarPeps60(){
-  const resultado = listaPeps.filter(item => item.dias >= 60);
-  renderizarPeps(resultado);
-}
-
-
 
 
 
@@ -3079,27 +3506,94 @@ function imprimirEtiquetasRacks(){
 
 
 
-
-
-
-
-
-
-
-
-
 /* DASHBOARD */
 
 function atualizarDashboard(){
+
   const totalRacks = listaRacks.length;
   const racksOcupados = [...new Set(listaEstoque.map(item => item.rack))].length;
   const racksLivres = totalRacks - racksOcupados;
   const ocupacao = totalRacks > 0 ? ((racksOcupados / totalRacks) * 100).toFixed(1) : 0;
 
-  document.getElementById("dashTotalRacks").innerText = totalRacks;
-  document.getElementById("dashRacksOcupados").innerText = racksOcupados;
-  document.getElementById("dashRacksLivres").innerText = racksLivres;
-  document.getElementById("dashOcupacao").innerText = ocupacao + "%";
+  const estoqueTotal = listaEstoque.reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const produtosCadastrados = listaProdutos.length;
+
+  const hoje = new Date().toLocaleDateString("pt-BR");
+
+  const entradasHoje = listaHistorico.filter(item =>
+    item.tipo === "ENTRADA" &&
+    new Date(item.data_movimentacao).toLocaleDateString("pt-BR") === hoje
+  ).length;
+
+  const saidasHoje = listaHistorico.filter(item =>
+    item.tipo === "SAIDA" &&
+    new Date(item.data_movimentacao).toLocaleDateString("pt-BR") === hoje
+  ).length;
+
+const produtos60Dias = listaEstoque.filter(item =>
+  calcularDiasFabricacao(item.validade) >= 60
+).length;
+
+
+  const inventariosPendentes = listaInventario.filter(item =>
+    item.status !== "AJUSTADO" &&
+    Number(item.divergencia) !== 0
+  ).length;
+
+  const totalInventariado = listaInventario.length;
+
+  const semDivergencia = listaInventario.filter(item =>
+    Number(item.divergencia) === 0
+  ).length;
+
+  const acuracidade = totalInventariado > 0
+    ? ((semDivergencia / totalInventariado) * 100).toFixed(1)
+    : 0;
+
+  if(document.getElementById("dashProdutos")){
+    document.getElementById("dashProdutos").innerText = produtosCadastrados;
+  }
+
+  if(document.getElementById("dashEntradasHoje")){
+    document.getElementById("dashEntradasHoje").innerText = entradasHoje;
+  }
+
+  if(document.getElementById("dashSaidasHoje")){
+    document.getElementById("dashSaidasHoje").innerText = saidasHoje;
+  }
+
+  if(document.getElementById("dash60Dias")){
+    document.getElementById("dash60Dias").innerText = produtos60Dias;
+  }
+
+  if(document.getElementById("dashInventarios")){
+    document.getElementById("dashInventarios").innerText = inventariosPendentes;
+  }
+
+  if(document.getElementById("dashAcuracidade")){
+    document.getElementById("dashAcuracidade").innerText = acuracidade + "%";
+  }
+
+  if(document.getElementById("dashTotalRacks")){
+    document.getElementById("dashTotalRacks").innerText = totalRacks;
+  }
+
+  if(document.getElementById("dashRacksOcupados")){
+    document.getElementById("dashRacksOcupados").innerText = racksOcupados;
+  }
+
+  if(document.getElementById("dashRacksLivres")){
+    document.getElementById("dashRacksLivres").innerText = racksLivres;
+  }
+
+  if(document.getElementById("dashOcupacao")){
+    document.getElementById("dashOcupacao").innerText = ocupacao + "%";
+  }
+
+  if(document.getElementById("dashEstoqueTotal")){
+    document.getElementById("dashEstoqueTotal").innerText = estoqueTotal;
+  }
 
   const agrupado = {};
 
@@ -3115,9 +3609,12 @@ function atualizarDashboard(){
     agrupado[item.codigo].racks.add(item.rack);
   });
 
-
-
   const tabela = document.getElementById("tabelaDashboardProduto");
+
+  if(!tabela){
+    return;
+  }
+
   tabela.innerHTML = "";
 
   Object.values(agrupado).forEach(item => {
@@ -3139,6 +3636,7 @@ function atualizarDashboard(){
     `;
   });
 }
+
 
 /* EXPORTAR E IMPRIMIR */
 
