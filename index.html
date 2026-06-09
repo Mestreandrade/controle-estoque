@@ -816,6 +816,11 @@ body.login-page{
 Lançar em Todos os Racks Marcados  
 </button>
 
+<button class="btn-amarelo" onclick="processarEntradaInicial()">
+  📦 Entrada Inicial
+</button>
+
+
 </div>
 
 
@@ -2209,7 +2214,7 @@ const validade = converterDataBRparaISO(validadeDigitada);
 
 /* ENTRADA EM MASSA */
 
-async function processarEntradaMassa(){
+async function processarEntradaInicial(){
 
   const codigo = document.getElementById("entradaMassaCodigo").value;
   const lote = document.getElementById("entradaMassaLote").value;
@@ -2217,7 +2222,6 @@ async function processarEntradaMassa(){
   const validade = document.getElementById("entradaMassaValidade").value;
 
   const checksMarcados = document.querySelectorAll(".checkEntradaRack:checked");
-
   const racksSelecionados = Array.from(checksMarcados).map(check => check.value);
 
   if(codigo === "" || lote === "" || quantidade <= 0){
@@ -2238,16 +2242,14 @@ async function processarEntradaMassa(){
     return;
   }
 
-  if(!confirm(`Confirmar entrada do produto ${produto.nome} em ${racksSelecionados.length} racks?`)){
+  if(!confirm(`Confirmar ENTRADA INICIAL do produto ${produto.nome} em ${racksSelecionados.length} racks?`)){
     return;
   }
 
-  const entradasImpressao = [];
-  const erros = [];
+  let sucesso = 0;
+  let erros = 0;
 
-  for(let i = 0; i < racksSelecionados.length; i++){
-
-    const rack = racksSelecionados[i];
+  for(const rack of racksSelecionados){
 
     const entrada = {
       codigo: codigo,
@@ -2255,7 +2257,8 @@ async function processarEntradaMassa(){
       lote: lote,
       rack: rack,
       quantidade: quantidade,
-      validade: validade || ""
+      validade: validade || "",
+      tipo_movimentacao: "ENTRADA INICIAL"
     };
 
     const resposta = await fetch("/entrada", {
@@ -2272,37 +2275,32 @@ async function processarEntradaMassa(){
       resultado.includes("não") ||
       resultado.includes("negado")
     ){
-      erros.push(`Rack ${rack}: ${resultado}`);
+      erros++;
     } else {
-      entradasImpressao.push(entrada);
+      sucesso++;
     }
   }
 
-  if(entradasImpressao.length > 0){
-    imprimirEntrada(entradasImpressao);
-  }
-
   alert(
-    "Entrada em massa finalizada.\n" +
-    "Racks lançados: " + entradasImpressao.length + "\n" +
-    "Erros: " + erros.length
+    "Entrada inicial finalizada.\n" +
+    "Racks lançados: " + sucesso + "\n" +
+    "Erros: " + erros
   );
-
-  if(erros.length > 0){
-    console.log("Erros na entrada em massa:", erros);
-  }
 
   document.getElementById("entradaMassaCodigo").value = "";
   document.getElementById("entradaMassaLote").value = "";
   document.getElementById("entradaMassaQuantidade").value = "";
   document.getElementById("entradaMassaValidade").value = "";
 
+  estoqueCarregado = false;
+  racksCarregados = false;
+  historicoCarregado = false;
+
   await carregarEstoque();
   await carregarMapaEntrada();
   await carregarMovimentacoes();
   await carregarRacks();
 }
-
 
 
 /* LEITURA QR / CÓDIGO DE BARRAS - PRODUTO */

@@ -498,14 +498,13 @@ app.post("/entrada", adminOuOperador, (req, res) => {
                                     }
 
                                     registrarMovimentacao(
-                                        produto.id,
-                                        lote,
-                                        rack,
-                                        "ENTRADA",
-                                        quantidade,
-                                        req.headers.usuario || "Sistema"
-                                    );
-
+  produto.id,
+  lote,
+  rack,
+  req.body.tipo_movimentacao || "ENTRADA",
+  quantidade,
+  req.headers.usuario || "Sistema"
+);
                                     res.send("Entrada realizada com sucesso");
                                 }
                             );
