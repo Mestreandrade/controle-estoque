@@ -957,42 +957,6 @@ Lançar em Todos os Racks Marcados
 
 <!-- INDICADORES SALDO GERAL -->
 
-<div class="cards-dashboard">
-
-  <div class="card-indicador">
-    <h3>📦 Produtos</h3>
-    <p id="indicadorProdutos">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>🟢 Livres</h3>
-    <p id="indicadorLivres">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>🔴 Ocupados</h3>
-    <p id="indicadorOcupados">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>⚠️ >60 Dias</h3>
-    <p id="indicador60Dias">0</p>
-  </div>
-
-  <div class="card-indicador">
-    <h3>💾 Último Backup</h3>
-    <p id="dashUltimoBackup">-</p>
-    <small id="dashUsuarioBackup"></small>
-  </div>
-
-</div>
-
-
-
-
-
-
-
  
   <input type="text" id="filtroSaldo" placeholder="Buscar por código ou produto" onkeyup="filtrarSaldo()">
 
@@ -1010,11 +974,6 @@ Lançar em Todos os Racks Marcados
     <tbody id="tabelaSaldo"></tbody>
   </table>
 </section>
-
-
-
-
-
 
 
 <!-- TELA INVENTÁRIO -->
@@ -1166,99 +1125,8 @@ Lançar em Todos os Racks Marcados
 
 <section id="dashboard" class="tela">
 
-<h2>📈 Dashboard Executivo</h2>
+  <h2>📈 Dashboard Executivo</h2>
 
-
-<!-- DASHBOARD PREMIUM - CARDS PRINCIPAIS -->
-
-<div class="dashboard-premium">
-
-  <div class="kpi-card kpi-blue">
-    <div class="kpi-icon">📥</div>
-    <div>
-      <h3>Entradas Hoje</h3>
-      <p id="dashEntradasHoje">0</p>
-      <small>Movimentações de entrada</small>
-    </div>
-  </div>
-
-  <div class="kpi-card kpi-red">
-    <div class="kpi-icon">📤</div>
-    <div>
-      <h3>Saídas Hoje</h3>
-      <p id="dashSaidasHoje">0</p>
-      <small>Movimentações de saída</small>
-    </div>
-  </div>
-
-  <div class="kpi-card kpi-green">
-    <div class="kpi-icon">🎯</div>
-    <div>
-      <h3>Acuracidade</h3>
-      <p id="dashAcuracidade">0%</p>
-      <small>Resultado do inventário</small>
-    </div>
-  </div>
-
-  <div class="kpi-card kpi-orange">
-    <div class="kpi-icon">⚠️</div>
-    <div>
-      <h3>Alertas PEPS</h3>
-      <p id="dash60Dias">0</p>
-      <small>Itens acima de 60 dias</small>
-    </div>
-  </div>
-
-</div>
-
-
-<!-- DASHBOARD PREMIUM - CARDS SECUNDÁRIOS -->
-
-<div class="dashboard-secundario">
-
-  <div class="mini-card">
-    <span>📦 Produtos</span>
-    <strong id="dashProdutos">0</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>🏷️ Total Racks</span>
-    <strong id="dashTotalRacks">0</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>🔴 Ocupados</span>
-    <strong id="dashRacksOcupados">0</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>🟢 Livres</span>
-    <strong id="dashRacksLivres">0</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>📊 Ocupação</span>
-    <strong id="dashOcupacao">0%</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>📋 Inventários</span>
-    <strong id="dashInventarios">0</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>📦 Estoque</span>
-    <strong id="dashEstoqueTotal">0</strong>
-  </div>
-
-  <div class="mini-card">
-    <span>💾 Último Backup</span>
-    <strong id="dashUltimoBackup">-</strong>
-  </div>
-
-</div>
-
-  
   <h3>📦 Ocupação por Produto</h3>
 
   <table>
@@ -1273,7 +1141,10 @@ Lançar em Todos os Racks Marcados
     </thead>
     <tbody id="tabelaDashboardProduto"></tbody>
   </table>
+
 </section>
+
+
 
 <section id="historico" class="tela">
   <h2>Histórico de Movimentações</h2>
