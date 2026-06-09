@@ -9,15 +9,14 @@ const fs = require("fs");
 
 const app = express();
 
-app.use(express.static("public"));
+app.use(express.static("Public"));
 
 const upload = multer({
   dest: "uploads/"
 });
 
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static(__dirname));
-
+app.use(express.static(path.join(__dirname,"Public")));
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -623,13 +622,6 @@ db.get(
     quantidade,
     req.headers.usuario || "Sistema"
 );
-
-res.send("Saída realizada e endereço liberado");
-
-
-
-
-
 
                                 res.send("Saída realizada e endereço liberado");
                             }
