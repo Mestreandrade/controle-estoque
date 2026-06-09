@@ -1492,6 +1492,16 @@ let listaEntrada = [];
 let listaSaida = [];
 let listaUsuarios = [];
 
+let produtosCarregados = false;
+let racksCarregados = false;
+let estoqueCarregado = false;
+let historicoCarregado = false;
+let usuariosCarregados = false;
+let inventarioCarregado = false;
+
+
+
+
 function perfilAtual(){
   return usuarioLogado ? usuarioLogado.perfil : "";
 }
@@ -1568,36 +1578,67 @@ function aplicarPermissoes(){
 function carregarTudo(){
   carregarProdutos();
   carregarRacks();
-  carregarEstoque();
-  carregarMovimentacoes();
-  carregarUsuarios();
+  
+
+  if(perfilAtual() === "ADMIN"){
+    carregarUsuarios();
+  }
 }
+
+
+
 
 /* ABRIR TELAS */
 
 function abrirTela(tela){
 
-if(tela === "inventario" && perfilAtual() !== "ADMIN"){
-  alert("Acesso permitido apenas para administrador");
-  return;
-}
-
+  if(tela === "inventario" && perfilAtual() !== "ADMIN"){
+    alert("Acesso permitido apenas para administrador");
+    return;
+  }
 
   document.querySelectorAll(".tela").forEach(secao => secao.classList.remove("ativa"));
   document.getElementById(tela).classList.add("ativa");
 
-  carregarProdutos();
-  carregarRacks();
-  carregarEstoque();
-  carregarMovimentacoes();
-  carregarUsuarios();
+  if(tela === "produtos"){
+    carregarProdutos();
+  }
 
-  if(tela === "entrada"){
-    carregarMapaEntrada();
+  if(tela === "racks"){
+    carregarRacks();
+  }
+
+  if(tela === "consulta"){
+    carregarEstoque().then(() => {
+      renderizarEstoque(listaEstoque);
+      atualizarIndicadoresRastreio();
+    });
+  }
+
+  if(tela === "saldo"){
+    carregarEstoque().then(() => {
+      gerarSaldoGeral();
+    });
   }
 
   if(tela === "dashboard"){
+    carregarEstoque().then(() => {
+      atualizarDashboard();
+    });
+
     carregarUltimoBackup();
+  }
+
+  if(tela === "historico"){
+    carregarMovimentacoes();
+  }
+
+  if(tela === "usuarios" && perfilAtual() === "ADMIN"){
+    carregarUsuarios();
+  }
+
+  if(tela === "entrada"){
+    carregarMapaEntrada();
   }
 
   if(tela === "inventario"){
@@ -1810,6 +1851,11 @@ function limparFormularioProduto(){
 }
 
 async function carregarProdutos(){
+
+  if(produtosCarregados) return;
+
+  produtosCarregados = true;
+
   const resposta = await fetch("/produtos");
   listaProdutos = await resposta.json();
 
@@ -1828,7 +1874,6 @@ async function carregarProdutos(){
     `;
   });
 }
-
 
 
 
@@ -1890,6 +1935,11 @@ function limparFormularioRack(){
 }
 
 async function carregarRacks(){
+
+  if(racksCarregados) return;
+
+  racksCarregados = true;
+
   const resposta = await fetch("/racks");
   listaRacks = await resposta.json();
 
@@ -1897,34 +1947,35 @@ async function carregarRacks(){
   const estoque = await estoqueResp.json();
 
   const tabela = document.getElementById("tabelaRacks");
+
+  if(!tabela){
+    return;
+  }
+
   tabela.innerHTML = "";
 
   listaRacks.forEach(item => {
     const ocupado = estoque.some(e => e.rack === item.endereco);
 
     tabela.innerHTML += `
-     
-
- <tr>
-  <td>
-    <input type="checkbox" class="checkRack" value="${item.id}">
-  </td>
-  <td>${item.endereco}</td>
-  <td>${ocupado ? "OCUPADO" : "LIVRE"}</td>
-  <td>
-    <button class="btn-amarelo" onclick="editarRack(${item.id})">Editar</button>
-    <button class="btn-vermelho" onclick="excluirRack(${item.id})">Excluir</button>
-  </td>
-</tr> 
-
-
-   `;
+      <tr>
+        <td>
+          <input type="checkbox" class="checkRack" value="${item.id}">
+        </td>
+        <td>${item.endereco}</td>
+        <td>${ocupado ? "OCUPADO" : "LIVRE"}</td>
+        <td>
+          <button class="btn-amarelo" onclick="editarRack(${item.id})">Editar</button>
+          <button class="btn-vermelho" onclick="excluirRack(${item.id})">Excluir</button>
+        </td>
+      </tr>
+    `;
   });
 
-  carregarRacksEntrada();
-  carregarRacksSaida();
   atualizarDashboard();
 }
+
+
 
 async function cadastrarRacksRapido(){
 
@@ -2995,16 +3046,15 @@ function imprimirEntrada(lista){
 /* CONSULTAS */
 
 async function carregarEstoque(){
+
+  if(estoqueCarregado) return;
+
+  estoqueCarregado = true;
+
   const resposta = await fetch("/estoque");
   listaEstoque = await resposta.json();
 
-  renderizarEstoque(listaEstoque);
-  atualizarIndicadoresRastreio();
-
-  gerarSaldoGeral();
-  atualizarDashboard();
 }
-
 
 
 /* RASTREAMENTO DE LOTES */
