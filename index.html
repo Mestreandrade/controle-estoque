@@ -1292,6 +1292,11 @@ Lançar em Todos os Racks Marcados
   🔒 Backup do Banco
 </button>
 
+<button class="btn-vermelho" onclick="viradaSistema()">
+  🚀 Virada do Sistema
+</button>
+
+
 <button
   class="btn-verde"
   onclick="document.getElementById('arquivoBackup').click()">
@@ -3776,6 +3781,53 @@ function exportarCSV(idTabela, nomeArquivo){
 }
 
 
+
+
+/* VIRADA DO SISTEMA */
+
+async function viradaSistema(){
+
+  if(perfilAtual() !== "ADMIN"){
+    alert("Somente administrador pode fazer a virada do sistema");
+    return;
+  }
+
+  const confirmar = confirm(
+    "ATENÇÃO!\n\n" +
+    "Esta ação vai apagar:\n" +
+    "- Estoque atual\n" +
+    "- Histórico de movimentações\n" +
+    "- Inventários\n\n" +
+    "Serão mantidos:\n" +
+    "- Produtos\n" +
+    "- Racks\n" +
+    "- Usuários\n\n" +
+    "Você já fez backup do banco?"
+  );
+
+  if(!confirmar){
+    return;
+  }
+
+  const segundaConfirmacao = confirm(
+    "Confirma definitivamente a VIRADA DO SISTEMA?"
+  );
+
+  if(!segundaConfirmacao){
+    return;
+  }
+
+  const resposta = await fetch("/virada-sistema", {
+    method: "POST",
+    headers: headersComPerfil()
+  });
+
+  const resultado = await resposta.text();
+
+  alert(resultado);
+
+  location.reload();
+}
 
 
 

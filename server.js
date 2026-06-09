@@ -1144,6 +1144,24 @@ app.get("/ultimo-backup", (req, res) => {
 
 
 
+/* VIRADA DO SISTEMA */
+
+app.post("/virada-sistema", somenteAdmin, (req, res) => {
+
+    db.serialize(() => {
+
+        db.run("DELETE FROM movimentacoes");
+        db.run("DELETE FROM inventarios");
+        db.run("DELETE FROM estoque");
+
+        res.send("Virada realizada com sucesso. Estoque, histórico e inventário foram zerados.");
+
+    });
+
+});
+
+
+
 
 /* RESTAURAR BACKUP DO BANCO */
 
