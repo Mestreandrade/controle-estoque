@@ -1,8 +1,19 @@
 const express = require("express");
 const path = require("path");
 const db = require("./database");
+const multer = require("multer");
+const fs = require("fs");
+
+
+
 
 const app = express();
+
+app.use(express.static("public"));
+
+const upload = multer({
+  dest: "uploads/"
+});
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static(__dirname));
@@ -1136,6 +1147,42 @@ app.get("/ultimo-backup", (req, res) => {
             }
         }
     );
+});
+
+
+
+
+
+/* RESTAURAR BACKUP DO BANCO */
+
+app.post("/restaurar-backup", upload.single("backup"), (req, res) => {
+
+    if(req.headers.perfil !== "ADMIN"){
+        return res.status(403).send("Acesso negado. Apenas administrador pode restaurar backup.");
+    }
+
+    if(!req.file){
+        return res.status(400).send("Nenhum arquivo enviado.");
+    }
+
+    try{
+
+        const arquivoBackup = req.file.path;
+
+        fs.copyFileSync(arquivoBackup, "./estoque.db");
+
+        fs.unlinkSync(arquivoBackup);
+
+        res.send("Backup restaurado com sucesso. Reinicie o sistema.");
+
+    }catch(erro){
+
+        console.error("Erro ao restaurar backup:", erro);
+
+        res.status(500).send("Erro ao restaurar backup.");
+
+    }
+
 });
 
 

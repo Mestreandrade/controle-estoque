@@ -6,7 +6,26 @@
 
 
   <style>
-    body{font-family:Arial;margin:0;background:#f4f4f4;}
+
+
+body{
+  font-family:Arial;
+  margin:0;
+  background:#f4f4f4;
+}
+
+body.login-page{
+  background-image:
+    linear-gradient(rgba(15,31,58,0.55), rgba(15,31,58,0.55)),
+    url("/img/fundo-login.png") !important;
+  background-size:cover !important;
+  background-position:center !important;
+  background-repeat:no-repeat !important;
+  background-attachment:fixed !important;
+}
+
+
+
     header{background:#1f2937;color:white;padding:20px;text-align:center;}
     nav{background:#111827;padding:10px;text-align:center;}
     nav button{background:#374151;color:white;border:none;padding:12px 18px;margin:5px;cursor:pointer;border-radius:5px;}
@@ -322,12 +341,6 @@
 
 
 
-
-
-
-
-
-
 /* RASTREAMENTO COMPACTO */
 
 #consulta table{
@@ -359,6 +372,7 @@
 #consulta .status-60{
     font-size:11px;
 }
+
 
 
 
@@ -445,6 +459,50 @@
 }
 
 
+/* LOGIN COCO&CIA */
+
+body.login-page{
+  background-image:
+    linear-gradient(
+      rgba(15,31,58,0.55),
+      rgba(15,31,58,0.55)
+    ),
+    url("/img/fundo-login.png");
+
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  background-attachment:fixed;
+}
+
+
+.logo-login{
+  width:180px;
+  display:block;
+  margin:0 auto 15px auto;
+}
+
+
+
+#loginBox{
+  max-width:420px;
+  margin:70px auto;
+  background:rgba(255,255,255,0.82);
+  padding:30px;
+  border-radius:18px;
+  text-align:center;
+  box-shadow:0 12px 35px rgba(0,0,0,0.30);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,0.35);
+}
+
+.rodape-login{
+  margin-top:18px;
+  font-size:12px;
+  color:#475569;
+  line-height:1.4;
+}
 
 
 
@@ -458,19 +516,29 @@
 
 </head>
 
-<body>
+<body class="login-page">
 
 <div id="loginBox">
-  <h2>Login do Sistema</h2>
+
+<img src="/img/logo-coco.png" class="logo-login">
+
+<h2>Sistema de Gestão de Estoque</h2>
+
 
   <input type="text" id="loginUsuario" placeholder="Usuário">
   <br>
   <input type="password" id="loginSenha" placeholder="Senha">
   <br>
 
-  <button class="btn-azul" onclick="fazerLogin()">Entrar</button>
+<button class="btn-azul" onclick="fazerLogin()">Entrar</button>
 
+<div class="rodape-login">
+  StockPro v1.0<br>
+  Desenvolvido por Saulo Pinheiro de Andrade
+  </div>
+CNPJ: 37.411.417/0001-57
 </div>
+
 
 <div id="sistema">
 
@@ -1224,6 +1292,21 @@ Lançar em Todos os Racks Marcados
   🔒 Backup do Banco
 </button>
 
+<button
+  class="btn-verde"
+  onclick="document.getElementById('arquivoBackup').click()">
+  📂 Restaurar Backup
+</button>
+
+<input
+  type="file"
+  id="arquivoBackup"
+  accept=".db"
+  style="display:none"
+  onchange="restaurarBackup()">
+
+
+
   <table>
     <thead>
       <tr>
@@ -1442,6 +1525,7 @@ async function fazerLogin(){
 
   document.getElementById("loginBox").style.display = "none";
   document.getElementById("sistema").style.display = "block";
+  document.body.classList.remove("login-page");
 
   document.getElementById("nomeUsuarioLogado").innerText = usuarioLogado.nome;
   document.getElementById("perfilUsuarioLogado").innerText = usuarioLogado.perfil;
@@ -3692,6 +3776,55 @@ function exportarCSV(idTabela, nomeArquivo){
 }
 
 
+
+
+
+
+/* RESTAURAR BACKUP */
+
+async function restaurarBackup(){
+
+  const arquivo = document.getElementById("arquivoBackup").files[0];
+
+  if(!arquivo){
+    return;
+  }
+
+  if(perfilAtual() !== "ADMIN"){
+    alert("Somente administrador pode restaurar backup");
+    return;
+  }
+
+  const confirmar = confirm(
+    "ATENÇÃO!\n\n" +
+    "O banco atual será substituído pelo backup selecionado.\n\n" +
+    "Antes de continuar, confirme se você já fez um backup do banco atual.\n\n" +
+    "Deseja continuar?"
+  );
+
+  if(!confirmar){
+    document.getElementById("arquivoBackup").value = "";
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("backup", arquivo);
+
+  const resposta = await fetch("/restaurar-backup", {
+    method: "POST",
+    headers: {
+      "perfil": perfilAtual(),
+      "usuario": usuarioLogado ? usuarioLogado.nome : "Sistema"
+    },
+    body: formData
+  });
+
+  const resultado = await resposta.text();
+
+  alert(resultado);
+
+  location.reload();
+}
 
 
 
