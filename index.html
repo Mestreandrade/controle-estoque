@@ -506,6 +506,36 @@ body.login-page{
 
 
 
+.coluna-rack{
+  min-width:160px;
+  white-space:nowrap;
+}
+
+.rack-check{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  font-size:14px;
+  font-weight:500;
+}
+
+.rack-check input{
+  width:16px;
+  height:16px;
+  margin:0;
+  flex:none;
+}
+
+.rack-texto{
+  font-size:14px;
+  font-weight:500;
+}
+
+
+
+
+
 
 
 
@@ -770,9 +800,6 @@ CNPJ: 37.411.417/0001-57
 
 <section id="entrada" class="tela">
   <h2>Entrada por Endereço</h2>
-
-
-
 
 
 <!-- ENTRADA EM MASSA POR RACKS SELECIONADOS -->
@@ -2028,14 +2055,18 @@ function renderizarMapaEntrada(lista){
       <tr class="${classeLinha}">
 
 
-<td>
+<td class="coluna-rack">
   ${
     item.status === "LIVRE"
-    ? `<input type="checkbox" class="checkEntradaRack" value="${item.rack}"> ${item.rack}`
-    : item.rack
+    ? `
+      <label class="rack-check">
+        <input type="checkbox" class="checkEntradaRack" value="${item.rack}">
+        <span>${item.rack}</span>
+      </label>
+    `
+    : `<span class="rack-texto">${item.rack}</span>`
   }
 </td>
-
 
 
 
