@@ -817,22 +817,23 @@ body.login-page{
 Lançar em Todos os Racks Marcados  
 </button>
 
-<button class="btn-amarelo" onclick="processarEntradaInicial()">
+<button class="btn-amarelo menu-admin" onclick="processarEntradaInicial()">
   📦 Entrada Inicial
 </button>
 
-<br><br>
+<div class="menu-admin">
+  <br><br>
 
-<input
-  type="file"
-  id="arquivoEntradaInicial"
-  accept=".xlsx,.xls"
->
+  <input
+    type="file"
+    id="arquivoEntradaInicial"
+    accept=".xlsx,.xls"
+  >
 
-<button class="btn-azul" onclick="importarEntradaInicialExcel()">
-  📥 Importar Entrada Inicial
-</button>
-
+  <button class="btn-azul" onclick="importarEntradaInicialExcel()">
+    📥 Importar Entrada Inicial
+  </button>
+</div>
 
 </div>
 
@@ -2226,6 +2227,104 @@ const validade = converterDataBRparaISO(validadeDigitada);
 
 
 /* ENTRADA EM MASSA */
+
+
+async function processarEntradaMassa(){
+
+  const codigo = document.getElementById("entradaMassaCodigo").value;
+  const lote = document.getElementById("entradaMassaLote").value;
+  const quantidade = Number(document.getElementById("entradaMassaQuantidade").value);
+  const validade = document.getElementById("entradaMassaValidade").value;
+
+  const checksMarcados = document.querySelectorAll(".checkEntradaRack:checked");
+  const racksSelecionados = Array.from(checksMarcados).map(check => check.value);
+
+  if(codigo === "" || lote === "" || quantidade <= 0){
+    alert("Preencha código, lote e quantidade");
+    return;
+  }
+
+  if(racksSelecionados.length === 0){
+    alert("Selecione pelo menos um rack livre");
+    return;
+  }
+
+  const produtoResp = await fetch("/produtos/" + codigo);
+  const produto = await produtoResp.json();
+
+  if(!produto){
+    alert("Produto não encontrado");
+    return;
+  }
+
+  if(!confirm(`Confirmar entrada do produto ${produto.nome} em ${racksSelecionados.length} racks?`)){
+    return;
+  }
+
+  const entradasImpressao = [];
+  const erros = [];
+
+  for(const rack of racksSelecionados){
+
+    const entrada = {
+      codigo: codigo,
+      produto: produto.nome,
+      lote: lote,
+      rack: rack,
+      quantidade: quantidade,
+      validade: validade || ""
+    };
+
+    const resposta = await fetch("/entrada", {
+      method: "POST",
+      headers: headersComPerfil(),
+      body: JSON.stringify(entrada)
+    });
+
+    const resultado = await resposta.text();
+
+    if(
+      resultado.includes("Erro") ||
+      resultado.includes("ocupado") ||
+      resultado.includes("não") ||
+      resultado.includes("negado")
+    ){
+      erros.push(`Rack ${rack}: ${resultado}`);
+    } else {
+      entradasImpressao.push(entrada);
+    }
+  }
+
+  if(entradasImpressao.length > 0){
+    imprimirEntrada(entradasImpressao);
+  }
+
+  alert(
+    "Entrada em massa finalizada.\n" +
+    "Racks lançados: " + entradasImpressao.length + "\n" +
+    "Erros: " + erros.length
+  );
+
+  if(erros.length > 0){
+    console.log("Erros na entrada em massa:", erros);
+  }
+
+  document.getElementById("entradaMassaCodigo").value = "";
+  document.getElementById("entradaMassaLote").value = "";
+  document.getElementById("entradaMassaQuantidade").value = "";
+  document.getElementById("entradaMassaValidade").value = "";
+
+  estoqueCarregado = false;
+  racksCarregados = false;
+  historicoCarregado = false;
+
+  await carregarEstoque();
+  await carregarMapaEntrada();
+  await carregarMovimentacoes();
+  await carregarRacks();
+}
+
+
 
 
 async function importarEntradaInicialExcel(){
