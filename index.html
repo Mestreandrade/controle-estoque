@@ -543,6 +543,7 @@ body.login-page{
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 </head>
 
@@ -818,6 +819,18 @@ Lançar em Todos os Racks Marcados
 
 <button class="btn-amarelo" onclick="processarEntradaInicial()">
   📦 Entrada Inicial
+</button>
+
+<br><br>
+
+<input
+  type="file"
+  id="arquivoEntradaInicial"
+  accept=".xlsx,.xls"
+>
+
+<button class="btn-azul" onclick="importarEntradaInicialExcel()">
+  📥 Importar Entrada Inicial
 </button>
 
 
@@ -2213,6 +2226,102 @@ const validade = converterDataBRparaISO(validadeDigitada);
 
 
 /* ENTRADA EM MASSA */
+
+
+async function importarEntradaInicialExcel(){
+
+  const arquivo = document.getElementById("arquivoEntradaInicial").files[0];
+
+  if(!arquivo){
+    alert("Selecione um arquivo Excel");
+    return;
+  }
+
+  const confirmar = confirm(
+    "Confirmar importação da Entrada Inicial?\n\n" +
+    "O sistema vai importar as linhas com COD, LOTE, FAB e QUANT preenchidos."
+  );
+
+  if(!confirmar){
+    return;
+  }
+
+  const leitor = new FileReader();
+
+  leitor.onload = async function(e){
+
+    const dados = new Uint8Array(e.target.result);
+    const workbook = XLSX.read(dados, { type: "array" });
+    const aba = workbook.Sheets[workbook.SheetNames[0]];
+    const linhas = XLSX.utils.sheet_to_json(aba);
+
+    let sucesso = 0;
+    let erros = [];
+
+    for(const linha of linhas){
+
+      const rack = String(linha["Endereçamento"] || "").trim();
+      const codigo = String(linha["COD"] || "").trim();
+      const lote = String(linha["LOTE"] || "").trim();
+      const quantidade = Number(String(linha["QUANT"] || "0").replace(",", "."));
+      let validade = String(linha["FAB"] || "").trim();
+
+      if(!rack || !codigo || !lote || !quantidade){
+        continue;
+      }
+
+      if(validade.includes("/")){
+        const partes = validade.split("/");
+        validade = `${partes[2]}-${partes[1]}-${partes[0]}`;
+      }
+
+      const entrada = {
+        codigo,
+        lote,
+        rack,
+        quantidade,
+        validade,
+        tipo_movimentacao: "ENTRADA INICIAL"
+      };
+
+      const resposta = await fetch("/entrada", {
+        method: "POST",
+        headers: headersComPerfil(),
+        body: JSON.stringify(entrada)
+      });
+
+      const resultado = await resposta.text();
+
+      if(resultado.toLowerCase().includes("sucesso")){
+        sucesso++;
+      } else {
+        erros.push(`${rack} - COD ${codigo}: ${resultado}`);
+      }
+    }
+
+    alert(
+      "Importação finalizada.\n\n" +
+      "Importados: " + sucesso + "\n" +
+      "Erros: " + erros.length
+    );
+
+    if(erros.length > 0){
+      console.log("Erros na importação:", erros);
+    }
+
+    estoqueCarregado = false;
+    racksCarregados = false;
+    historicoCarregado = false;
+
+    await carregarEstoque();
+    await carregarMapaEntrada();
+    await carregarMovimentacoes();
+    await carregarRacks();
+  };
+
+  leitor.readAsArrayBuffer(arquivo);
+}
+
 
 async function processarEntradaInicial(){
 
