@@ -1492,15 +1492,10 @@ function aplicarPermissoes(){
 }
 
 function carregarTudo(){
+  // Carrega somente produtos no login.
+  // Racks, estoque, histórico e usuários carregam só quando abrir a tela.
   carregarProdutos();
-  carregarRacks();
-  
-
-  if(perfilAtual() === "ADMIN"){
-    carregarUsuarios();
-  }
 }
-
 
 
 
@@ -1554,8 +1549,13 @@ function abrirTela(tela){
   }
 
   if(tela === "entrada"){
+  if(listaMapaEntrada.length === 0){
     carregarMapaEntrada();
+  } else {
+    renderizarMapaEntrada(listaMapaEntrada);
   }
+}
+
 
   if(tela === "inventario"){
     carregarInventario();
@@ -2017,15 +2017,32 @@ let listaMapaEntrada = [];
 
 async function carregarMapaEntrada(){
 
-  const racksResp = await fetch("/racks");
-  const racks = await racksResp.json();
+  if(listaMapaEntrada.length > 0){
+    renderizarMapaEntrada(listaMapaEntrada);
+    return;
+  }
 
-  const estoqueResp = await fetch("/estoque");
-  const estoque = await estoqueResp.json();
+  let racks = listaRacks;
+
+  if(!racks || racks.length === 0){
+    const racksResp = await fetch("/racks");
+    racks = await racksResp.json();
+    listaRacks = racks;
+  }
+
+  await carregarEstoque();
+
+  const estoque = listaEstoque;
+
+  const estoquePorRack = new Map();
+
+  estoque.forEach(item => {
+    estoquePorRack.set(item.rack, item);
+  });
 
   listaMapaEntrada = racks.map(rack => {
 
-    const itemEstoque = estoque.find(e => e.rack === rack.endereco);
+    const itemEstoque = estoquePorRack.get(rack.endereco);
 
     if(itemEstoque){
       return {
@@ -2053,6 +2070,8 @@ async function carregarMapaEntrada(){
 
   renderizarMapaEntrada(listaMapaEntrada);
 }
+
+
 
 function renderizarMapaEntrada(lista){
 
@@ -2317,6 +2336,7 @@ async function processarEntradaMassa(){
   estoqueCarregado = false;
   racksCarregados = false;
   historicoCarregado = false;
+  listaMapaEntrada = [];
 
   await carregarEstoque();
   await carregarMapaEntrada();
@@ -2408,6 +2428,7 @@ async function importarEntradaInicialExcel(){
       console.log("Erros na importação:", erros);
     }
 
+
     estoqueCarregado = false;
     racksCarregados = false;
     historicoCarregado = false;
@@ -2416,6 +2437,9 @@ async function importarEntradaInicialExcel(){
     await carregarMapaEntrada();
     await carregarMovimentacoes();
     await carregarRacks();
+
+
+
   };
 
   leitor.readAsArrayBuffer(arquivo);
@@ -2697,11 +2721,21 @@ async function confirmarMovimentacaoLeitor(){
     resultado.toLowerCase().includes("realizada") ||
     resultado.toLowerCase().includes("liberado")
   ){
-    limparLeitor();
-    carregarEstoque();
-    carregarMovimentacoes();
-    carregarRacks();
-    carregarMapaEntrada();
+    
+
+estoqueCarregado = false;
+racksCarregados = false;
+historicoCarregado = false;
+listaMapaEntrada = [];
+
+carregarEstoque();
+carregarMovimentacoes();
+carregarRacks();
+
+limparLeitor();
+
+
+
   }
 }
 
@@ -2885,9 +2919,18 @@ async function processarEntradas(){
   listaEntrada = [];
   renderizarListaEntrada();
 
-  carregarEstoque();
-  carregarMovimentacoes();
-  carregarRacks();
+estoqueCarregado = false;
+racksCarregados = false;
+historicoCarregado = false;
+listaMapaEntrada = [];
+
+carregarEstoque();
+carregarMovimentacoes();
+carregarRacks();
+
+
+
+
 }
 
 
@@ -2967,9 +3010,19 @@ async function processarSaidas(){
   listaSaida = [];
   renderizarListaSaida();
 
-  carregarEstoque();
-  carregarMovimentacoes();
-  carregarRacks();
+ estoqueCarregado = false;
+racksCarregados = false;
+historicoCarregado = false;
+listaMapaEntrada = [];
+
+carregarEstoque();
+carregarMovimentacoes();
+carregarRacks();
+
+
+
+
+
 }
 
 
@@ -3079,9 +3132,17 @@ itens.push({
   document.getElementById("tabelaSaidaBusca").innerHTML = "";
   listaSaidaBusca = [];
 
-  carregarEstoque();
-  carregarMovimentacoes();
-  carregarRacks();
+  
+estoqueCarregado = false;
+racksCarregados = false;
+historicoCarregado = false;
+listaMapaEntrada = [];
+
+carregarEstoque();
+carregarMovimentacoes();
+carregarRacks();
+
+
 }
 
 
