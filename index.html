@@ -3407,6 +3407,8 @@ function filtrarRastreio60(){
   renderizarEstoque(resultado);
 }
 
+
+
 async function buscarRastreamento(){
 
   const termo = document.getElementById("filtroConsulta").value.trim();
@@ -3429,11 +3431,36 @@ async function buscarRastreamento(){
 
   const dados = await resposta.json();
 
-  listaEstoque = dados;
-
-  renderizarEstoque(listaEstoque);
-  atualizarIndicadoresRastreio();
+  renderizarEstoque(dados);
+  atualizarIndicadoresRastreioLocal(dados);
 }
+
+function atualizarIndicadoresRastreioLocal(lista){
+
+  const totalItens = lista.reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const acima30 = lista
+    .filter(item => {
+      const dias = calcularDiasFabricacao(item.validade);
+      return dias > 30 && dias <= 60;
+    })
+    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const acima60 = lista
+    .filter(item => calcularDiasFabricacao(item.validade) > 60)
+    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+  const percentual30 = totalItens > 0 ? ((acima30 / totalItens) * 100).toFixed(1) : 0;
+  const percentual60 = totalItens > 0 ? ((acima60 / totalItens) * 100).toFixed(1) : 0;
+
+  document.getElementById("rastTotalItens").innerText = totalItens;
+  document.getElementById("rastAcima30").innerText = acima30;
+  document.getElementById("rastPercentual30").innerText = percentual30 + "%";
+  document.getElementById("rastAcima60").innerText = acima60;
+  document.getElementById("rastPercentual60").innerText = percentual60 + "%";
+}
+
+
 
 
 
