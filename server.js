@@ -398,6 +398,53 @@ app.get("/racks", (req, res) => {
     });
 });
 
+app.get("/mapa-entrada", (req, res) => {
+    const termo = (req.query.termo || "").trim();
+
+    if(termo === ""){
+        return res.json([]);
+    }
+
+    const busca = `%${termo}%`;
+
+    db.all(
+        `
+        SELECT 
+            racks.endereco AS rack,
+            CASE 
+                WHEN estoque.id IS NULL THEN 'LIVRE'
+                ELSE 'OCUPADO'
+            END AS status,
+            produtos.codigo AS codigo,
+            produtos.nome AS produto,
+            estoque.lote AS lote,
+            estoque.quantidade AS quantidade,
+            estoque.validade AS validade
+        FROM racks
+        LEFT JOIN estoque
+            ON estoque.rack = racks.endereco
+        LEFT JOIN produtos
+            ON produtos.id = estoque.produto_id
+        WHERE 
+            racks.endereco LIKE ?
+            OR produtos.codigo LIKE ?
+            OR produtos.nome LIKE ?
+            OR estoque.lote LIKE ?
+        ORDER BY racks.endereco
+        `,
+        [busca, busca, busca, busca],
+        (err, rows) => {
+            if(err){
+                return res.status(500).send("Erro ao buscar mapa de entrada");
+            }
+
+            res.json(rows);
+        }
+    );
+});
+
+
+
 app.get("/racks-livres", (req, res) => {
     db.all(
         `
@@ -836,6 +883,58 @@ app.post("/saida-lote", adminOuOperador, (req, res) => {
 
 
 /* CONSULTAS */
+
+
+app.get("/estoque-rastreamento", (req, res) => {
+    const termo = (req.query.termo || "").trim();
+    const tipo = (req.query.tipo || "codigo").trim();
+
+    if(termo === ""){
+        return res.json([]);
+    }
+
+    let sql = `
+        SELECT 
+            estoque.id,
+            produtos.codigo,
+            produtos.nome,
+            estoque.lote,
+            estoque.rack,
+            estoque.quantidade,
+            estoque.validade,
+            estoque.data_entrada
+        FROM estoque
+        INNER JOIN produtos
+        ON produtos.id = estoque.produto_id
+        WHERE 1 = 1
+    `;
+
+    let params = [];
+
+    if(tipo === "codigo"){
+        sql += " AND produtos.codigo LIKE ?";
+        params.push(`%${termo}%`);
+    }
+
+    if(tipo === "lote"){
+        sql += " AND estoque.lote LIKE ?";
+        params.push(`%${termo}%`);
+    }
+
+    sql += " ORDER BY estoque.rack";
+
+    db.all(sql, params, (err, rows) => {
+        if(err){
+            return res.status(500).send("Erro ao buscar rastreamento");
+        }
+
+        res.json(rows);
+    });
+});
+
+
+
+
 
 app.get("/estoque", (req, res) => {
     db.all(

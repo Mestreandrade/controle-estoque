@@ -839,15 +839,19 @@ Lançar em Todos os Racks Marcados
 
 
   <input
-    type="text"
-    id="filtroEntradaRack"
-    placeholder="Buscar rack, produto ou lote"
-    onkeyup="filtrarMapaEntrada()"
-  >
+  type="text"
+  id="filtroEntradaRack"
+  placeholder="Digite rack, produto ou lote"
+>
 
-  <button class="btn-cinza" onclick="carregarMapaEntrada()">
-    Atualizar Racks
-  </button>
+<button class="btn-cinza" onclick="buscarMapaEntrada()">
+  Atualizar Racks
+</button>
+
+<button class="btn-cinza" onclick="limparBuscaEntrada()">
+  Limpar Busca
+</button>
+
 
   <table>
     <thead>
@@ -955,9 +959,23 @@ Lançar em Todos os Racks Marcados
 
 
 
-  <input type="text" id="filtroConsulta" placeholder="Buscar código, produto, lote ou rack" onkeyup="filtrarEstoque()">
+<label>
+  <input type="radio" name="tipoBuscaRastreamento" value="codigo" checked>
+  Código
+</label>
 
+<label>
+  <input type="radio" name="tipoBuscaRastreamento" value="lote">
+  Lote
+</label>
 
+<br><br>
+
+<input type="text" id="filtroConsulta" placeholder="Digite sua pesquisa">
+
+<button class="btn-azul" onclick="buscarRastreamento()">
+  🔎 Buscar
+</button>
 
 
 <button class="btn-cinza" onclick="renderizarEstoque(listaEstoque)">
@@ -1520,11 +1538,15 @@ function abrirTela(tela){
   }
 
   if(tela === "consulta"){
-    carregarEstoque().then(() => {
-      renderizarEstoque(listaEstoque);
-      atualizarIndicadoresRastreio();
-    });
-  }
+  document.getElementById("tabelaEstoque").innerHTML = "";
+  document.getElementById("filtroConsulta").value = "";
+
+  document.getElementById("rastTotalItens").innerText = "0";
+  document.getElementById("rastAcima30").innerText = "0";
+  document.getElementById("rastPercentual30").innerText = "0%";
+  document.getElementById("rastAcima60").innerText = "0";
+  document.getElementById("rastPercentual60").innerText = "0%";
+}
 
   if(tela === "saldo"){
     carregarEstoque().then(() => {
@@ -1548,14 +1570,12 @@ function abrirTela(tela){
     carregarUsuarios();
   }
 
-  if(tela === "entrada"){
-  if(listaMapaEntrada.length === 0){
-    carregarMapaEntrada();
-  } else {
-    renderizarMapaEntrada(listaMapaEntrada);
-  }
-}
+ if(tela === "entrada"){
+  document.getElementById("tabelaMapaEntrada").innerHTML = "";
+  document.getElementById("filtroEntradaRack").value = "";
 
+  alert("Digite um rack, produto ou lote e clique em Atualizar Racks.");
+}
 
   if(tela === "inventario"){
     carregarInventario();
@@ -2168,7 +2188,30 @@ function converterDataBRparaISO(dataBR){
 
 
 
+async function buscarMapaEntrada(){
 
+  const filtro = document.getElementById("filtroEntradaRack").value.trim();
+
+  if(filtro === ""){
+    alert("Digite um rack, produto ou lote antes de atualizar.");
+    return;
+  }
+
+  const resposta = await fetch("/mapa-entrada?termo=" + encodeURIComponent(filtro));
+  const dados = await resposta.json();
+
+  listaMapaEntrada = dados.map(item => ({
+    rack: item.rack || "",
+    status: item.status || "LIVRE",
+    codigo: item.codigo || "",
+    produto: item.produto || "",
+    lote: item.lote || "",
+    quantidade: item.quantidade || "",
+    validade: item.validade || ""
+  }));
+
+  renderizarMapaEntrada(listaMapaEntrada);
+}
 
 
 async function abrirEntradaRack(rack){
@@ -2242,6 +2285,21 @@ const validade = converterDataBRparaISO(validadeDigitada);
   }
 
 }
+
+
+
+function limparBuscaEntrada(){
+
+  document.getElementById("filtroEntradaRack").value = "";
+
+  document.getElementById("tabelaMapaEntrada").innerHTML = "";
+
+  listaMapaEntrada = [];
+}
+
+
+
+
 
 
 
@@ -3302,17 +3360,27 @@ else if(dias > 30){
 
 function atualizarIndicadoresRastreio(){
 
-  const totalItens = listaEstoque.reduce((soma, item) => soma + Number(item.quantidade), 0);
+  
 
-  const acima30 = listaEstoque
-    .filter(item => calcularDiasFabricacao(item.validade) >= 30)
-    .reduce((soma, item) => soma + Number(item.quantidade), 0);
 
-  const acima60 = listaEstoque
-    .filter(item => calcularDiasFabricacao(item.validade) >= 60)
-    .reduce((soma, item) => soma + Number(item.quantidade), 0);
+const totalItens = listaEstoque.reduce((soma, item) => soma + Number(item.quantidade), 0);
 
-  const percentual30 = totalItens > 0 ? ((acima30 / totalItens) * 100).toFixed(1) : 0;
+const acima30 = listaEstoque
+  .filter(item => {
+    const dias = calcularDiasFabricacao(item.validade);
+    return dias > 30 && dias <= 60;
+  })
+  .reduce((soma, item) => soma + Number(item.quantidade), 0);
+
+const acima60 = listaEstoque
+  .filter(item => calcularDiasFabricacao(item.validade) > 60)
+  .reduce((soma, item) => soma + Number(item.quantidade), 0);
+ 
+
+
+
+
+ const percentual30 = totalItens > 0 ? ((acima30 / totalItens) * 100).toFixed(1) : 0;
   const percentual60 = totalItens > 0 ? ((acima60 / totalItens) * 100).toFixed(1) : 0;
 
   document.getElementById("rastTotalItens").innerText = totalItens;
@@ -3327,34 +3395,46 @@ function atualizarIndicadoresRastreio(){
 function filtrarRastreio30(){
   const resultado = listaEstoque.filter(item => {
     const dias = calcularDiasFabricacao(item.validade);
-    return dias >= 30 && dias < 60;
+    return dias > 30 && dias <= 60;
   });
 
   renderizarEstoque(resultado);
 }
 
 
-
-
 function filtrarRastreio60(){
-  const resultado = listaEstoque.filter(item => calcularDiasFabricacao(item.validade) >= 60);
+  const resultado = listaEstoque.filter(item => calcularDiasFabricacao(item.validade) > 60);
   renderizarEstoque(resultado);
 }
 
+async function buscarRastreamento(){
 
+  const termo = document.getElementById("filtroConsulta").value.trim();
 
-function filtrarEstoque(){
-  const filtro = document.getElementById("filtroConsulta").value.toLowerCase();
+  if(termo === ""){
+    alert("Digite um código ou lote antes de buscar.");
+    return;
+  }
 
-  const resultado = listaEstoque.filter(item =>
-    item.codigo.toLowerCase().includes(filtro) ||
-    item.nome.toLowerCase().includes(filtro) ||
-    item.lote.toLowerCase().includes(filtro) ||
-    item.rack.toLowerCase().includes(filtro)
+  const tipo = document.querySelector(
+    'input[name="tipoBuscaRastreamento"]:checked'
+  ).value;
+
+  const resposta = await fetch(
+    "/estoque-rastreamento?tipo=" +
+    encodeURIComponent(tipo) +
+    "&termo=" +
+    encodeURIComponent(termo)
   );
 
-  renderizarEstoque(resultado);
+  const dados = await resposta.json();
+
+  listaEstoque = dados;
+
+  renderizarEstoque(listaEstoque);
+  atualizarIndicadoresRastreio();
 }
+
 
 
 /* SALDO GERAL */
@@ -3487,6 +3567,14 @@ function formatarDataBR(dataISO){
     return "";
   }
 
+  if(!isNaN(dataISO)){
+    const data = new Date((Number(dataISO) - 25569) * 86400 * 1000);
+
+    return data.toLocaleDateString("pt-BR", {
+      timeZone: "UTC"
+    });
+  }
+
   const partes = dataISO.split("-");
 
   if(partes.length !== 3){
@@ -3497,26 +3585,28 @@ function formatarDataBR(dataISO){
 }
 
 
-
 function calcularDiasFabricacao(dataISO){
 
   if(!dataISO){
     return 0;
   }
 
+  let fabricacao;
+
+  if(!isNaN(dataISO)){
+    fabricacao = new Date((Number(dataISO) - 25569) * 86400 * 1000);
+  } else {
+    fabricacao = new Date(dataISO + "T00:00:00");
+  }
+
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
 
-  const fabricacao = new Date(dataISO + "T00:00:00");
-
   const diferenca = hoje - fabricacao;
-
   const dias = Math.floor(diferenca / (1000 * 60 * 60 * 24));
 
-  return dias < 0 ? 0 : dias;
+  return isNaN(dias) || dias < 0 ? 0 : dias;
 }
-
-
 
 /* ÚLTIMO BACKUP */
 
