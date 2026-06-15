@@ -494,6 +494,74 @@ app.get("/racks-ocupados", (req, res) => {
 
 
 
+app.post("/manutencao-lote-data", somenteAdmin, (req, res) => {
+    const { ids, novoLote, novaData } = req.body;
+    const usuario = req.headers.usuario || "Sistema";
+
+    if(!ids || ids.length === 0){
+        return res.send("Nenhum item selecionado");
+    }
+
+    if(!novoLote && !novaData){
+        return res.send("Informe novo lote ou nova fabricação");
+    }
+
+    let processados = 0;
+    let sucesso = 0;
+    let erros = 0;
+
+    ids.forEach(id => {
+        db.get("SELECT * FROM estoque WHERE id = ?", [id], (err, item) => {
+            if(err || !item){
+                erros++;
+                finalizar();
+                return;
+            }
+
+            const loteFinal = novoLote || item.lote;
+            const dataFinal = novaData || item.validade;
+
+            db.run(
+                `
+                UPDATE estoque
+                SET lote = ?, validade = ?
+                WHERE id = ?
+                `,
+                [loteFinal, dataFinal, id],
+                function(err){
+                    if(err){
+                        erros++;
+                    } else {
+                        registrarMovimentacao(
+                            item.produto_id,
+                            item.lote,
+                            item.rack,
+                            "MANUTENÇÃO LOTE/DATA",
+                            item.quantidade,
+                            usuario
+                        );
+
+                        sucesso++;
+                    }
+
+                    finalizar();
+                }
+            );
+        });
+    });
+
+    function finalizar(){
+        processados++;
+
+        if(processados === ids.length){
+            res.send(`Manutenção concluída. Atualizados: ${sucesso}. Erros: ${erros}`);
+        }
+    }
+});
+
+
+
+
 /* ENTRADA */
 
 app.post("/entrada", adminOuOperador, (req, res) => {
@@ -894,20 +962,21 @@ app.get("/estoque-rastreamento", (req, res) => {
     }
 
     let sql = `
-        SELECT 
-            estoque.id,
-            produtos.codigo,
-            produtos.nome,
-            estoque.lote,
-            estoque.rack,
-            estoque.quantidade,
-            estoque.validade,
-            estoque.data_entrada
-        FROM estoque
-        INNER JOIN produtos
-        ON produtos.id = estoque.produto_id
-        WHERE 1 = 1
-    `;
+    SELECT 
+        estoque.id,
+        produtos.codigo,
+        produtos.nome,
+        produtos.imagem,
+        estoque.lote,
+        estoque.rack,
+        estoque.quantidade,
+        estoque.validade,
+        estoque.data_entrada
+    FROM estoque
+    INNER JOIN produtos
+    ON produtos.id = estoque.produto_id
+    WHERE 1 = 1
+`;
 
     let params = [];
 
