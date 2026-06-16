@@ -679,23 +679,22 @@ app.get("/estoque-rack/:rack", (req, res) => {
 
 /* SAÍDA */
 
+
 app.post("/saida", adminOuOperador, (req, res) => {
     const { codigo, lote, rack, quantidade } = req.body;
+    const usuario = req.headers.usuario || "Sistema";
 
-    
-db.get(
-    `
-    SELECT *
-    FROM produtos
-    WHERE codigo = ?
-    OR codigo_barras = ?
-    `,
-    [codigo, codigo],
-
-
+    db.get(
+        `
+        SELECT *
+        FROM produtos
+        WHERE codigo = ?
+        OR codigo_barras = ?
+        `,
+        [codigo, codigo],
         (err, produto) => {
 
-            if(!produto){	
+            if(!produto){
                 return res.send("Produto não encontrado");
             }
 
@@ -713,63 +712,60 @@ db.get(
                         return res.send("Produto/lote/rack não encontrado no estoque");
                     }
 
-                    if(estoque.quantidade < quantidade){
+                    if(Number(estoque.quantidade) < Number(quantidade)){
                         return res.send("Quantidade insuficiente no estoque");
                     }
 
-                    const novaQuantidade = estoque.quantidade - quantidade;
+                    const novaQuantidade = Number(estoque.quantidade) - Number(quantidade);
 
                     if(novaQuantidade === 0){
+
                         db.run(
                             "DELETE FROM estoque WHERE id = ?",
                             [estoque.id],
                             function(err){
+
                                 if(err){
                                     return res.send("Erro ao remover estoque");
                                 }
 
+                                registrarMovimentacao(
+                                    produto.id,
+                                    lote,
+                                    rack,
+                                    "SAIDA",
+                                    quantidade,
+                                    usuario
+                                );
 
-                                registrarMovimentacao(produto.id,
-    lote,
-    rack,
-    "SAIDA",
-    quantidade,
-    req.headers.usuario || "Sistema"
-);
-
-                                res.send("Saída realizada e endereço liberado");
+                                return res.send("Saída realizada e endereço liberado");
                             }
                         );
+
                     } else {
+
                         db.run(
                             "UPDATE estoque SET quantidade = ? WHERE id = ?",
                             [novaQuantidade, estoque.id],
                             function(err){
+
                                 if(err){
                                     return res.send("Erro ao atualizar estoque");
                                 }
 
+                                registrarMovimentacao(
+                                    produto.id,
+                                    lote,
+                                    rack,
+                                    "SAIDA",
+                                    quantidade,
+                                    usuario
+                                );
 
-
-registrarMovimentacao(
-    produto.id,
-    lote,
-    rack,
-    "SAIDA",
-    quantidade,
-    req.headers.usuario || "Sistema"
-);
-
-res.send("Saída realizada com sucesso");
-
-
-
-
-                                res.send("Saída realizada com sucesso");
+                                return res.send("Saída realizada com sucesso");
                             }
                         );
                     }
-
                 }
             );
         }
