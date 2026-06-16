@@ -1651,6 +1651,40 @@ async function carregarDadosRackParaSaida(rack){
 document.getElementById("descricaoLeitor").innerText =
   item.nome + " | Saldo: " + item.quantidade;
 
+
+
+async function consultarRackColetor(){
+
+  const rack = document.getElementById("coletorRack").value.trim();
+  const resultado = document.getElementById("coletorResultado");
+
+  if(rack === ""){
+    resultado.innerHTML = "⚠️ Bipe ou digite um rack.";
+    return;
+  }
+
+  resultado.innerHTML = "🔎 Consultando rack...";
+
+  const resposta = await fetch("/estoque-rack/" + encodeURIComponent(rack));
+  const item = await resposta.json();
+
+  if(!item){
+    resultado.innerHTML = `
+      <strong>Rack livre ou não encontrado</strong><br>
+      ${rack}
+    `;
+    return;
+  }
+
+  resultado.innerHTML = `
+    <strong>Rack:</strong> ${rack}<br>
+    <strong>Produto:</strong> ${item.codigo} - ${item.nome}<br>
+    <strong>Lote:</strong> ${item.lote}<br>
+    <strong>Saldo:</strong> ${item.quantidade}<br>
+    <strong>Fabricação:</strong> ${formatarDataBR(item.validade || "")}
+  `;
+}
+
 /* BLOQUEAR CAMPOS NA SAÍDA */
 
 document.getElementById("leitorRack").readOnly = true;
@@ -1663,6 +1697,7 @@ document.getElementById("leitorQuantidade").readOnly = false;
 document.getElementById("leitorQuantidade").focus();
 
 }
+
 
 
 
