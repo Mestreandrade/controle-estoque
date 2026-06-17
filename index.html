@@ -224,6 +224,22 @@ input[type="radio"]{
   font-weight:bold;
 }
 
+.card-produto{
+  background:white;
+  border-radius:10px;
+  padding:15px;
+  border-left:5px solid #2563eb;
+}
+
+.card-produto h3{
+  margin:0 0 12px 0;
+  color:#1e3a8a;
+}
+
+.card-produto p{
+  margin:6px 0;
+}
+
 
     #loginBox{
       max-width:400px;
@@ -4831,17 +4847,25 @@ async function consultarRackColetor(){
     }
 
     resultado.innerHTML = `
-      <div style="font-size:22px;font-weight:bold;color:#0f172a;">
-        ${item.codigo} - ${item.nome}
-      </div>
+  <div class="card-produto">
 
-      <hr>
+    <h3>📦 ${item.nome}</h3>
 
-      <strong>Rack:</strong> ${rack}<br>
-      <strong>Lote:</strong> ${item.lote}<br>
-      <strong>Saldo:</strong> ${item.quantidade}<br>
-      <strong>Fabricação:</strong> ${formatarDataBR(item.validade || "")}
-    `;
+    <p><strong>Código:</strong> ${item.codigo}</p>
+
+    <p><strong>Rack:</strong> ${rack}</p>
+
+    <p><strong>Lote:</strong> ${item.lote}</p>
+
+    <p><strong>Saldo:</strong> ${item.quantidade}</p>
+
+    <p><strong>Fabricação:</strong>
+      ${formatarDataBR(item.validade || "")}
+    </p>
+
+  </div>
+`;
+
 
   } catch(erro){
 
