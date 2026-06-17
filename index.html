@@ -734,13 +734,41 @@ body.login-page{
 
 .coletor-resultado{
   margin-top:15px;
-  min-height:80px;
   padding:15px;
-  border-radius:10px;
+  border-radius:12px;
   background:#f1f5f9;
-  font-size:18px;
+  min-height:120px;
 }
-	
+
+.card-rack{
+  background:white;
+  border-radius:10px;
+  padding:12px;
+  margin-top:10px;
+  border-left:5px solid #16a34a;
+}
+
+.card-rack h3{
+  margin:0 0 10px 0;
+  font-size:20px;
+}
+
+.card-rack p{
+  margin:6px 0;
+  font-size:16px;
+}
+
+.status-livre{
+  color:#15803d;
+  font-weight:bold;
+  font-size:20px;
+}
+
+.status-ocupado{
+  color:#1e3a8a;
+  font-weight:bold;
+  font-size:20px;
+}	
 
 @media (max-width: 768px){
 
@@ -4786,12 +4814,19 @@ async function consultarRackColetor(){
 
     if(!item){
       resultado.innerHTML = `
-        <div style="color:#166534;font-weight:bold;">
-          ✅ Rack livre
-        </div>
-        <br>
-        <strong>Rack:</strong> ${rack}
-      `;
+  <div class="card-rack">
+
+    <div class="status-livre">
+      🟢 RACK LIVRE
+    </div>
+
+    <p>
+      <strong>Endereço:</strong><br>
+      ${rack}
+    </p>
+
+  </div>
+`;
       return;
     }
 
