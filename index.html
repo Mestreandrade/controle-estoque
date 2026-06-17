@@ -1862,6 +1862,11 @@ if(dispositivoMobile()){
 
   const coletor = document.getElementById("modoColetor");
 
+  document.querySelectorAll(".tela").forEach(secao => {
+    secao.classList.remove("ativa");
+    secao.style.display = "none";
+  });
+
   if(coletor){
     coletor.style.display = "block";
 
@@ -1874,8 +1879,8 @@ if(dispositivoMobile()){
     }, 300);
   }
 
+  return;
 }
-
   if(tela === "inventario" && perfilAtual() !== "ADMIN"){
     alert("Acesso permitido apenas para administrador");
     return;
