@@ -876,11 +876,22 @@ body.login-page{
     <div class="coletor-card">
 
       <label>Rack</label>
-      <input type="text" id="coletorRack" placeholder="Bipe ou digite o rack">
-
-      <button class="btn-coletor" onclick="consultarRackColetor()">
-        🔍 Consultar Rack
-      </button>
+<input
+  type="text"
+  id="coletorRack"
+  placeholder="Bipe ou digite o rack"
+  autocomplete="off"
+  oninput="consultarRackColetorAutomatico()"
+  onkeydown="if(event.key === 'Enter'){ consultarRackColetor(); }"
+>
+      <button
+  class="btn-coletor"
+  id="btnConsultarRackColetor"
+  onclick="consultarRackColetor()"
+  style="display:none;"
+>
+  🔍 Consultar Rack
+</button>
 
       <div id="coletorResultado" class="coletor-resultado">
         Bipe um rack para iniciar
@@ -1853,9 +1864,18 @@ if(dispositivoMobile()){
 
   if(coletor){
     coletor.style.display = "block";
+
+    setTimeout(() => {
+      const campoRack = document.getElementById("coletorRack");
+
+      if(campoRack){
+        campoRack.focus();
+      }
+    }, 300);
   }
 
 }
+
   if(tela === "inventario" && perfilAtual() !== "ADMIN"){
     alert("Acesso permitido apenas para administrador");
     return;
@@ -4680,6 +4700,99 @@ console.log(
     ? "MODO CELULAR"
     : "MODO DESKTOP"
 );
+
+
+
+let tempoConsultaColetor = null;
+
+function consultarRackColetorAutomatico(){
+  clearTimeout(tempoConsultaColetor);
+
+  tempoConsultaColetor = setTimeout(() => {
+    const rack = document.getElementById("coletorRack").value.trim();
+
+    if(rack.length >= 5){
+      consultarRackColetor();
+    }
+  }, 600);
+}
+
+async function consultarRackColetor(){
+
+  const campoRack = document.getElementById("coletorRack");
+  const resultado = document.getElementById("coletorResultado");
+
+  const rack = campoRack.value.trim().toUpperCase();
+
+  if(rack === ""){
+    resultado.innerHTML = "⚠️ Bipe ou digite um rack.";
+    return;
+  }
+
+  campoRack.value = rack;
+  resultado.innerHTML = "🔎 Consultando rack...";
+
+  try{
+
+    const resposta = await fetch("/estoque-rack/" + encodeURIComponent(rack));
+
+    if(!resposta.ok){
+      resultado.innerHTML = "❌ Erro ao consultar o rack.";
+      return;
+    }
+
+    const item = await resposta.json();
+
+    if(!item){
+      resultado.innerHTML = `
+        <div style="color:#166534;font-weight:bold;">
+          ✅ Rack livre
+        </div>
+        <br>
+        <strong>Rack:</strong> ${rack}
+      `;
+      return;
+    }
+
+    resultado.innerHTML = `
+      <div style="font-size:22px;font-weight:bold;color:#0f172a;">
+        ${item.codigo} - ${item.nome}
+      </div>
+
+      <hr>
+
+      <strong>Rack:</strong> ${rack}<br>
+      <strong>Lote:</strong> ${item.lote}<br>
+      <strong>Saldo:</strong> ${item.quantidade}<br>
+      <strong>Fabricação:</strong> ${formatarDataBR(item.validade || "")}
+    `;
+
+  } catch(erro){
+
+    resultado.innerHTML = "❌ Falha de conexão ao consultar rack.";
+    console.error(erro);
+
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </script>
