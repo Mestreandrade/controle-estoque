@@ -4752,6 +4752,46 @@ async function excluirRacksSelecionados(){
 }
 
 
+function abrirSaidaColetor(){
+
+  if(!itemColetorAtual){
+    alert("Nenhum produto carregado no coletor.");
+    return;
+  }
+
+  const resultado = document.getElementById("coletorResultado");
+
+  resultado.innerHTML += `
+    <div class="card-rack" style="border-left-color:#dc2626;">
+
+      <h3>📤 Saída do Produto</h3>
+
+      <p><strong>Produto:</strong> ${itemColetorAtual.codigo} - ${itemColetorAtual.nome}</p>
+      <p><strong>Saldo disponível:</strong> ${itemColetorAtual.quantidade}</p>
+
+      <input
+        type="number"
+        id="coletorQuantidadeSaida"
+        placeholder="Quantidade de saída"
+        min="1"
+        max="${itemColetorAtual.quantidade}"
+      >
+
+      <button class="btn-coletor-saida">
+        Confirmar Saída
+      </button>
+
+    </div>
+  `;
+
+  setTimeout(() => {
+    document.getElementById("coletorQuantidadeSaida").focus();
+  }, 200);
+}
+
+
+
+
 function dispositivoMobile(){
   return window.innerWidth <= 768;
 }
