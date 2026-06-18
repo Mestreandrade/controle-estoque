@@ -811,9 +811,16 @@ body.login-page{
 }
 
 
-
-
-
+.btn-coletor-saida{
+  width:100%;
+  margin-top:15px;
+  padding:18px;
+  border-radius:12px;
+  background:#dc2626;
+  color:white;
+  font-size:20px;
+  font-weight:bold;
+}
 
 
 
@@ -1744,38 +1751,6 @@ document.getElementById("descricaoLeitor").innerText =
 
 
 
-async function consultarRackColetor(){
-
-  const rack = document.getElementById("coletorRack").value.trim();
-  const resultado = document.getElementById("coletorResultado");
-
-  if(rack === ""){
-    resultado.innerHTML = "⚠️ Bipe ou digite um rack.";
-    return;
-  }
-
-  resultado.innerHTML = "🔎 Consultando rack...";
-
-  const resposta = await fetch("/estoque-rack/" + encodeURIComponent(rack));
-  const item = await resposta.json();
-
-  if(!item){
-    resultado.innerHTML = `
-      <strong>Rack livre ou não encontrado</strong><br>
-      ${rack}
-    `;
-    return;
-  }
-
-  resultado.innerHTML = `
-    <strong>Rack:</strong> ${rack}<br>
-    <strong>Produto:</strong> ${item.codigo} - ${item.nome}<br>
-    <strong>Lote:</strong> ${item.lote}<br>
-    <strong>Saldo:</strong> ${item.quantidade}<br>
-    <strong>Fabricação:</strong> ${formatarDataBR(item.validade || "")}
-  `;
-}
-
 /* BLOQUEAR CAMPOS NA SAÍDA */
 
 document.getElementById("leitorRack").readOnly = true;
@@ -1842,6 +1817,7 @@ let listaSaldo = [];
 let listaEntrada = [];
 let listaSaida = [];
 let listaUsuarios = [];
+let itemColetorAtual = null;
 
 let produtosCarregados = false;
 let racksCarregados = false;
@@ -4828,23 +4804,41 @@ async function consultarRackColetor(){
 
     const item = await resposta.json();
 
-    if(!item){
-      resultado.innerHTML = `
-  <div class="card-rack">
+  
 
-    <div class="status-livre">
-      🟢 RACK LIVRE
+  if(!item){
+
+  itemColetorAtual = null;
+
+  resultado.innerHTML = `
+    <div class="card-rack">
+
+      <div class="status-livre">
+        🟢 RACK LIVRE
+      </div>
+
+      <p>
+        <strong>Endereço:</strong><br>
+        ${rack}
+      </p>
+
     </div>
+  `;
 
-    <p>
-      <strong>Endereço:</strong><br>
-      ${rack}
-    </p>
+  return;
+}
 
-  </div>
-`;
-      return;
-    }
+
+itemColetorAtual = {
+  rack: rack,
+  codigo: item.codigo,
+  nome: item.nome,
+  lote: item.lote,
+  quantidade: item.quantidade,
+  validade: item.validade || ""
+};
+
+
 
     resultado.innerHTML = `
   <div class="card-produto">
@@ -4860,10 +4854,18 @@ async function consultarRackColetor(){
     <p><strong>Saldo:</strong> ${item.quantidade}</p>
 
     <p><strong>Fabricação:</strong>
-      ${formatarDataBR(item.validade || "")}
-    </p>
+  ${formatarDataBR(item.validade || "")}
+</p>
 
-  </div>
+<button class="btn-coletor-saida" onclick="abrirSaidaColetor()">
+  📤 Registrar Saída
+</button>
+
+</div>
+
+
+
+
 `;
 
 
