@@ -822,7 +822,16 @@ body.login-page{
   font-weight:bold;
 }
 
-
+.btn-coletor-transferencia{
+  width:100%;
+  margin-top:10px;
+  padding:18px;
+  border-radius:12px;
+  background:#2563eb;
+  color:white;
+  font-size:20px;
+  font-weight:bold;
+}
 
 
 
@@ -4799,6 +4808,13 @@ async function confirmarSaidaColetor(){
 
 
 
+function abrirTransferenciaColetor(){
+
+  alert(
+    "Transferência de endereço será a próxima etapa."
+  );
+
+}
 
 
 function abrirSaidaColetor(){
@@ -4949,6 +4965,11 @@ itemColetorAtual = {
 <button class="btn-coletor-saida" onclick="abrirSaidaColetor()">
   📤 Registrar Saída
 </button>
+
+<button class="btn-coletor-transferencia" onclick="abrirTransferenciaColetor()">
+  🔄 Transferir Endereço
+</button>
+
 
 </div>
 
