@@ -4810,12 +4810,48 @@ async function confirmarSaidaColetor(){
 
 function abrirTransferenciaColetor(){
 
-  alert(
-    "Transferência de endereço será a próxima etapa."
-  );
+  if(!itemColetorAtual){
+    alert("Nenhum produto carregado no coletor.");
+    return;
+  }
 
+  const resultado = document.getElementById("coletorResultado");
+
+  resultado.innerHTML += `
+    <div class="card-rack" style="border-left-color:#2563eb;">
+
+      <h3>🔄 Transferência de Endereço</h3>
+
+      <p><strong>Origem:</strong> ${itemColetorAtual.rack}</p>
+      <p><strong>Produto:</strong> ${itemColetorAtual.codigo} - ${itemColetorAtual.nome}</p>
+      <p><strong>Saldo disponível:</strong> ${itemColetorAtual.quantidade}</p>
+
+      <input
+        type="text"
+        id="coletorRackDestino"
+        placeholder="Bipe o rack destino"
+        autocomplete="off"
+      >
+
+      <input
+        type="number"
+        id="coletorQuantidadeTransferencia"
+        placeholder="Quantidade a transferir"
+        min="1"
+        max="${itemColetorAtual.quantidade}"
+      >
+
+      <button class="btn-coletor-transferencia">
+        Confirmar Transferência
+      </button>
+
+    </div>
+  `;
+
+  setTimeout(() => {
+    document.getElementById("coletorRackDestino").focus();
+  }, 200);
 }
-
 
 function abrirSaidaColetor(){
 
