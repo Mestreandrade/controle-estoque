@@ -4752,6 +4752,55 @@ async function excluirRacksSelecionados(){
 }
 
 
+async function confirmarSaidaColetor(){
+
+  if(!itemColetorAtual){
+    alert("Nenhum produto carregado.");
+    return;
+  }
+
+  const quantidade = Number(
+    document.getElementById("coletorQuantidadeSaida").value
+  );
+
+  if(!quantidade || quantidade <= 0){
+    alert("Informe uma quantidade válida.");
+    return;
+  }
+
+  if(quantidade > Number(itemColetorAtual.quantidade)){
+    alert("Quantidade maior que o saldo disponível.");
+    return;
+  }
+
+  if(!confirm("Confirmar saída de " + quantidade + " unidade(s)?")){
+    return;
+  }
+
+  const resposta = await fetch("/saida", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({
+      codigo: itemColetorAtual.codigo,
+      lote: itemColetorAtual.lote,
+      rack: itemColetorAtual.rack,
+      quantidade: quantidade
+    })
+  });
+
+  alert(await resposta.text());
+
+  itemColetorAtual = null;
+  document.getElementById("coletorRack").value = "";
+  document.getElementById("coletorResultado").innerHTML = "Bipe um rack para iniciar";
+  document.getElementById("coletorRack").focus();
+}
+
+
+
+
+
+
 function abrirSaidaColetor(){
 
   if(!itemColetorAtual){
@@ -4777,9 +4826,9 @@ function abrirSaidaColetor(){
         max="${itemColetorAtual.quantidade}"
       >
 
-      <button class="btn-coletor-saida">
-        Confirmar Saída
-      </button>
+      <button class="btn-coletor-saida" onclick="confirmarSaidaColetor()">
+  Confirmar Saída
+</button>
 
     </div>
   `;
