@@ -946,6 +946,140 @@ app.post("/saida-lote", adminOuOperador, (req, res) => {
 
 
 
+/* TRANSFERENCIA DE RACK COM LEITOR */
+
+app.post("/transferencia", adminOuOperador, (req, res) => {
+    const { codigo, lote, rackOrigem, rackDestino, quantidade } = req.body;
+    const usuario = req.headers.usuario || "Sistema";
+
+    if(!codigo || !lote || !rackOrigem || !rackDestino || !quantidade){
+        return res.send("Dados incompletos para transferência");
+    }
+
+    if(rackOrigem === rackDestino){
+        return res.send("Rack origem e destino não podem ser iguais");
+    }
+
+    db.get(
+        "SELECT * FROM racks WHERE endereco = ?",
+        [rackDestino],
+        (err, destinoCadastrado) => {
+
+            if(!destinoCadastrado){
+                return res.send("Rack destino não cadastrado");
+            }
+
+            db.get(
+                "SELECT * FROM estoque WHERE rack = ?",
+                [rackDestino],
+                (err, destinoOcupado) => {
+
+                    if(destinoOcupado){
+                        return res.send("Rack destino já está ocupado");
+                    }
+
+                    db.get(
+                        `
+                        SELECT estoque.*, produtos.id AS produto_id
+                        FROM estoque
+                        INNER JOIN produtos
+                        ON produtos.id = estoque.produto_id
+                        WHERE produtos.codigo = ?
+                        AND estoque.lote = ?
+                        AND estoque.rack = ?
+                        `,
+                        [codigo, lote, rackOrigem],
+                        (err, origem) => {
+
+                            if(err || !origem){
+                                return res.send("Estoque de origem não encontrado");
+                            }
+
+                            if(Number(origem.quantidade) < Number(quantidade)){
+                                return res.send("Quantidade maior que saldo da origem");
+                            }
+
+                            const novaQuantidadeOrigem =
+                                Number(origem.quantidade) - Number(quantidade);
+
+                            if(novaQuantidadeOrigem === 0){
+
+                                db.run(
+                                    "UPDATE estoque SET rack = ? WHERE id = ?",
+                                    [rackDestino, origem.id],
+                                    function(err){
+
+                                        if(err){
+                                            return res.send("Erro ao transferir estoque");
+                                        }
+
+                                        registrarMovimentacao(
+                                            origem.produto_id,
+                                            lote,
+                                            rackOrigem + " → " + rackDestino,
+                                            "TRANSFERÊNCIA",
+                                            quantidade,
+                                            usuario
+                                        );
+
+                                        return res.send("Transferência realizada com sucesso");
+                                    }
+                                );
+
+                            } else {
+
+                                db.serialize(() => {
+
+                                    db.run(
+                                        "UPDATE estoque SET quantidade = ? WHERE id = ?",
+                                        [novaQuantidadeOrigem, origem.id]
+                                    );
+
+                                    db.run(
+                                        `
+                                        INSERT INTO estoque
+                                        (produto_id, lote, rack, quantidade, validade)
+                                        VALUES (?, ?, ?, ?, ?)
+                                        `,
+                                        [
+                                            origem.produto_id,
+                                            lote,
+                                            rackDestino,
+                                            quantidade,
+                                            origem.validade || null
+                                        ],
+                                        function(err){
+
+                                            if(err){
+                                                return res.send("Erro ao criar estoque no destino");
+                                            }
+
+                                            registrarMovimentacao(
+                                                origem.produto_id,
+                                                lote,
+                                                rackOrigem + " → " + rackDestino,
+                                                "TRANSFERÊNCIA",
+                                                quantidade,
+                                                usuario
+                                            );
+
+                                            return res.send("Transferência parcial realizada com sucesso");
+                                        }
+                                    );
+
+                                });
+                            }
+                        }
+                    );
+                }
+            );
+        }
+    );
+});
+
+
+
+
 /* CONSULTAS */
 
 

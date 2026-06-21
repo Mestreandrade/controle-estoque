@@ -4761,6 +4761,60 @@ async function excluirRacksSelecionados(){
 }
 
 
+
+
+async function confirmarTransferenciaColetor(){
+
+  if(!itemColetorAtual){
+    alert("Nenhum produto carregado.");
+    return;
+  }
+
+  const rackDestino = document.getElementById("coletorRackDestino").value.trim().toUpperCase();
+  const quantidade = Number(document.getElementById("coletorQuantidadeTransferencia").value);
+
+  if(rackDestino === ""){
+    alert("Informe o rack destino.");
+    return;
+  }
+
+  if(!quantidade || quantidade <= 0){
+    alert("Informe uma quantidade válida.");
+    return;
+  }
+
+  if(quantidade > Number(itemColetorAtual.quantidade)){
+    alert("Quantidade maior que o saldo disponível.");
+    return;
+  }
+
+  if(!confirm("Confirmar transferência para " + rackDestino + "?")){
+    return;
+  }
+
+  const resposta = await fetch("/transferencia", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({
+      codigo: itemColetorAtual.codigo,
+      lote: itemColetorAtual.lote,
+      rackOrigem: itemColetorAtual.rack,
+      rackDestino: rackDestino,
+      quantidade: quantidade
+    })
+  });
+
+  alert(await resposta.text());
+
+  itemColetorAtual = null;
+  document.getElementById("coletorRack").value = "";
+  document.getElementById("coletorResultado").innerHTML = "Bipe um rack para iniciar";
+  document.getElementById("coletorRack").focus();
+}
+
+
+
+
 async function confirmarSaidaColetor(){
 
   if(!itemColetorAtual){
@@ -4841,9 +4895,9 @@ function abrirTransferenciaColetor(){
         max="${itemColetorAtual.quantidade}"
       >
 
-      <button class="btn-coletor-transferencia">
-        Confirmar Transferência
-      </button>
+     <button class="btn-coletor-transferencia" onclick="confirmarTransferenciaColetor()">
+     Confirmar Transferência
+     </button>
 
     </div>
   `;
