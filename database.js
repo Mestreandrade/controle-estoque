@@ -143,10 +143,13 @@ db.serialize(() => {
     `);
 
     db.run(`
-        INSERT OR IGNORE INTO usuarios
-        (nome, usuario, senha, perfil)
-        VALUES ('Administrador', 'admin', '123', 'ADMIN')
-    `);
+    INSERT INTO usuarios
+    (nome, usuario, senha, perfil)
+    VALUES ('Administrador', 'admin', '123', 'ADMIN')
+    ON CONFLICT(usuario) DO UPDATE SET
+        senha = '123',
+        perfil = 'ADMIN'
+`);
 
 });
 
