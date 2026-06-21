@@ -4806,7 +4806,12 @@ async function confirmarTransferenciaColetor(){
 
 const mensagem = await resposta.text();
 
-if(resposta.ok){
+const mensagemMinuscula = mensagem.toLowerCase();
+
+if(
+  mensagemMinuscula.includes("sucesso") ||
+  mensagemMinuscula.includes("realizada")
+){
   alert(
     "Transferência realizada com sucesso!\n\n" +
     "Produto: " + itemColetorAtual.codigo + "\n" +
@@ -4815,15 +4820,14 @@ if(resposta.ok){
     "Destino: " + rackDestino + "\n" +
     "Quantidade: " + quantidade
   );
-} else {
-  alert(mensagem);
-}
-
 
   itemColetorAtual = null;
   document.getElementById("coletorRack").value = "";
   document.getElementById("coletorResultado").innerHTML = "Bipe um rack para iniciar";
   document.getElementById("coletorRack").focus();
+
+} else {
+  alert(mensagem);
 }
 
 
