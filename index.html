@@ -4804,7 +4804,21 @@ async function confirmarTransferenciaColetor(){
     })
   });
 
-  alert(await resposta.text());
+const mensagem = await resposta.text();
+
+if(resposta.ok){
+  alert(
+    "Transferência realizada com sucesso!\n\n" +
+    "Produto: " + itemColetorAtual.codigo + "\n" +
+    "Lote: " + itemColetorAtual.lote + "\n" +
+    "Origem: " + itemColetorAtual.rack + "\n" +
+    "Destino: " + rackDestino + "\n" +
+    "Quantidade: " + quantidade
+  );
+} else {
+  alert(mensagem);
+}
+
 
   itemColetorAtual = null;
   document.getElementById("coletorRack").value = "";
