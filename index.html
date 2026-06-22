@@ -2182,6 +2182,7 @@ let listaEntrada = [];
 let listaSaida = [];
 let listaUsuarios = [];
 let itemColetorAtual = null;
+let moduloColetorAtual = "";
 
 let produtosCarregados = false;
 let racksCarregados = false;
@@ -5745,6 +5746,83 @@ function abrirSaidaColetor(){
     document.getElementById("coletorQuantidadeSaida").focus();
   }, 200);
 }
+
+
+
+
+
+
+function abrirModuloColetor(modulo){
+
+  moduloColetorAtual = modulo;
+
+  document.getElementById("menuColetor").style.display = "none";
+  document.getElementById("areaModuloColetor").style.display = "block";
+
+  const titulo = document.getElementById("tituloModuloColetor");
+  const resultado = document.getElementById("coletorResultado");
+
+  if(modulo === "entrada"){
+    titulo.innerText = "Entrada de Estoque";
+    resultado.innerHTML = "Bipe o rack destino para iniciar a entrada.";
+  }
+
+  if(modulo === "saida"){
+    titulo.innerText = "Saída de Estoque";
+    resultado.innerHTML = "Bipe o rack origem para registrar saída.";
+  }
+
+  if(modulo === "transferencia"){
+    titulo.innerText = "Transferência Interna";
+    resultado.innerHTML = "Bipe o rack origem para transferir.";
+  }
+
+  if(modulo === "consulta"){
+    titulo.innerText = "Consulta de Rack";
+    resultado.innerHTML = "Bipe um rack para consultar produto, lote e saldo.";
+  }
+
+  document.getElementById("coletorRack").value = "";
+
+  setTimeout(() => {
+    document.getElementById("coletorRack").focus();
+  }, 200);
+}
+
+
+function voltarMenuColetor(){
+
+  moduloColetorAtual = "";
+
+  document.getElementById("areaModuloColetor").style.display = "none";
+  document.getElementById("menuColetor").style.display = "flex";
+
+  document.getElementById("coletorRack").value = "";
+  document.getElementById("coletorResultado").innerHTML = "Bipe um rack para iniciar";
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
