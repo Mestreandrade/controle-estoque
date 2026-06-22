@@ -971,6 +971,37 @@ body.login-page{
   border:1px solid #fde68a;
 }
 
+.btn-camera-coletor{
+  width:100%;
+  margin-top:4px;
+  margin-bottom:10px;
+  padding:16px;
+  border-radius:14px;
+  background:#0f766e;
+  color:white;
+  font-size:17px;
+  font-weight:800;
+  box-shadow:0 5px 14px rgba(0,0,0,0.18);
+}
+
+.btn-camera-coletor:active{
+  transform:scale(0.98);
+}
+
+.camera-coletor{
+  width:100%;
+  margin-top:10px;
+  margin-bottom:12px;
+  border-radius:14px;
+  overflow:hidden;
+  background:#000;
+}
+
+
+
+
+
+
 
 
 
@@ -1313,6 +1344,26 @@ body.login-page{
       oninput="consultarRackColetorAutomatico()"
       onkeydown="if(event.key === 'Enter'){ consultarRackColetor(); }"
     >
+
+
+<button
+  class="btn-camera-coletor"
+  onclick="abrirCameraColetorRack()"
+>
+  📷 Ler QR / Código
+</button>
+
+<div
+  id="cameraColetorRack"
+  class="camera-coletor"
+  style="display:none;"
+></div>
+
+
+
+
+
+
 
     <button
       class="btn-coletor-transferencia"
@@ -5836,6 +5887,70 @@ console.log(
     ? "MODO CELULAR"
     : "MODO DESKTOP"
 );
+
+
+
+
+let leitorCameraColetorRack = null;
+
+function abrirCameraColetorRack(){
+
+  const areaCamera = document.getElementById("cameraColetorRack");
+
+  if(!areaCamera){
+    alert("Área da câmera não encontrada.");
+    return;
+  }
+
+  areaCamera.style.display = "block";
+
+  if(leitorCameraColetorRack){
+    leitorCameraColetorRack.clear();
+  }
+
+  leitorCameraColetorRack = new Html5Qrcode("cameraColetorRack");
+
+  leitorCameraColetorRack.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: 250
+    },
+    function(resultado){
+
+      document.getElementById("coletorRack").value = resultado;
+
+      leitorCameraColetorRack.stop().then(() => {
+        areaCamera.style.display = "none";
+        consultarRackColetor();
+      });
+
+    },
+    function(erro){
+      // leitura em andamento
+    }
+  ).catch(function(err){
+    alert("Não foi possível abrir a câmera. Verifique a permissão do navegador.");
+    console.error(err);
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
