@@ -898,7 +898,70 @@ body.login-page{
 }
 
 
+.coletor-status-topo{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
 
+.badge-ocupado{
+  background:#dbeafe;
+  color:#1d4ed8;
+  font-size:12px;
+  font-weight:800;
+  padding:6px 10px;
+  border-radius:999px;
+  letter-spacing:0.5px;
+}
+
+.coletor-rack{
+  font-size:14px;
+  font-weight:800;
+  color:#0f172a;
+  background:#f1f5f9;
+  padding:6px 10px;
+  border-radius:999px;
+}
+
+.coletor-produto h3{
+  font-size:19px;
+  margin-bottom:14px;
+  color:#0f172a;
+}
+
+.coletor-grid-info{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.coletor-grid-info div{
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  border-radius:12px;
+  padding:12px;
+}
+
+.coletor-grid-info span{
+  display:block;
+  font-size:11px;
+  color:#64748b;
+  text-transform:uppercase;
+  font-weight:700;
+  margin-bottom:5px;
+}
+
+.coletor-grid-info strong{
+  display:block;
+  font-size:17px;
+  color:#0f172a;
+}
+
+.coletor-acoes{
+  margin-top:14px;
+}
 
 
 
@@ -5401,36 +5464,48 @@ itemColetorAtual = {
 
 
     resultado.innerHTML = `
-  <div class="card-produto">
+  <div class="card-produto coletor-produto">
 
-    <h3>📦 ${item.nome}</h3>
+    <div class="coletor-status-topo">
+      <span class="badge-ocupado">OCUPADO</span>
+      <span class="coletor-rack">${rack}</span>
+    </div>
 
-    <p><strong>Código:</strong> ${item.codigo}</p>
+    <h3>${item.nome}</h3>
 
-    <p><strong>Rack:</strong> ${rack}</p>
+    <div class="coletor-grid-info">
+      <div>
+        <span>Código</span>
+        <strong>${item.codigo}</strong>
+      </div>
 
-    <p><strong>Lote:</strong> ${item.lote}</p>
+      <div>
+        <span>Lote</span>
+        <strong>${item.lote}</strong>
+      </div>
 
-    <p><strong>Saldo:</strong> ${item.quantidade}</p>
+      <div>
+        <span>Saldo</span>
+        <strong>${item.quantidade}</strong>
+      </div>
 
-    <p><strong>Fabricação:</strong>
-  ${formatarDataBR(item.validade || "")}
-</p>
+      <div>
+        <span>Fabricação</span>
+        <strong>${formatarDataBR(item.validade || "")}</strong>
+      </div>
+    </div>
 
-<button class="btn-coletor-saida" onclick="abrirSaidaColetor()">
-  📤 Registrar Saída
-</button>
+    <div class="coletor-acoes">
+      <button class="btn-coletor-saida" onclick="abrirSaidaColetor()">
+        Registrar Saída
+      </button>
 
-<button class="btn-coletor-transferencia" onclick="abrirTransferenciaColetor()">
-  🔄 Transferir Endereço
-</button>
+      <button class="btn-coletor-transferencia" onclick="abrirTransferenciaColetor()">
+        Transferir Endereço
+      </button>
+    </div>
 
-
-</div>
-
-
-
-
+  </div>
 `;
 
 
