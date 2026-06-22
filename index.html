@@ -700,28 +700,78 @@ body.login-page{
 
 
 
-/* MODO COLETOR */
+/* MODO COLETOR PROFISSIONAL */
 
 #modoColetor{
-  padding:16px;
+  min-height:100vh;
+  padding:14px;
+  background:#0f172a;
+  box-sizing:border-box;
 }
 
 #modoColetor h2{
   text-align:center;
-  margin-bottom:18px;
+  margin:0 0 14px 0;
+  padding:14px;
+  color:white;
+  font-size:20px;
+  font-weight:700;
+  background:#111827;
+  border-radius:14px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.25);
 }
 
-.btn-coletor{
-  width:100%;
-  display:block;
-  padding:22px;
-  margin:12px 0;
-  font-size:22px;
-  font-weight:bold;
-  border-radius:14px;
-  background:#2563eb;
-  color:white;
+.coletor-card{
+  background:#ffffff;
+  border-radius:18px;
+  padding:18px;
+  margin-top:14px;
+  box-shadow:0 8px 24px rgba(0,0,0,0.25);
 }
+
+.coletor-card label{
+  display:block;
+  font-size:13px;
+  font-weight:700;
+  color:#475569;
+  margin-bottom:8px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.coletor-card input{
+  width:100%;
+  font-size:22px;
+  padding:18px;
+  margin-bottom:14px;
+  box-sizing:border-box;
+  border:2px solid #cbd5e1;
+  border-radius:14px;
+  outline:none;
+  font-weight:bold;
+  text-transform:uppercase;
+}
+
+.coletor-card input:focus{
+  border-color:#2563eb;
+  box-shadow:0 0 0 3px rgba(37,99,235,0.18);
+}
+
+.coletor-resultado{
+  margin-top:14px;
+  padding:14px;
+  border-radius:14px;
+  background:#f8fafc;
+  min-height:150px;
+  border:1px solid #e2e8f0;
+  color:#334155;
+  font-size:16px;
+}
+
+
+
+
+
 
 /* COLETOR MOBILE */
 
@@ -756,24 +806,34 @@ body.login-page{
   min-height:120px;
 }
 
-.card-rack{
+.card-rack,
+.card-produto{
   background:white;
-  border-radius:10px;
-  padding:12px;
-  margin-top:10px;
-  border-left:5px solid #16a34a;
+  border-radius:16px;
+  padding:16px;
+  margin-top:12px;
+  border-left:6px solid #2563eb;
+  box-shadow:0 4px 14px rgba(15,23,42,0.12);
 }
 
-.card-rack h3{
-  margin:0 0 10px 0;
+.card-rack h3,
+.card-produto h3{
+  margin:0 0 14px 0;
   font-size:20px;
+  color:#0f172a;
 }
 
-.card-rack p{
-  margin:6px 0;
+.card-rack p,
+.card-produto p{
+  margin:8px 0;
   font-size:16px;
+  color:#334155;
 }
 
+.card-rack strong,
+.card-produto strong{
+  color:#0f172a;
+}
 .status-livre{
   color:#15803d;
   font-weight:bold;
@@ -811,28 +871,31 @@ body.login-page{
 }
 
 
-.btn-coletor-saida{
+.btn-coletor-saida,
+.btn-coletor-transferencia{
   width:100%;
-  margin-top:15px;
+  margin-top:12px;
   padding:18px;
-  border-radius:12px;
-  background:#dc2626;
+  border-radius:14px;
   color:white;
-  font-size:20px;
-  font-weight:bold;
+  font-size:18px;
+  font-weight:800;
+  letter-spacing:0.3px;
+  box-shadow:0 5px 14px rgba(0,0,0,0.18);
+}
+
+.btn-coletor-saida{
+  background:#dc2626;
 }
 
 .btn-coletor-transferencia{
-  width:100%;
-  margin-top:10px;
-  padding:18px;
-  border-radius:12px;
   background:#2563eb;
-  color:white;
-  font-size:20px;
-  font-weight:bold;
 }
 
+.btn-coletor-saida:active,
+.btn-coletor-transferencia:active{
+  transform:scale(0.98);
+}
 
 
 
