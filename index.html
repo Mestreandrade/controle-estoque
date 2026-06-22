@@ -988,15 +988,59 @@ body.login-page{
   transform:scale(0.98);
 }
 
-.camera-coletor{
-  width:100%;
-  margin-top:10px;
-  margin-bottom:12px;
-  border-radius:14px;
-  overflow:hidden;
+.overlay-camera-coletor{
+  position:fixed;
+  inset:0;
   background:#000;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  padding:0;
 }
 
+.topo-camera-coletor{
+  height:58px;
+  background:#0f172a;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px;
+  box-sizing:border-box;
+  font-size:16px;
+  font-weight:800;
+}
+
+.topo-camera-coletor button{
+  background:#dc2626;
+  color:white;
+  border:none;
+  border-radius:8px;
+  padding:9px 12px;
+  font-weight:800;
+}
+
+.camera-coletor{
+  flex:1;
+  width:100%;
+  background:#000;
+  overflow:hidden;
+}
+
+.camera-coletor video{
+  width:100% !important;
+  height:100% !important;
+  object-fit:cover !important;
+}
+
+.rodape-camera-coletor{
+  background:#0f172a;
+  color:white;
+  padding:14px;
+  text-align:center;
+  font-size:14px;
+  font-weight:700;
+}
 
 
 
@@ -1354,12 +1398,26 @@ body.login-page{
 </button>
 
 <div
-  id="cameraColetorRack"
-  class="camera-coletor"
+  id="overlayCameraColetor"
+  class="overlay-camera-coletor"
   style="display:none;"
-></div>
+>
 
+  <div class="topo-camera-coletor">
+    <strong>Leitura do Rack</strong>
 
+    <button onclick="fecharCameraColetorRack()">
+      Fechar
+    </button>
+  </div>
+
+  <div id="cameraColetorRack" class="camera-coletor"></div>
+
+  <div class="rodape-camera-coletor">
+    Aponte a câmera para o QR Code ou código de barras do rack
+  </div>
+
+</div>
 
 
 
@@ -5895,14 +5953,15 @@ let leitorCameraColetorRack = null;
 
 function abrirCameraColetorRack(){
 
+  const overlay = document.getElementById("overlayCameraColetor");
   const areaCamera = document.getElementById("cameraColetorRack");
 
-  if(!areaCamera){
+  if(!overlay || !areaCamera){
     alert("Área da câmera não encontrada.");
     return;
   }
 
-  areaCamera.style.display = "block";
+  overlay.style.display = "flex";
 
   if(leitorCameraColetorRack){
     leitorCameraColetorRack.clear();
@@ -5914,14 +5973,17 @@ function abrirCameraColetorRack(){
     { facingMode: "environment" },
     {
       fps: 10,
-      qrbox: 250
+      qrbox: {
+        width: 280,
+        height: 280
+      }
     },
     function(resultado){
 
       document.getElementById("coletorRack").value = resultado;
 
       leitorCameraColetorRack.stop().then(() => {
-        areaCamera.style.display = "none";
+        overlay.style.display = "none";
         consultarRackColetor();
       });
 
@@ -5930,11 +5992,40 @@ function abrirCameraColetorRack(){
       // leitura em andamento
     }
   ).catch(function(err){
+    overlay.style.display = "none";
     alert("Não foi possível abrir a câmera. Verifique a permissão do navegador.");
     console.error(err);
   });
 }
 
+
+
+
+function fecharCameraColetorRack(){
+
+  const overlay = document.getElementById("overlayCameraColetor");
+
+  if(leitorCameraColetorRack){
+    leitorCameraColetorRack.stop()
+      .then(() => {
+        leitorCameraColetorRack.clear();
+        leitorCameraColetorRack = null;
+
+        if(overlay){
+          overlay.style.display = "none";
+        }
+      })
+      .catch(() => {
+        if(overlay){
+          overlay.style.display = "none";
+        }
+      });
+  } else {
+    if(overlay){
+      overlay.style.display = "none";
+    }
+  }
+}
 
 
 
