@@ -770,9 +770,6 @@ body.login-page{
 
 
 
-
-
-
 /* COLETOR MOBILE */
 
 .coletor-card{
@@ -969,6 +966,146 @@ body.login-page{
 
 
 
+/* AJUSTE VISUAL DO MENU DO COLETOR - ESTILO MERCADO */
+
+#modoColetor{
+  min-height:100vh !important;
+  padding:14px !important;
+  background:#eef2f7 !important;
+  box-sizing:border-box !important;
+}
+
+#modoColetor h2{
+  margin:0 !important;
+  padding:0 !important;
+  background:none !important;
+  box-shadow:none !important;
+  color:inherit !important;
+  border-radius:0 !important;
+  text-align:left !important;
+}
+
+.coletor-topo-app{
+  background:linear-gradient(180deg,#10b4d4,#0d87b8);
+  border-radius:0 0 18px 18px;
+  padding:18px 16px 16px 16px;
+  margin:-14px -14px 18px -14px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.25);
+}
+
+.coletor-logo-texto{
+  color:white;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:0.8px;
+}
+
+.coletor-subtitulo{
+  color:#e0f2fe;
+  font-size:13px;
+  font-weight:600;
+  margin-top:4px;
+}
+
+.coletor-topo-status{
+  margin-top:10px;
+}
+
+.coletor-status-online{
+  display:inline-block;
+  background:rgba(255,255,255,0.22);
+  color:white;
+  padding:6px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.5px;
+}
+
+.menu-coletor-mercado{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.opcao-coletor-mercado{
+  width:100%;
+  min-height:88px;
+  border:none;
+  border-radius:8px;
+  display:flex;
+  align-items:center;
+  padding:0;
+  overflow:hidden;
+  color:white;
+  box-shadow:0 6px 16px rgba(0,0,0,0.22);
+}
+
+.faixa-icone{
+  width:78px;
+  min-width:78px;
+  height:88px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:28px;
+  background:rgba(255,255,255,0.18);
+}
+
+.faixa-texto{
+  flex:1;
+  padding:14px 16px;
+  text-align:left;
+}
+
+.faixa-texto strong{
+  display:block;
+  font-size:22px;
+  font-weight:800;
+  line-height:1.1;
+  margin-bottom:6px;
+  color:white;
+}
+
+.faixa-texto small{
+  display:block;
+  font-size:12px;
+  color:rgba(255,255,255,0.92);
+  line-height:1.3;
+}
+
+.opcao-azul{
+  background:linear-gradient(90deg,#5a8fc5,#4a7fb6);
+}
+
+.opcao-verde{
+  background:linear-gradient(90deg,#46b8b2,#33a39d);
+}
+
+.opcao-vermelha{
+  background:linear-gradient(90deg,#ea8080,#df6c6c);
+}
+
+.opcao-cinza{
+  background:linear-gradient(90deg,#94a3a8,#7b8b91);
+}
+
+.opcao-coletor-mercado:active{
+  transform:scale(0.985);
+}
+
+.btn-voltar-coletor{
+  background:#e5e7eb;
+  color:#111827;
+  border:none;
+  padding:10px 14px;
+  border-radius:10px;
+  font-weight:800;
+  margin-bottom:12px;
+}
+
+
+
 
 
 
@@ -1095,39 +1232,49 @@ body.login-page{
 
 <div id="modoColetor" style="display:none;">
 
-  <div class="coletor-header">
-    <div>
-      <h2>MONT STOCK</h2>
-      <p>Coletor Operacional</p>
+  <div class="coletor-topo-app">
+    <div class="coletor-topo-marca">
+      <div class="coletor-logo-texto">MONT STOCK</div>
+      <div class="coletor-subtitulo">Coletor Operacional</div>
     </div>
 
-    <span class="coletor-user">ONLINE</span>
+    <div class="coletor-topo-status">
+      <span class="coletor-status-online">ONLINE</span>
+    </div>
   </div>
 
-  <div id="menuColetor" class="menu-coletor-app">
+  <div id="menuColetor" class="menu-coletor-mercado">
 
-    <button class="opcao-coletor opcao-entrada" onclick="abrirModuloColetor('entrada')">
-      <span>⬇️</span>
-      <strong>Entrada</strong>
-      <small>Recebimento e armazenagem</small>
+    <button class="opcao-coletor-mercado opcao-azul" onclick="abrirModuloColetor('entrada')">
+      <div class="faixa-icone">⬇️</div>
+      <div class="faixa-texto">
+        <strong>Entrada</strong>
+        <small>Recebimento e armazenagem</small>
+      </div>
     </button>
 
-    <button class="opcao-coletor opcao-saida" onclick="abrirModuloColetor('saida')">
-      <span>⬆️</span>
-      <strong>Saída</strong>
-      <small>Separação e baixa de estoque</small>
+    <button class="opcao-coletor-mercado opcao-vermelha" onclick="abrirModuloColetor('saida')">
+      <div class="faixa-icone">⬆️</div>
+      <div class="faixa-texto">
+        <strong>Saída</strong>
+        <small>Separação e baixa de estoque</small>
+      </div>
     </button>
 
-    <button class="opcao-coletor opcao-transferencia" onclick="abrirModuloColetor('transferencia')">
-      <span>🔄</span>
-      <strong>Transferência</strong>
-      <small>Movimentação interna</small>
+    <button class="opcao-coletor-mercado opcao-verde" onclick="abrirModuloColetor('transferencia')">
+      <div class="faixa-icone">🔄</div>
+      <div class="faixa-texto">
+        <strong>Transferência</strong>
+        <small>Movimentação interna</small>
+      </div>
     </button>
 
-    <button class="opcao-coletor opcao-consulta" onclick="abrirModuloColetor('consulta')">
-      <span>🔎</span>
-      <strong>Consulta Rack</strong>
-      <small>Produto, lote e saldo por endereço</small>
+    <button class="opcao-coletor-mercado opcao-cinza" onclick="abrirModuloColetor('consulta')">
+      <div class="faixa-icone">🔎</div>
+      <div class="faixa-texto">
+        <strong>Consulta Rack</strong>
+        <small>Produto, lote e saldo por endereço</small>
+      </div>
     </button>
 
   </div>
@@ -1167,8 +1314,6 @@ body.login-page{
   </div>
 
 </div>
-
-
 
 
 <section id="produtos" class="tela ativa">
