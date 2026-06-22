@@ -5670,18 +5670,30 @@ function abrirEntradaColetor(rack){
       <p><strong>Rack destino:</strong> ${rack}</p>
 
       <input
-        type="text"
-        id="coletorEntradaCodigo"
-        placeholder="Código do produto"
-        autocomplete="off"
-      >
+  type="text"
+  id="coletorEntradaCodigo"
+  placeholder="Código do produto"
+  autocomplete="off"
+>
+
+<button class="btn-camera-coletor" onclick="abrirCameraColetorCampo('coletorEntradaCodigo')">
+  📷 Ler Produto
+</button>
+
+
 
       <input
-        type="text"
-        id="coletorEntradaLote"
-        placeholder="Lote"
-        autocomplete="off"
-      >
+  type="text"
+  id="coletorEntradaLote"
+  placeholder="Lote"
+  autocomplete="off"
+>
+
+<button class="btn-camera-coletor" onclick="abrirCameraColetorCampo('coletorEntradaLote')">
+  📷 Ler Lote
+</button>
+
+
 
       <input
         type="number"
@@ -6020,12 +6032,101 @@ function fecharCameraColetorRack(){
           overlay.style.display = "none";
         }
       });
-  } else {
-    if(overlay){
-      overlay.style.display = "none";
-    }
+
+    return;
+  }
+
+  if(leitorCameraColetorCampo){
+    leitorCameraColetorCampo.stop()
+      .then(() => {
+        leitorCameraColetorCampo.clear();
+        leitorCameraColetorCampo = null;
+
+        if(overlay){
+          overlay.style.display = "none";
+        }
+      })
+      .catch(() => {
+        if(overlay){
+          overlay.style.display = "none";
+        }
+      });
+
+    return;
+  }
+
+  if(overlay){
+    overlay.style.display = "none";
   }
 }
+
+
+
+let leitorCameraColetorCampo = null;
+let campoDestinoCameraColetor = "";
+
+function abrirCameraColetorCampo(campoDestino){
+
+  campoDestinoCameraColetor = campoDestino;
+
+  const overlay = document.getElementById("overlayCameraColetor");
+  const areaCamera = document.getElementById("cameraColetorRack");
+
+  if(!overlay || !areaCamera){
+    alert("Área da câmera não encontrada.");
+    return;
+  }
+
+  overlay.style.display = "flex";
+
+  if(leitorCameraColetorCampo){
+    leitorCameraColetorCampo.clear();
+  }
+
+  leitorCameraColetorCampo = new Html5Qrcode("cameraColetorRack");
+
+  leitorCameraColetorCampo.start(
+    { facingMode: "environment" },
+    {
+      fps: 10,
+      qrbox: {
+        width: 280,
+        height: 280
+      }
+    },
+    function(resultado){
+
+      const campo = document.getElementById(campoDestinoCameraColetor);
+
+      if(campo){
+        campo.value = resultado;
+      }
+
+      leitorCameraColetorCampo.stop().then(() => {
+        overlay.style.display = "none";
+        leitorCameraColetorCampo.clear();
+        leitorCameraColetorCampo = null;
+
+        if(campoDestinoCameraColetor === "coletorEntradaCodigo"){
+          document.getElementById("coletorEntradaLote").focus();
+        }
+
+        if(campoDestinoCameraColetor === "coletorEntradaLote"){
+          document.getElementById("coletorEntradaQuantidade").focus();
+        }
+      });
+
+    },
+    function(erro){
+      // leitura em andamento
+    }
+  ).catch(function(err){
+    overlay.style.display = "none";
+    alert("Não foi possível abrir a câmera. Verifique a permissão do navegador.");
+    console.error(err);
+  });
+}
+
 
 
 
