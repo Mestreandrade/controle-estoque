@@ -960,6 +960,20 @@ body.login-page{
   margin-top:14px;
 }
 
+.aviso-coletor{
+  margin-top:14px;
+  padding:14px;
+  background:#fef3c7;
+  color:#92400e;
+  border-radius:12px;
+  font-size:14px;
+  font-weight:700;
+  border:1px solid #fde68a;
+}
+
+
+
+
 
 
 
@@ -5528,6 +5542,173 @@ function abrirTransferenciaColetor(){
   }, 200);
 }
 
+
+
+
+
+
+
+function abrirEntradaColetor(rack){
+
+  const resultado = document.getElementById("coletorResultado");
+
+  resultado.innerHTML += `
+    <div class="card-rack" style="border-left-color:#2563eb;">
+
+      <h3>⬇️ Entrada no Rack</h3>
+
+      <p><strong>Rack destino:</strong> ${rack}</p>
+
+      <input
+        type="text"
+        id="coletorEntradaCodigo"
+        placeholder="Código do produto"
+        autocomplete="off"
+      >
+
+      <input
+        type="text"
+        id="coletorEntradaLote"
+        placeholder="Lote"
+        autocomplete="off"
+      >
+
+      <input
+        type="number"
+        id="coletorEntradaQuantidade"
+        placeholder="Quantidade"
+        min="1"
+      >
+
+      <label>Fabricação</label>
+      <input
+        type="date"
+        id="coletorEntradaValidade"
+      >
+
+      <button class="btn-coletor-transferencia" onclick="confirmarEntradaColetor('${rack}')">
+        Confirmar Entrada
+      </button>
+
+    </div>
+  `;
+
+  setTimeout(() => {
+    document.getElementById("coletorEntradaCodigo").focus();
+  }, 200);
+}
+
+
+
+async function confirmarEntradaColetor(rack){
+
+  const codigo = document.getElementById("coletorEntradaCodigo").value.trim();
+  const lote = document.getElementById("coletorEntradaLote").value.trim();
+  const quantidade = Number(document.getElementById("coletorEntradaQuantidade").value);
+  const validade = document.getElementById("coletorEntradaValidade").value;
+
+  if(codigo === ""){
+    alert("Informe o código do produto.");
+    return;
+  }
+
+  if(lote === ""){
+    alert("Informe o lote.");
+    return;
+  }
+
+  if(!quantidade || quantidade <= 0){
+    alert("Informe uma quantidade válida.");
+    return;
+  }
+
+  const produtoResp = await fetch("/produtos/" + encodeURIComponent(codigo));
+  const produto = await produtoResp.json();
+
+  if(!produto){
+    alert("Produto não encontrado.");
+    return;
+  }
+
+  if(!confirm(
+    "Confirmar entrada?\n\n" +
+    "Produto: " + codigo + " - " + produto.nome + "\n" +
+    "Lote: " + lote + "\n" +
+    "Rack: " + rack + "\n" +
+    "Quantidade: " + quantidade
+  )){
+    return;
+  }
+
+  const resposta = await fetch("/entrada", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({
+      codigo: codigo,
+      lote: lote,
+      rack: rack,
+      quantidade: quantidade,
+      validade: validade || ""
+    })
+  });
+
+  const mensagem = await resposta.text();
+  const texto = mensagem.toLowerCase();
+
+  if(
+    texto.includes("sucesso") ||
+    texto.includes("realizada") ||
+    texto.includes("adicionada")
+  ){
+    alert(
+      "Entrada realizada com sucesso!\n\n" +
+      "Produto: " + codigo + "\n" +
+      "Lote: " + lote + "\n" +
+      "Rack: " + rack + "\n" +
+      "Quantidade: " + quantidade
+    );
+
+    itemColetorAtual = null;
+
+    document.getElementById("coletorRack").value = "";
+    document.getElementById("coletorResultado").innerHTML =
+      "Bipe o próximo rack para continuar.";
+
+    estoqueCarregado = false;
+    racksCarregados = false;
+    historicoCarregado = false;
+    listaMapaEntrada = [];
+
+    carregarEstoque();
+    carregarMovimentacoes();
+    carregarRacks();
+
+    document.getElementById("coletorRack").focus();
+
+  } else {
+    alert(mensagem);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function abrirSaidaColetor(){
 
   if(!itemColetorAtual){
@@ -5626,6 +5807,32 @@ async function consultarRackColetor(){
 
   itemColetorAtual = null;
 
+  let acaoRackLivre = "";
+
+  if(moduloColetorAtual === "entrada"){
+    acaoRackLivre = `
+      <button class="btn-coletor-transferencia" onclick="abrirEntradaColetor('${rack}')">
+        Registrar Entrada neste Rack
+      </button>
+    `;
+  }
+
+  if(moduloColetorAtual === "saida"){
+    acaoRackLivre = `
+      <div class="aviso-coletor">
+        Este rack está livre. Não existe saldo para saída.
+      </div>
+    `;
+  }
+
+  if(moduloColetorAtual === "transferencia"){
+    acaoRackLivre = `
+      <div class="aviso-coletor">
+        Este rack está livre. Não existe produto para transferir.
+      </div>
+    `;
+  }
+
   resultado.innerHTML = `
     <div class="card-rack">
 
@@ -5637,6 +5844,8 @@ async function consultarRackColetor(){
         <strong>Endereço:</strong><br>
         ${rack}
       </p>
+
+      ${acaoRackLivre}
 
     </div>
   `;
@@ -5688,15 +5897,50 @@ itemColetorAtual = {
       </div>
     </div>
 
-    <div class="coletor-acoes">
+<div class="coletor-acoes">
+  ${
+    moduloColetorAtual === "saida"
+    ? `
       <button class="btn-coletor-saida" onclick="abrirSaidaColetor()">
         Registrar Saída
       </button>
+    `
+    : ""
+  }
 
+  ${
+    moduloColetorAtual === "transferencia"
+    ? `
       <button class="btn-coletor-transferencia" onclick="abrirTransferenciaColetor()">
         Transferir Endereço
       </button>
-    </div>
+    `
+    : ""
+  }
+
+  ${
+    moduloColetorAtual === "entrada"
+    ? `
+      <div class="aviso-coletor">
+        Este rack já está ocupado. Para entrada, escolha um rack livre.
+      </div>
+    `
+    : ""
+  }
+
+  ${
+    moduloColetorAtual === "consulta"
+    ? `
+      <div class="aviso-coletor">
+        Consulta realizada. Nenhuma ação operacional selecionada.
+      </div>
+    `
+    : ""
+  }
+</div>
+
+
+
 
   </div>
 `;
