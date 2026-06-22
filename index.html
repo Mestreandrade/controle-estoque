@@ -4967,10 +4967,15 @@ async function buscarRackTransferencia(){
       >
 
       <input
-        type="text"
-        id="transferenciaRackDestino"
-        placeholder="Rack destino"
-      >
+  type="text"
+  id="transferenciaRackDestino"
+  placeholder="Rack destino"
+  onblur="consultarRackDestinoTransferencia()"
+>
+
+<div id="statusRackDestinoTransferencia" style="margin-top:10px;"></div>
+
+
 
       <input
         type="number"
@@ -5089,6 +5094,55 @@ async function confirmarTransferenciaDesktop(){
     alert(mensagem);
   }
 }
+
+
+
+
+
+
+
+async function consultarRackDestinoTransferencia(){
+
+  const rackDestino = document
+    .getElementById("transferenciaRackDestino")
+    .value
+    .trim()
+    .toUpperCase();
+
+  const area = document.getElementById("statusRackDestinoTransferencia");
+
+  if(rackDestino === ""){
+    area.innerHTML = "";
+    return;
+  }
+
+  area.innerHTML = "🔎 Consultando rack destino...";
+
+  const resposta = await fetch("/estoque-rack/" + encodeURIComponent(rackDestino));
+  const item = await resposta.json();
+
+  if(!item){
+    area.innerHTML = `
+      <div class="card-rack">
+        <div class="status-livre">🟢 RACK LIVRE</div>
+        <p><strong>Destino:</strong> ${rackDestino}</p>
+      </div>
+    `;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="card-rack" style="border-left-color:#dc2626;">
+      <div class="status-ocupado">🔴 RACK OCUPADO</div>
+      <p><strong>Destino:</strong> ${rackDestino}</p>
+      <p><strong>Produto:</strong> ${item.codigo} - ${item.nome}</p>
+      <p><strong>Lote:</strong> ${item.lote}</p>
+      <p><strong>Saldo:</strong> ${item.quantidade}</p>
+    </div>
+  `;
+}
+
+
 
 
 
