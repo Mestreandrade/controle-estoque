@@ -1093,36 +1093,82 @@ body.login-page{
 
 <div class="container">
 
-  <div id="modoColetor" style="display:none;">
-    <h2>📱 Coletor Mont Stock</h2>
+<div id="modoColetor" style="display:none;">
 
-    <div class="coletor-card">
+  <div class="coletor-header">
+    <div>
+      <h2>MONT STOCK</h2>
+      <p>Coletor Operacional</p>
+    </div>
 
-      <label>Rack</label>
-<input
-  type="text"
-  id="coletorRack"
-  placeholder="Bipe ou digite o rack"
-  autocomplete="off"
-  oninput="consultarRackColetorAutomatico()"
-  onkeydown="if(event.key === 'Enter'){ consultarRackColetor(); }"
->
-      <button
-  class="btn-coletor"
-  id="btnConsultarRackColetor"
-  onclick="consultarRackColetor()"
-  style="display:none;"
->
-  🔍 Consultar Rack
-</button>
+    <span class="coletor-user">ONLINE</span>
+  </div>
 
-      <div id="coletorResultado" class="coletor-resultado">
-        Bipe um rack para iniciar
-      </div>
+  <div id="menuColetor" class="menu-coletor-app">
 
+    <button class="opcao-coletor opcao-entrada" onclick="abrirModuloColetor('entrada')">
+      <span>⬇️</span>
+      <strong>Entrada</strong>
+      <small>Recebimento e armazenagem</small>
+    </button>
+
+    <button class="opcao-coletor opcao-saida" onclick="abrirModuloColetor('saida')">
+      <span>⬆️</span>
+      <strong>Saída</strong>
+      <small>Separação e baixa de estoque</small>
+    </button>
+
+    <button class="opcao-coletor opcao-transferencia" onclick="abrirModuloColetor('transferencia')">
+      <span>🔄</span>
+      <strong>Transferência</strong>
+      <small>Movimentação interna</small>
+    </button>
+
+    <button class="opcao-coletor opcao-consulta" onclick="abrirModuloColetor('consulta')">
+      <span>🔎</span>
+      <strong>Consulta Rack</strong>
+      <small>Produto, lote e saldo por endereço</small>
+    </button>
+
+  </div>
+
+  <div id="areaModuloColetor" class="coletor-card" style="display:none;">
+
+    <button class="btn-voltar-coletor" onclick="voltarMenuColetor()">
+      ← Voltar
+    </button>
+
+    <h3 id="tituloModuloColetor">Consulta Rack</h3>
+
+    <label>Leitura do rack</label>
+
+    <input
+      type="text"
+      id="coletorRack"
+      placeholder="Bipe ou digite o rack"
+      autocomplete="off"
+      oninput="consultarRackColetorAutomatico()"
+      onkeydown="if(event.key === 'Enter'){ consultarRackColetor(); }"
+    >
+
+    <button
+      class="btn-coletor-transferencia"
+      id="btnConsultarRackColetor"
+      onclick="consultarRackColetor()"
+      style="display:none;"
+    >
+      Consultar Rack
+    </button>
+
+    <div id="coletorResultado" class="coletor-resultado">
+      Bipe um rack para iniciar
     </div>
 
   </div>
+
+</div>
+
+
 
 
 <section id="produtos" class="tela ativa">
