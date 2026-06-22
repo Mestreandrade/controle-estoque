@@ -916,6 +916,7 @@ body.login-page{
       <button class="menu-operador" onclick="abrirTela('entrada')">⬇️ Entrada</button>
       <button class="menu-operador" onclick="abrirTela('saida')">⬆️ Saída</button>
       <button class="menu-operador" onclick="abrirTela('leitor')">📷 Leitor</button>
+      <button class="menu-operador" onclick="abrirTela('transferencia')">🔄 Transferência</button>
 
       <div class="grupo-menu">Controle</div>
 
@@ -1270,6 +1271,27 @@ Lançar em Todos os Racks Marcados
     <tbody id="tabelaSaidaBusca"></tbody>
   </table>
 </section>
+
+
+<section id="transferencia" class="tela">
+  <h2>🔄 Transferência Interna</h2>
+
+  <input
+    type="text"
+    id="transferenciaRackOrigem"
+    placeholder="Rack origem"
+  >
+
+  <button class="btn-azul" onclick="buscarRackTransferencia()">
+    Buscar Rack
+  </button>
+
+  <div id="dadosTransferencia" style="margin-top:15px;"></div>
+</section>
+
+
+
+
 
 
 <section id="consulta" class="tela">
@@ -4878,6 +4900,212 @@ async function confirmarSaidaColetor(){
   document.getElementById("coletorResultado").innerHTML = "Bipe um rack para iniciar";
   document.getElementById("coletorRack").focus();
 }
+
+
+
+
+async function buscarRackTransferencia(){
+
+  const rackOrigem = document
+    .getElementById("transferenciaRackOrigem")
+    .value
+    .trim()
+    .toUpperCase();
+
+  const area = document.getElementById("dadosTransferencia");
+
+  if(rackOrigem === ""){
+    alert("Informe o rack origem.");
+    return;
+  }
+
+  area.innerHTML = "🔎 Buscando rack...";
+
+  const resposta = await fetch("/estoque-rack/" + encodeURIComponent(rackOrigem));
+  const item = await resposta.json();
+
+  if(!item){
+    area.innerHTML = `
+      <div class="card-rack">
+        <h3>Rack sem estoque</h3>
+        <p><strong>Rack:</strong> ${rackOrigem}</p>
+        <p>Não existe produto nesse endereço.</p>
+      </div>
+    `;
+    return;
+  }
+
+  area.innerHTML = `
+    <div class="card-produto">
+
+      <h3>📦 ${item.nome}</h3>
+
+      <p><strong>Código:</strong> ${item.codigo}</p>
+      <p><strong>Lote:</strong> ${item.lote}</p>
+      <p><strong>Rack origem:</strong> ${item.rack}</p>
+      <p><strong>Saldo disponível:</strong> ${item.quantidade}</p>
+      <p><strong>Fabricação:</strong> ${formatarDataBR(item.validade || "")}</p>
+
+      <hr>
+
+      <input
+        type="hidden"
+        id="transferenciaCodigo"
+        value="${item.codigo}"
+      >
+
+      <input
+        type="hidden"
+        id="transferenciaLote"
+        value="${item.lote}"
+      >
+
+      <input
+        type="hidden"
+        id="transferenciaSaldo"
+        value="${item.quantidade}"
+      >
+
+      <input
+        type="text"
+        id="transferenciaRackDestino"
+        placeholder="Rack destino"
+      >
+
+      <input
+        type="number"
+        id="transferenciaQuantidade"
+        placeholder="Quantidade"
+        min="1"
+        max="${item.quantidade}"
+      >
+
+      <button class="btn-verde" onclick="confirmarTransferenciaDesktop()">
+        Confirmar Transferência
+      </button>
+
+    </div>
+  `;
+
+  document.getElementById("transferenciaRackDestino").focus();
+}
+
+
+
+
+
+
+
+
+async function confirmarTransferenciaDesktop(){
+
+  const codigo = document.getElementById("transferenciaCodigo").value;
+  const lote = document.getElementById("transferenciaLote").value;
+  const rackOrigem = document
+    .getElementById("transferenciaRackOrigem")
+    .value
+    .trim()
+    .toUpperCase();
+
+  const saldo = Number(document.getElementById("transferenciaSaldo").value);
+
+  const rackDestino = document
+    .getElementById("transferenciaRackDestino")
+    .value
+    .trim()
+    .toUpperCase();
+
+  const quantidade = Number(
+    document.getElementById("transferenciaQuantidade").value
+  );
+
+  if(rackDestino === ""){
+    alert("Informe o rack destino.");
+    return;
+  }
+
+  if(!quantidade || quantidade <= 0){
+    alert("Informe uma quantidade válida.");
+    return;
+  }
+
+  if(quantidade > saldo){
+    alert("Quantidade maior que o saldo disponível.");
+    return;
+  }
+
+  if(!confirm(
+    "Confirmar transferência?\n\n" +
+    "Origem: " + rackOrigem + "\n" +
+    "Destino: " + rackDestino + "\n" +
+    "Quantidade: " + quantidade
+  )){
+    return;
+  }
+
+  const resposta = await fetch("/transferencia", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify({
+      codigo: codigo,
+      lote: lote,
+      rackOrigem: rackOrigem,
+      rackDestino: rackDestino,
+      quantidade: quantidade
+    })
+  });
+
+  const mensagem = await resposta.text();
+  const mensagemMinuscula = mensagem.toLowerCase();
+
+  if(
+    mensagemMinuscula.includes("sucesso") ||
+    mensagemMinuscula.includes("realizada")
+  ){
+    alert(
+      "Transferência realizada com sucesso!\n\n" +
+      "Produto: " + codigo + "\n" +
+      "Lote: " + lote + "\n" +
+      "Origem: " + rackOrigem + "\n" +
+      "Destino: " + rackDestino + "\n" +
+      "Quantidade: " + quantidade
+    );
+
+    document.getElementById("transferenciaRackOrigem").value = "";
+    document.getElementById("dadosTransferencia").innerHTML = "";
+
+    estoqueCarregado = false;
+    racksCarregados = false;
+    historicoCarregado = false;
+    listaMapaEntrada = [];
+
+    carregarEstoque();
+    carregarMovimentacoes();
+    carregarRacks();
+
+    document.getElementById("transferenciaRackOrigem").focus();
+
+  } else {
+    alert(mensagem);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
