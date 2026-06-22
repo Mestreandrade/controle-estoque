@@ -5724,8 +5724,13 @@ function abrirEntradaColetor(rack){
 
 async function confirmarEntradaColetor(rack){
 
-  const codigo = document.getElementById("coletorEntradaCodigo").value.trim();
-  const lote = document.getElementById("coletorEntradaLote").value.trim();
+  const codigo = limparCodigoBipado(
+  document.getElementById("coletorEntradaCodigo").value
+);
+
+const lote = limparCodigoBipado(
+  document.getElementById("coletorEntradaLote").value
+);
   const quantidade = Number(document.getElementById("coletorEntradaQuantidade").value);
   const validade = document.getElementById("coletorEntradaValidade").value;
 
@@ -6063,6 +6068,43 @@ function fecharCameraColetorRack(){
 
 
 let leitorCameraColetorCampo = null;
+
+
+function limparCodigoBipado(codigo){
+
+  if(!codigo){
+    return "";
+  }
+
+  codigo = String(codigo).trim();
+
+  codigo = codigo.replace("]C1", "");
+  codigo = codigo.replace("]E0", "");
+  codigo = codigo.replace("]Q3", "");
+
+  if(codigo.startsWith("C1")){
+    codigo = codigo.substring(2);
+  }
+
+  if(codigo.startsWith("E0")){
+    codigo = codigo.substring(2);
+  }
+
+  if(codigo.startsWith("Q3")){
+    codigo = codigo.substring(2);
+  }
+
+  return codigo.trim();
+}
+
+
+
+
+
+
+
+
+
 let campoDestinoCameraColetor = "";
 
 function abrirCameraColetorCampo(campoDestino){
@@ -6094,13 +6136,16 @@ function abrirCameraColetorCampo(campoDestino){
         height: 280
       }
     },
+
     function(resultado){
 
-      const campo = document.getElementById(campoDestinoCameraColetor);
+  const campo = document.getElementById(campoDestinoCameraColetor);
+  const codigoLimpo = limparCodigoBipado(resultado);
 
-      if(campo){
-        campo.value = resultado;
-      }
+  if(campo){
+    campo.value = codigoLimpo;
+  }
+
 
       leitorCameraColetorCampo.stop().then(() => {
         overlay.style.display = "none";
