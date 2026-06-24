@@ -31,31 +31,29 @@ async function tabelaExisteSQLite(nomeTabela){
 async function limparTabelasOperacionaisPostgres(){
   console.log("Limpando tabelas operacionais no PostgreSQL...");
 
-  await pool.query("DELETE FROM inventario");
+  await pool.query("DELETE FROM inventarios");
   await pool.query("DELETE FROM movimentacoes");
   await pool.query("DELETE FROM estoque");
-  await pool.query("DELETE FROM backup_logs");
+  await pool.query("DELETE FROM backups");
 
-  await pool.query("ALTER SEQUENCE inventario_id_seq RESTART WITH 1");
+  await pool.query("ALTER SEQUENCE inventarios_id_seq RESTART WITH 1");
   await pool.query("ALTER SEQUENCE movimentacoes_id_seq RESTART WITH 1");
   await pool.query("ALTER SEQUENCE estoque_id_seq RESTART WITH 1");
-  await pool.query("ALTER SEQUENCE backup_logs_id_seq RESTART WITH 1");
+  await pool.query("ALTER SEQUENCE backups_id_seq RESTART WITH 1");
 }
 
 async function migrarEstoque(){
 
   const estoque = await listarSQLite(`
     SELECT
-      e.id,
-      p.codigo,
-      p.nome,
-      e.lote,
-      e.rack,
-      e.quantidade,
-      e.validade,
-      e.data_entrada
-    FROM estoque e
-    INNER JOIN produtos p ON p.id = e.produto_id
+      id,
+      produto_id,
+      lote,
+      rack,
+      quantidade,
+      data_entrada,
+      validade
+    FROM estoque
   `);
 
   console.log("Migrando estoque:", estoque.length);
@@ -64,17 +62,17 @@ async function migrarEstoque(){
     await pool.query(
       `
         INSERT INTO estoque
-        (id, codigo, lote, rack, quantidade, validade, created_at)
+        (id, produto_id, lote, rack, quantidade, data_entrada, validade)
         VALUES ($1, $2, $3, $4, $5, $6, $7)
       `,
       [
         item.id,
-        item.codigo,
+        item.produto_id,
         item.lote,
         item.rack,
         item.quantidade || 0,
-        item.validade || null,
-        item.data_entrada || new Date()
+        item.data_entrada || new Date(),
+        item.validade || null
       ]
     );
   }
@@ -91,17 +89,15 @@ async function migrarMovimentacoes(){
 
   const movimentacoes = await listarSQLite(`
     SELECT
-      m.id,
-      p.codigo,
-      p.nome,
-      m.lote,
-      m.rack,
-      m.tipo,
-      m.quantidade,
-      m.usuario,
-      m.data_movimentacao
-    FROM movimentacoes m
-    INNER JOIN produtos p ON p.id = m.produto_id
+      id,
+      produto_id,
+      lote,
+      rack,
+      tipo,
+      quantidade,
+      data_movimentacao,
+      usuario
+    FROM movimentacoes
   `);
 
   console.log("Migrando movimentações:", movimentacoes.length);
@@ -110,19 +106,18 @@ async function migrarMovimentacoes(){
     await pool.query(
       `
         INSERT INTO movimentacoes
-        (id, codigo, nome, lote, rack, tipo, quantidade, usuario, data_movimentacao)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        (id, produto_id, lote, rack, tipo, quantidade, data_movimentacao, usuario)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       `,
       [
         item.id,
-        item.codigo || null,
-        item.nome || null,
-        item.lote || null,
-        item.rack || null,
-        item.tipo || null,
+        item.produto_id,
+        item.lote,
+        item.rack,
+        item.tipo,
         item.quantidade || 0,
-        item.usuario || "Sistema",
-        item.data_movimentacao || new Date()
+        item.data_movimentacao || new Date(),
+        item.usuario || "Sistema"
       ]
     );
   }
@@ -135,26 +130,27 @@ async function migrarMovimentacoes(){
   `);
 }
 
-async function migrarInventario(){
+async function migrarInventarios(){
 
-  const existe = await tabelaExisteSQLite("inventario");
+  const existe = await tabelaExisteSQLite("inventarios");
 
   if(!existe){
-    console.log("Tabela inventario não existe no SQLite. Pulando...");
+    console.log("Tabela inventarios não existe no SQLite. Pulando...");
     return;
   }
 
-  const inventario = await listarSQLite("SELECT * FROM inventario");
+  const inventarios = await listarSQLite("SELECT * FROM inventarios");
 
-  console.log("Migrando inventário:", inventario.length);
+  console.log("Migrando inventários:", inventarios.length);
 
-  for(const item of inventario){
+  for(const item of inventarios){
     await pool.query(
       `
-        INSERT INTO inventario
+        INSERT INTO inventarios
         (
           id,
           estoque_id,
+          produto_id,
           codigo,
           produto,
           lote,
@@ -166,11 +162,12 @@ async function migrarInventario(){
           status,
           data_inventario
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
       `,
       [
         item.id,
         item.estoque_id || null,
+        item.produto_id || null,
         item.codigo || null,
         item.produto || null,
         item.lote || null,
@@ -187,29 +184,29 @@ async function migrarInventario(){
 
   await pool.query(`
     SELECT setval(
-      'inventario_id_seq',
-      COALESCE((SELECT MAX(id) FROM inventario), 1)
+      'inventarios_id_seq',
+      COALESCE((SELECT MAX(id) FROM inventarios), 1)
     )
   `);
 }
 
-async function migrarBackupLogs(){
+async function migrarBackups(){
 
-  const existe = await tabelaExisteSQLite("backup_logs");
+  const existe = await tabelaExisteSQLite("backups");
 
   if(!existe){
-    console.log("Tabela backup_logs não existe no SQLite. Pulando...");
+    console.log("Tabela backups não existe no SQLite. Pulando...");
     return;
   }
 
-  const backupLogs = await listarSQLite("SELECT * FROM backup_logs");
+  const backups = await listarSQLite("SELECT * FROM backups");
 
-  console.log("Migrando logs de backup:", backupLogs.length);
+  console.log("Migrando backups:", backups.length);
 
-  for(const item of backupLogs){
+  for(const item of backups){
     await pool.query(
       `
-        INSERT INTO backup_logs
+        INSERT INTO backups
         (id, usuario, data_backup)
         VALUES ($1, $2, $3)
       `,
@@ -223,22 +220,22 @@ async function migrarBackupLogs(){
 
   await pool.query(`
     SELECT setval(
-      'backup_logs_id_seq',
-      COALESCE((SELECT MAX(id) FROM backup_logs), 1)
+      'backups_id_seq',
+      COALESCE((SELECT MAX(id) FROM backups), 1)
     )
   `);
 }
 
 async function migrar(){
   try{
-    console.log("Iniciando migração operacional corrigida...");
+    console.log("Iniciando migração operacional no padrão final...");
 
     await limparTabelasOperacionaisPostgres();
 
     await migrarEstoque();
     await migrarMovimentacoes();
-    await migrarInventario();
-    await migrarBackupLogs();
+    await migrarInventarios();
+    await migrarBackups();
 
     console.log("Migração operacional concluída com sucesso.");
 
