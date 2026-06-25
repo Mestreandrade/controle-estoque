@@ -2268,8 +2268,7 @@ async function baixarBackup(){
   const link = document.createElement("a");
 
   link.href = URL.createObjectURL(blob);
-  link.download = `backup-estoque-${data}.db`;
-
+  link.download = `backup-postgresql-${data}.json`;
   document.body.appendChild(link);
   link.click();
   link.remove();
