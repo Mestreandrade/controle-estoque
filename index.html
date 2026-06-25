@@ -2695,6 +2695,9 @@ async function carregarProdutos(){
   listaProdutos.forEach(item => {
     tabela.innerHTML += `
       <tr>
+<td>
+  <input type="checkbox" class="check-produto" value="${item.id}">
+</td>
         <td>${item.imagem ? `<img src="${item.imagem}">` : ""}</td>
         <td>${item.codigo}</td>
         <td>${item.nome}</td>
