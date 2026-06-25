@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const db = require("./db-postgres");
+const db = require("./database");
 const multer = require("multer");
 const fs = require("fs");
 
@@ -1393,7 +1393,7 @@ const PORT = process.env.PORT || 3000;
 
 
 
-/* BACKUP DO BANCO POSTGRESQL */
+/* BACKUP DO BANCO */
 
 app.get("/backup", adminOuOperador, (req, res) => {
 
@@ -1404,88 +1404,16 @@ app.get("/backup", adminOuOperador, (req, res) => {
         INSERT INTO backups (usuario)
         VALUES (?)
         `,
-        [usuario],
-        function(err){
-
-            if(err){
-                return res.status(500).send("Erro ao registrar backup");
-            }
-
-            const backup = {};
-
-            db.all("SELECT * FROM produtos ORDER BY id", [], (err, produtos) => {
-
-                if(err){
-                    return res.status(500).send("Erro ao gerar backup de produtos");
-                }
-
-                backup.produtos = produtos;
-
-                db.all("SELECT * FROM racks ORDER BY id", [], (err, racks) => {
-
-                    if(err){
-                        return res.status(500).send("Erro ao gerar backup de racks");
-                    }
-
-                    backup.racks = racks;
-
-                    db.all("SELECT * FROM usuarios ORDER BY id", [], (err, usuarios) => {
-
-                        if(err){
-                            return res.status(500).send("Erro ao gerar backup de usuários");
-                        }
-
-                        backup.usuarios = usuarios;
-
-                        db.all("SELECT * FROM estoque ORDER BY id", [], (err, estoque) => {
-
-                            if(err){
-                                return res.status(500).send("Erro ao gerar backup de estoque");
-                            }
-
-                            backup.estoque = estoque;
-
-                            db.all("SELECT * FROM movimentacoes ORDER BY id", [], (err, movimentacoes) => {
-
-                                if(err){
-                                    return res.status(500).send("Erro ao gerar backup de movimentações");
-                                }
-
-                                backup.movimentacoes = movimentacoes;
-
-                                db.all("SELECT * FROM inventarios ORDER BY id", [], (err, inventarios) => {
-
-                                    if(err){
-                                        return res.status(500).send("Erro ao gerar backup de inventários");
-                                    }
-
-                                    backup.inventarios = inventarios;
-
-                                    backup.gerado_em = new Date().toISOString();
-                                    backup.usuario = usuario;
-                                    backup.tipo = "POSTGRESQL_JSON";
-
-                                    res.setHeader("Content-Type", "application/json");
-                                    res.setHeader(
-                                        "Content-Disposition",
-                                        `attachment; filename=backup-postgresql-${new Date().toISOString().slice(0,10)}.json`
-                                    );
-
-                                    res.send(JSON.stringify(backup, null, 2));
-
-                                });
-
-                            });
-
-                        });
-
-                    });
-
-                });
-
-            });
-        }
+        [usuario]
     );
+
+    const arquivoBanco = path.join(__dirname, "estoque.db");
+
+    res.download(
+        arquivoBanco,
+        `backup-estoque-${new Date().toISOString().slice(0,10)}.db`
+    );
+
 });
 
 
@@ -1511,48 +1439,60 @@ app.get("/ultimo-backup", (req, res) => {
 });
 
 
-/* VIRADA DO SISTEMA POSTGRESQL */
+
+
+/* VIRADA DO SISTEMA */
 
 app.post("/virada-sistema", somenteAdmin, (req, res) => {
 
-    db.run("DELETE FROM movimentacoes", [], function(err){
+    db.serialize(() => {
 
-        if(err){
-            return res.status(500).send("Erro ao limpar movimentações");
-        }
+        db.run("DELETE FROM movimentacoes");
+        db.run("DELETE FROM inventarios");
+        db.run("DELETE FROM estoque");
 
-        db.run("DELETE FROM inventarios", [], function(err){
-
-            if(err){
-                return res.status(500).send("Erro ao limpar inventários");
-            }
-
-            db.run("DELETE FROM estoque", [], function(err){
-
-                if(err){
-                    return res.status(500).send("Erro ao limpar estoque");
-                }
-
-                res.send("Virada realizada com sucesso. Estoque, histórico e inventário foram zerados.");
-
-            });
-
-        });
+        res.send("Virada realizada com sucesso. Estoque, histórico e inventário foram zerados.");
 
     });
 
 });
 
 
+
+
 /* RESTAURAR BACKUP DO BANCO */
 
 app.post("/restaurar-backup", upload.single("backup"), (req, res) => {
 
-    return res.status(501).send(
-        "Restauração automática ainda não disponível no PostgreSQL. Use o backup JSON para conferência ou restauração técnica."
-    );
+    if(req.headers.perfil !== "ADMIN"){
+        return res.status(403).send("Acesso negado. Apenas administrador pode restaurar backup.");
+    }
+
+    if(!req.file){
+        return res.status(400).send("Nenhum arquivo enviado.");
+    }
+
+    try{
+
+        const arquivoBackup = req.file.path;
+
+        fs.copyFileSync(arquivoBackup, "./estoque.db");
+
+        fs.unlinkSync(arquivoBackup);
+
+        res.send("Backup restaurado com sucesso. Reinicie o sistema.");
+
+    }catch(erro){
+
+        console.error("Erro ao restaurar backup:", erro);
+
+        res.status(500).send("Erro ao restaurar backup.");
+
+    }
 
 });
+
+
 
 
 
