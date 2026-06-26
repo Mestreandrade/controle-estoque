@@ -1221,6 +1221,100 @@ body.login-page{
   margin-bottom:12px;
 }
 
+/* HUB DE MÓDULOS */
+
+.hub-modulos{
+  min-height:100vh;
+  background:#0f172a;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  box-sizing:border-box;
+}
+
+.hub-card{
+  width:100%;
+  max-width:900px;
+  background:white;
+  border-radius:22px;
+  padding:35px;
+  box-shadow:0 18px 45px rgba(0,0,0,0.35);
+  text-align:center;
+}
+
+.hub-marca{
+  font-size:34px;
+  font-weight:900;
+  color:#0f172a;
+  letter-spacing:0.5px;
+}
+
+.hub-subtitulo{
+  font-size:14px;
+  color:#64748b;
+  font-weight:700;
+  margin-top:6px;
+  margin-bottom:25px;
+  text-transform:uppercase;
+  letter-spacing:0.8px;
+}
+
+.hub-card h2{
+  color:#1e293b;
+  margin-bottom:25px;
+}
+
+.hub-opcoes{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:20px;
+}
+
+.hub-opcao{
+  background:#f8fafc;
+  border:2px solid #e2e8f0;
+  border-radius:18px;
+  padding:28px 22px;
+  text-align:center;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.hub-opcao:hover{
+  border-color:#2563eb;
+  transform:translateY(-4px);
+  box-shadow:0 10px 24px rgba(37,99,235,0.18);
+}
+
+.hub-opcao span{
+  display:block;
+  font-size:42px;
+  margin-bottom:12px;
+}
+
+.hub-opcao strong{
+  display:block;
+  font-size:24px;
+  color:#0f172a;
+  margin-bottom:8px;
+}
+
+.hub-opcao small{
+  display:block;
+  font-size:14px;
+  color:#64748b;
+  line-height:1.4;
+}
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1266,7 +1360,40 @@ body.login-page{
 
 <div id="sistema">
 
-<div class="layout-sistema">
+
+<div id="hubModulos" class="hub-modulos" style="display:none;">
+
+  <div class="hub-card">
+
+    <div class="hub-marca">MontStock</div>
+    <div class="hub-subtitulo">Plataforma de Gestão Operacional</div>
+
+    <h2>Escolha o módulo</h2>
+
+    <div class="hub-opcoes">
+
+      <button class="hub-opcao" onclick="entrarModulo('estoque')">
+        <span>📦</span>
+        <strong>Estoque</strong>
+        <small>Produtos, racks, entrada, saída, transferência e rastreabilidade</small>
+      </button>
+
+      <button class="hub-opcao" onclick="entrarModulo('expedicao')">
+        <span>🚚</span>
+        <strong>Expedição</strong>
+        <small>Ordem de carregamento, protocolo e relatório gerencial</small>
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+
+<div id="layoutSistema" class="layout-sistema" style="display:none;">
 
   <aside class="sidebar">
 
@@ -1329,6 +1456,10 @@ body.login-page{
 
 
     <div class="topbar">
+
+<button class="btn-cinza" onclick="voltarHubModulos()">
+  ⬅️ Módulos
+</button>
 
   <input
     class="busca-topo"
@@ -1468,6 +1599,48 @@ body.login-page{
   </div>
 
 </div>
+
+
+
+
+<section id="expedicaoInicio" class="tela">
+
+  <h2>🚚 Módulo Expedição</h2>
+
+  <div class="cards-dashboard">
+
+    <div class="card-indicador">
+      <h3>Ordens Recebidas</h3>
+      <p>0</p>
+    </div>
+
+    <div class="card-indicador">
+      <h3>Em Carregamento</h3>
+      <p>0</p>
+    </div>
+
+    <div class="card-indicador">
+      <h3>Protocolos Gerados</h3>
+      <p>0</p>
+    </div>
+
+  </div>
+
+  <div class="card-produto">
+
+    <h3>Fluxo planejado da Expedição</h3>
+
+    <p><strong>1.</strong> Logística cadastra a Ordem de Carregamento.</p>
+    <p><strong>2.</strong> Logística envia a ordem para Expedição.</p>
+    <p><strong>3.</strong> Expedição recebe a demanda.</p>
+    <p><strong>4.</strong> Expedição imprime a Ordem de Carregamento.</p>
+    <p><strong>5.</strong> Após carregar, informa motorista, placa, telefone e lacres.</p>
+    <p><strong>6.</strong> Sistema libera o Protocolo de Carregamento.</p>
+
+  </div>
+
+</section>
+
 
 
 <section id="produtos" class="tela ativa">
@@ -2162,6 +2335,108 @@ Lançar em Todos os Racks Marcados
 <script>
 
 
+/* HUB DE MÓDULOS */
+
+function mostrarHubModulos(){
+
+  const hub = document.getElementById("hubModulos");
+  const layout = document.getElementById("layoutSistema");
+
+  if(layout){
+    layout.style.display = "none";
+  }
+
+  if(hub){
+    hub.style.display = "flex";
+  }
+}
+
+function voltarHubModulos(){
+
+  const hub = document.getElementById("hubModulos");
+  const layout = document.getElementById("layoutSistema");
+  const coletor = document.getElementById("modoColetor");
+
+  document.querySelectorAll(".tela").forEach(secao => {
+    secao.classList.remove("ativa");
+    secao.style.display = "none";
+  });
+
+  if(coletor){
+    coletor.style.display = "none";
+  }
+
+  if(layout){
+    layout.style.display = "none";
+  }
+
+  if(hub){
+    hub.style.display = "flex";
+  }
+}
+
+function entrarModulo(modulo){
+
+  const hub = document.getElementById("hubModulos");
+  const layout = document.getElementById("layoutSistema");
+
+  if(hub){
+    hub.style.display = "none";
+  }
+
+  if(layout){
+    layout.style.display = "flex";
+  }
+
+  if(modulo === "estoque"){
+    aplicarPermissoes();
+    return;
+  }
+
+  if(modulo === "expedicao"){
+
+    const coletor = document.getElementById("modoColetor");
+
+    if(coletor){
+      coletor.style.display = "none";
+    }
+
+    document.querySelectorAll(".tela").forEach(secao => {
+      secao.classList.remove("ativa");
+      secao.style.display = "none";
+    });
+
+    const telaExpedicao = document.getElementById("expedicaoInicio");
+
+    if(telaExpedicao){
+      telaExpedicao.classList.add("ativa");
+      telaExpedicao.style.display = "block";
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* DATA DO TOPO */
 
@@ -2374,9 +2649,10 @@ async function fazerLogin(){
   document.getElementById("nomeUsuarioLogado").innerText = usuarioLogado.nome;
   document.getElementById("perfilUsuarioLogado").innerText = usuarioLogado.perfil;
 
-  aplicarPermissoes();
-  carregarTudo();
-atualizarDataTopo();
+    carregarTudo();
+  atualizarDataTopo();
+  mostrarHubModulos();
+
 }
 
 function sairSistema(){
