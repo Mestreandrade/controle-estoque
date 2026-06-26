@@ -1603,6 +1603,21 @@ body.login-page{
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <section id="expedicaoInicio" class="tela">
 
   <h2>🚚 Módulo Expedição</h2>
@@ -1639,7 +1654,130 @@ body.login-page{
 
   </div>
 
+
+<br>
+
+<button class="btn-azul" onclick="abrirTelaExpedicao('expedicaoNovaOrdem')">
+  ➕ Nova Ordem de Carregamento
+</button>
+
+<button class="btn-cinza" onclick="abrirTelaExpedicao('expedicaoOrdens')">
+  📋 Ordens Enviadas
+</button>
+
+
+
 </section>
+
+
+
+
+<section id="expedicaoNovaOrdem" class="tela">
+
+  <h2>➕ Nova Ordem de Carregamento</h2>
+
+  <div class="card-produto">
+
+    <h3>Dados da Ordem</h3>
+
+    <input type="text" id="expNumeroDespacho" placeholder="Nº Despacho / Ordem">
+    <input type="date" id="expDataEmbarque">
+    <input type="text" id="expTransportadora" placeholder="Transportadora">
+    <input type="text" id="expObservacao" placeholder="Observação">
+
+  </div>
+
+  <br>
+
+  <div class="card-produto">
+
+    <h3>Adicionar NF-e na Ordem</h3>
+
+    <input type="text" id="expNfe" placeholder="NF-e">
+    <input type="text" id="expCliente" placeholder="Cliente">
+    <input type="text" id="expCidade" placeholder="Cidade de Entrega">
+    <input type="text" id="expValorNfe" placeholder="Valor NF-e">
+    <input type="number" id="expPesoBruto" placeholder="Peso Bruto">
+    <input type="number" id="expVolume" placeholder="Volume">
+
+    <select id="expPaletizado">
+      <option value="">Paletizado?</option>
+      <option value="SIM">SIM</option>
+      <option value="NÃO">NÃO</option>
+    </select>
+
+    <br>
+
+    <button class="btn-verde" onclick="adicionarNotaExpedicao()">
+      Adicionar NF-e
+    </button>
+
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>NF-e</th>
+        <th>Cliente</th>
+        <th>Cidade</th>
+        <th>Valor NF-e</th>
+        <th>Peso Bruto</th>
+        <th>Volume</th>
+        <th>Paletizado</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+
+    <tbody id="tabelaNotasExpedicao"></tbody>
+  </table>
+
+  <br>
+
+  <button class="btn-azul" onclick="enviarOrdemParaExpedicao()">
+    Enviar para Expedição
+  </button>
+
+  <button class="btn-cinza" onclick="abrirTelaExpedicao('expedicaoInicio')">
+    Voltar
+  </button>
+
+</section>
+
+<section id="expedicaoOrdens" class="tela">
+
+  <h2>📋 Ordens Enviadas para Expedição</h2>
+
+  <button class="btn-cinza" onclick="abrirTelaExpedicao('expedicaoInicio')">
+    Voltar
+  </button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Despacho</th>
+        <th>Data Embarque</th>
+        <th>Transportadora</th>
+        <th>NF-es</th>
+        <th>Peso Total</th>
+        <th>Volume Total</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+
+    <tbody id="tabelaOrdensExpedicao"></tbody>
+  </table>
+
+</section>
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2335,6 +2473,228 @@ Lançar em Todos os Racks Marcados
 <script>
 
 
+/* MÓDULO EXPEDIÇÃO - FASE 2 */
+
+let listaNotasExpedicao = [];
+let listaOrdensExpedicao = [];
+
+function abrirTelaExpedicao(tela){
+
+  document.querySelectorAll(".tela").forEach(secao => {
+    secao.classList.remove("ativa");
+    secao.style.display = "none";
+  });
+
+  const telaSelecionada = document.getElementById(tela);
+
+  if(telaSelecionada){
+    telaSelecionada.classList.add("ativa");
+    telaSelecionada.style.display = "block";
+  }
+
+  if(tela === "expedicaoOrdens"){
+    renderizarOrdensExpedicao();
+  }
+}
+
+function adicionarNotaExpedicao(){
+
+  const nfe = document.getElementById("expNfe").value.trim();
+  const cliente = document.getElementById("expCliente").value.trim();
+  const cidade = document.getElementById("expCidade").value.trim();
+  const valorNfe = document.getElementById("expValorNfe").value.trim();
+  const pesoBruto = Number(document.getElementById("expPesoBruto").value);
+  const volume = Number(document.getElementById("expVolume").value);
+  const paletizado = document.getElementById("expPaletizado").value;
+
+  if(nfe === "" || cliente === "" || cidade === ""){
+    alert("Preencha NF-e, cliente e cidade.");
+    return;
+  }
+
+  if(pesoBruto <= 0 || volume <= 0){
+    alert("Informe peso bruto e volume.");
+    return;
+  }
+
+  if(paletizado === ""){
+    alert("Informe se é paletizado SIM ou NÃO.");
+    return;
+  }
+
+  listaNotasExpedicao.push({
+    nfe,
+    cliente,
+    cidade,
+    valorNfe,
+    pesoBruto,
+    volume,
+    paletizado
+  });
+
+  document.getElementById("expNfe").value = "";
+  document.getElementById("expCliente").value = "";
+  document.getElementById("expCidade").value = "";
+  document.getElementById("expValorNfe").value = "";
+  document.getElementById("expPesoBruto").value = "";
+  document.getElementById("expVolume").value = "";
+  document.getElementById("expPaletizado").value = "";
+
+  renderizarNotasExpedicao();
+}
+
+function renderizarNotasExpedicao(){
+
+  const tabela = document.getElementById("tabelaNotasExpedicao");
+
+  if(!tabela){
+    return;
+  }
+
+  tabela.innerHTML = "";
+
+  listaNotasExpedicao.forEach((item, index) => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${item.nfe}</td>
+        <td>${item.cliente}</td>
+        <td>${item.cidade}</td>
+        <td>${item.valorNfe}</td>
+        <td>${item.pesoBruto}</td>
+        <td>${item.volume}</td>
+        <td>${item.paletizado}</td>
+        <td>
+          <button class="btn-vermelho" onclick="removerNotaExpedicao(${index})">
+            Remover
+          </button>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function removerNotaExpedicao(index){
+  listaNotasExpedicao.splice(index, 1);
+  renderizarNotasExpedicao();
+}
+
+function enviarOrdemParaExpedicao(){
+
+  const numeroDespacho = document.getElementById("expNumeroDespacho").value.trim();
+  const dataEmbarque = document.getElementById("expDataEmbarque").value;
+  const transportadora = document.getElementById("expTransportadora").value.trim();
+  const observacao = document.getElementById("expObservacao").value.trim();
+
+  if(numeroDespacho === ""){
+    alert("Informe o número do despacho / ordem.");
+    return;
+  }
+
+  if(dataEmbarque === ""){
+    alert("Informe a data prevista de embarque.");
+    return;
+  }
+
+  if(listaNotasExpedicao.length === 0){
+    alert("Adicione pelo menos uma NF-e na ordem.");
+    return;
+  }
+
+  const pesoTotal = listaNotasExpedicao.reduce(
+    (soma, item) => soma + Number(item.pesoBruto),
+    0
+  );
+
+  const volumeTotal = listaNotasExpedicao.reduce(
+    (soma, item) => soma + Number(item.volume),
+    0
+  );
+
+  const ordem = {
+    numeroDespacho,
+    dataEmbarque,
+    transportadora,
+    observacao,
+    notas: [...listaNotasExpedicao],
+    pesoTotal,
+    volumeTotal,
+    status: "ENVIADA PARA EXPEDIÇÃO"
+  };
+
+  listaOrdensExpedicao.push(ordem);
+
+  alert("Ordem enviada para Expedição com sucesso.");
+
+  document.getElementById("expNumeroDespacho").value = "";
+  document.getElementById("expDataEmbarque").value = "";
+  document.getElementById("expTransportadora").value = "";
+  document.getElementById("expObservacao").value = "";
+
+  listaNotasExpedicao = [];
+  renderizarNotasExpedicao();
+
+  abrirTelaExpedicao("expedicaoOrdens");
+}
+
+function renderizarOrdensExpedicao(){
+
+  const tabela = document.getElementById("tabelaOrdensExpedicao");
+
+  if(!tabela){
+    return;
+  }
+
+  tabela.innerHTML = "";
+
+  if(listaOrdensExpedicao.length === 0){
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="7">Nenhuma ordem enviada ainda.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  listaOrdensExpedicao.forEach(ordem => {
+    tabela.innerHTML += `
+      <tr>
+        <td>${ordem.numeroDespacho}</td>
+        <td>${formatarDataBR(ordem.dataEmbarque)}</td>
+        <td>${ordem.transportadora || "-"}</td>
+        <td>${ordem.notas.length}</td>
+        <td>${ordem.pesoTotal}</td>
+        <td>${ordem.volumeTotal}</td>
+        <td>${ordem.status}</td>
+      </tr>
+    `;
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* HUB DE MÓDULOS */
 
 function mostrarHubModulos(){
@@ -2720,8 +3080,17 @@ if(dispositivoMobile()){
     return;
   }
 
-  document.querySelectorAll(".tela").forEach(secao => secao.classList.remove("ativa"));
-  document.getElementById(tela).classList.add("ativa");
+  document.querySelectorAll(".tela").forEach(secao => {
+  secao.classList.remove("ativa");
+  secao.style.display = "none";
+});
+
+const telaSelecionada = document.getElementById(tela);
+
+if(telaSelecionada){
+  telaSelecionada.classList.add("ativa");
+  telaSelecionada.style.display = "block";
+}
 
   if(tela === "produtos"){
     carregarProdutos();
