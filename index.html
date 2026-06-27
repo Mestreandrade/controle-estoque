@@ -1308,6 +1308,181 @@ body.login-page{
 }
 
 
+/* ORDEM DE CARREGAMENTO - ESTILO PLANILHA */
+
+.ordem-cabecalho-simples{
+  display:flex;
+  flex-wrap:wrap;
+  align-items:end;
+  gap:8px;
+  background:white;
+  padding:10px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom:14px;
+}
+
+.ordem-cabecalho-simples div{
+  width:135px;
+}
+
+.ordem-cabecalho-simples div:nth-child(2){
+  width:190px;
+}
+
+.ordem-cabecalho-simples div:nth-child(3){
+  width:130px;
+}
+
+.ordem-cabecalho-simples div:nth-child(4){
+  width:105px;
+}
+
+.ordem-cabecalho-simples div:nth-child(5){
+  width:105px;
+}
+
+.ordem-cabecalho-simples input{
+  width:100%;
+  box-sizing:border-box;
+  margin:0;
+  padding:6px;
+  font-size:12px;
+}
+
+
+.ordem-cabecalho-simples label,
+.ordem-observacoes label{
+  display:block;
+  font-size:12px;
+  font-weight:800;
+  color:#475569;
+  margin-bottom:4px;
+}
+
+.ordem-cabecalho-simples input{
+  width:100%;
+  box-sizing:border-box;
+  margin:0;
+}
+
+.tabela-ordem-excel{
+  min-width:1350px;
+  font-size:12px;
+  background:white;
+}
+
+.tabela-ordem-excel th{
+  background:#d9ead3;
+  color:#111827;
+  font-size:12px;
+  padding:6px;
+  border:1px solid #b6d7a8;
+  white-space:nowrap;
+}
+
+.tabela-ordem-excel td{
+  padding:4px;
+  border:1px solid #d9ead3;
+  text-align:center;
+}
+
+.tabela-ordem-excel input,
+.tabela-ordem-excel select{
+  width:100%;
+  min-width:90px;
+  box-sizing:border-box;
+  margin:0;
+  padding:6px;
+  font-size:12px;
+  border:1px solid #cbd5e1;
+  border-radius:4px;
+}
+
+.tabela-ordem-excel td:nth-child(3) input,
+.tabela-ordem-excel td:nth-child(4) input{
+  min-width:180px;
+}
+
+.tabela-ordem-excel td:nth-child(5) input{
+  min-width:45px;
+  max-width:55px;
+  text-align:center;
+}
+
+.linha-digitacao-ordem{
+  background:#fff7ed;
+}
+
+.ordem-observacoes{
+  background:white;
+  padding:14px;
+  border-radius:12px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.06);
+}
+
+.ordem-observacoes textarea{
+  width:100%;
+  min-height:65px;
+  box-sizing:border-box;
+  margin-bottom:12px;
+  border:1px solid #cbd5e1;
+  border-radius:8px;
+  padding:10px;
+  font-family:Arial;
+}
+
+
+.btn-sequencia{
+  padding:3px 6px;
+  font-size:11px;
+  margin:2px;
+  border-radius:4px;
+}
+
+.tabela-ordem-excel td:first-child{
+  min-width:70px;
+}
+
+
+
+.ordem-cabecalho-simples div{
+  width:135px;
+}
+
+.ordem-cabecalho-simples div:nth-child(2){
+  width:155px;
+}
+
+.ordem-cabecalho-simples div:nth-child(3){
+  width:190px;
+}
+
+.ordem-cabecalho-simples div:nth-child(4){
+  width:130px;
+}
+
+.ordem-cabecalho-simples div:nth-child(5){
+  width:105px;
+}
+
+.ordem-cabecalho-simples div:nth-child(6){
+  width:105px;
+}
+
+.ordem-cabecalho-simples input,
+.ordem-cabecalho-simples select{
+  width:100%;
+  box-sizing:border-box;
+  margin:0;
+  padding:6px;
+  font-size:12px;
+}
+
+</style>
+
+
+
 
 
 
@@ -1672,64 +1847,132 @@ body.login-page{
 
 
 
+
+
 <section id="expedicaoNovaOrdem" class="tela">
 
   <h2>➕ Nova Ordem de Carregamento</h2>
 
-  <div class="card-produto">
+  <div class="ordem-cabecalho-simples">
 
-    <h3>Dados da Ordem</h3>
+    <div>
+      <label>Previsão Embarque</label>
+      <input type="date" id="expPrevisaoEmbarque">
+    </div>
 
-    <input type="text" id="expNumeroDespacho" placeholder="Nº Despacho / Ordem">
-    <input type="date" id="expDataEmbarque">
-    <input type="text" id="expTransportadora" placeholder="Transportadora">
-    <input type="text" id="expObservacao" placeholder="Observação">
+<div>
+  <label>Contrato Logístico</label>
+  <select id="expContratoLogistico">
+    <option value="">Selecione</option>
+    <option value="Transportadora">Transportadora</option>
+    <option value="Veículo da Coco&Cia">Veículo da Coco&Cia</option>
+    <option value="Agregado">Agregado</option>
+    <option value="Cliente">Cliente</option>
+  </select>
+</div>
+
+
+    <div>
+      <label>Nº Despacho</label>
+      <input type="text" id="expNumeroDespacho" placeholder="Ex: 260626-CLIENTE">
+    </div>
+
+   
+    <div>
+      <label>Total R$</label>
+      <input type="text" id="expTotalValor" placeholder="R$ 0,00" readonly>
+    </div>
+
+    <div>
+      <label>Peso Total</label>
+    <input type="number" id="expTotalPeso" placeholder="KG" readonly>
+    </div>
+
+    <div>
+      <label>Volume Total</label>
+     <input type="number" id="expTotalVolume" placeholder="Vol." readonly>
+    </div>
+
+  </div>
+
+  <div class="tabela-scroll">
+
+    <table class="tabela-ordem-excel">
+
+   <thead>
+  <tr>
+    <th>Seq.</th>
+    <th>NF-e</th>
+    <th>Cliente</th>
+    <th>Cidade Entrega</th>
+    <th>UF</th>
+    <th>Valor NF-e</th>
+    <th>Peso</th>
+    <th>Vol.</th>
+    <th>Paletizado</th>
+    <th>Dat. Agendamento</th>
+    <th>Obs</th>
+    <th>Ação</th>
+  </tr>
+</thead>
+
+      <tbody>
+
+        <tr class="linha-digitacao-ordem">
+          <td><input type="number" id="expSeq" placeholder="1"></td>
+<td>
+  <input
+    type="text"
+    id="expNfe"
+    maxlength="7"
+    inputmode="numeric"
+    placeholder="7 dígitos"
+  >
+</td>          <td><input type="text" id="expCliente"></td>
+          <td><input type="text" id="expCidade"></td>
+          <td><input type="text" id="expUf" placeholder="UF"></td>
+          <td><input type="text" id="expValorNfe" placeholder="R$"></td>
+          <td><input type="number" id="expPesoBruto"></td>
+          <td><input type="number" id="expVolume"></td>
+
+          <td>
+            <select id="expPaletizado">
+              <option value="">-</option>
+              <option value="SIM">SIM</option>
+              <option value="NÃO">NÃO</option>
+            </select>
+          </td>
+
+          <td><input type="date" id="expData"></td>
+         
+          <td><input type="text" id="expObsLinha"></td>
+
+          <td>
+            <button class="btn-verde" onclick="adicionarNotaExpedicao()">
+              +
+            </button>
+          </td>
+        </tr>
+
+      </tbody>
+
+      <tbody id="tabelaNotasExpedicao"></tbody>
+
+    </table>
 
   </div>
 
   <br>
 
-  <div class="card-produto">
+  <div class="ordem-observacoes">
 
-    <h3>Adicionar NF-e na Ordem</h3>
+    <label>Observação Geral</label>
+    <textarea id="expObservacaoGeral" placeholder="Digite observações gerais da ordem"></textarea>
 
-    <input type="text" id="expNfe" placeholder="NF-e">
-    <input type="text" id="expCliente" placeholder="Cliente">
-    <input type="text" id="expCidade" placeholder="Cidade de Entrega">
-    <input type="text" id="expValorNfe" placeholder="Valor NF-e">
-    <input type="number" id="expPesoBruto" placeholder="Peso Bruto">
-    <input type="number" id="expVolume" placeholder="Volume">
-
-    <select id="expPaletizado">
-      <option value="">Paletizado?</option>
-      <option value="SIM">SIM</option>
-      <option value="NÃO">NÃO</option>
-    </select>
-
-    <br>
-
-    <button class="btn-verde" onclick="adicionarNotaExpedicao()">
-      Adicionar NF-e
-    </button>
+    <label>Local de entrega para redespacho</label>
+    <textarea id="expLocalRedespacho" placeholder="Digite o local de entrega para redespacho"></textarea>
 
   </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>NF-e</th>
-        <th>Cliente</th>
-        <th>Cidade</th>
-        <th>Valor NF-e</th>
-        <th>Peso Bruto</th>
-        <th>Volume</th>
-        <th>Paletizado</th>
-        <th>Ação</th>
-      </tr>
-    </thead>
-
-    <tbody id="tabelaNotasExpedicao"></tbody>
-  </table>
 
   <br>
 
@@ -1743,6 +1986,13 @@ body.login-page{
 
 </section>
 
+
+
+
+
+
+
+
 <section id="expedicaoOrdens" class="tela">
 
   <h2>📋 Ordens Enviadas para Expedição</h2>
@@ -1753,16 +2003,17 @@ body.login-page{
 
   <table>
     <thead>
-      <tr>
-        <th>Despacho</th>
-        <th>Data Embarque</th>
-        <th>Transportadora</th>
-        <th>NF-es</th>
-        <th>Peso Total</th>
-        <th>Volume Total</th>
-        <th>Status</th>
-      </tr>
-    </thead>
+  <tr>
+    <th>Despacho</th>
+    <th>Previsão Embarque</th>
+    <th>Contrato Logístico</th>
+    <th>NF-es</th>
+    <th>Total R$</th>
+    <th>Peso Total</th>
+    <th>Volume Total</th>
+    <th>Status</th>
+  </tr>
+</thead>
 
     <tbody id="tabelaOrdensExpedicao"></tbody>
   </table>
@@ -2497,20 +2748,50 @@ function abrirTelaExpedicao(tela){
   }
 }
 
+
+
+
 function adicionarNotaExpedicao(){
 
-  const nfe = document.getElementById("expNfe").value.trim();
+  let seq = document.getElementById("expSeq").value.trim();
+
+  if(seq === ""){
+    seq = listaNotasExpedicao.length + 1;
+  }
+
+  const nfe = document.getElementById("expNfe").value.trim().replace(/\D/g, "");
   const cliente = document.getElementById("expCliente").value.trim();
   const cidade = document.getElementById("expCidade").value.trim();
+  const uf = document.getElementById("expUf").value.trim().toUpperCase();
+
   const valorNfe = document.getElementById("expValorNfe").value.trim();
   const pesoBruto = Number(document.getElementById("expPesoBruto").value);
   const volume = Number(document.getElementById("expVolume").value);
-  const paletizado = document.getElementById("expPaletizado").value;
 
-  if(nfe === "" || cliente === "" || cidade === ""){
-    alert("Preencha NF-e, cliente e cidade.");
+  const paletizado = document.getElementById("expPaletizado").value;
+  const data = document.getElementById("expData").value;
+  const obsLinha = document.getElementById("expObsLinha").value.trim();
+
+  if(nfe === "" || cliente === "" || cidade === "" || uf === ""){
+    alert("Preencha NF-e, cliente, cidade e UF.");
     return;
   }
+
+if(nfe.length !== 7){
+  alert("A NF-e deve conter exatamente 7 dígitos. Exemplo: 1063535");
+  return;
+}
+
+const notaDuplicada = listaNotasExpedicao.some(item =>
+  String(item.nfe).trim() === String(nfe).trim()
+);
+
+if(notaDuplicada){
+  alert("Esta NF-e já foi adicionada nesta Ordem de Carregamento. Verifique para evitar duplicidade.");
+  return;
+}
+
+
 
   if(pesoBruto <= 0 || volume <= 0){
     alert("Informe peso bruto e volume.");
@@ -2522,26 +2803,43 @@ function adicionarNotaExpedicao(){
     return;
   }
 
+  
+  
+
   listaNotasExpedicao.push({
+    seq,
     nfe,
     cliente,
     cidade,
+    uf,
     valorNfe,
     pesoBruto,
     volume,
-    paletizado
+    paletizado,
+    data,
+    obsLinha
   });
 
+  document.getElementById("expSeq").value = "";
   document.getElementById("expNfe").value = "";
   document.getElementById("expCliente").value = "";
   document.getElementById("expCidade").value = "";
+  document.getElementById("expUf").value = "";
   document.getElementById("expValorNfe").value = "";
   document.getElementById("expPesoBruto").value = "";
   document.getElementById("expVolume").value = "";
   document.getElementById("expPaletizado").value = "";
+  document.getElementById("expData").value = "";
+  document.getElementById("expContratoLogistico").value = "";
+  document.getElementById("expObsLinha").value = "";
 
+  atualizarSequenciaExpedicao();
   renderizarNotasExpedicao();
+  atualizarTotaisExpedicao();
 }
+
+
+
 
 function renderizarNotasExpedicao(){
 
@@ -2556,13 +2854,26 @@ function renderizarNotasExpedicao(){
   listaNotasExpedicao.forEach((item, index) => {
     tabela.innerHTML += `
       <tr>
+        <td>
+          <strong>${item.seq || index + 1}</strong>
+          <br>
+          <button class="btn-cinza btn-sequencia" onclick="moverNotaExpedicao(${index}, 'cima')">
+            ⬆️
+          </button>
+          <button class="btn-cinza btn-sequencia" onclick="moverNotaExpedicao(${index}, 'baixo')">
+            ⬇️
+          </button>
+        </td>
         <td>${item.nfe}</td>
         <td>${item.cliente}</td>
         <td>${item.cidade}</td>
+        <td>${item.uf || ""}</td>
         <td>${item.valorNfe}</td>
         <td>${item.pesoBruto}</td>
         <td>${item.volume}</td>
         <td>${item.paletizado}</td>
+        <td>${formatarDataBR(item.data || "")}</td>
+        <td>${item.obsLinha || ""}</td>
         <td>
           <button class="btn-vermelho" onclick="removerNotaExpedicao(${index})">
             Remover
@@ -2573,51 +2884,152 @@ function renderizarNotasExpedicao(){
   });
 }
 
+
+
 function removerNotaExpedicao(index){
   listaNotasExpedicao.splice(index, 1);
+  atualizarSequenciaExpedicao();
   renderizarNotasExpedicao();
+  atualizarTotaisExpedicao();
 }
 
-function enviarOrdemParaExpedicao(){
 
-  const numeroDespacho = document.getElementById("expNumeroDespacho").value.trim();
-  const dataEmbarque = document.getElementById("expDataEmbarque").value;
-  const transportadora = document.getElementById("expTransportadora").value.trim();
-  const observacao = document.getElementById("expObservacao").value.trim();
 
-  if(numeroDespacho === ""){
-    alert("Informe o número do despacho / ordem.");
+function moverNotaExpedicao(index, direcao){
+
+  if(direcao === "cima" && index === 0){
     return;
   }
 
-  if(dataEmbarque === ""){
-    alert("Informe a data prevista de embarque.");
+  if(direcao === "baixo" && index === listaNotasExpedicao.length - 1){
+    return;
+  }
+
+  const novoIndex = direcao === "cima" ? index - 1 : index + 1;
+
+  const itemAtual = listaNotasExpedicao[index];
+  listaNotasExpedicao[index] = listaNotasExpedicao[novoIndex];
+  listaNotasExpedicao[novoIndex] = itemAtual;
+
+  atualizarSequenciaExpedicao();
+  renderizarNotasExpedicao();
+}
+
+function atualizarSequenciaExpedicao(){
+
+  listaNotasExpedicao.forEach((item, index) => {
+    item.seq = index + 1;
+  });
+
+}
+
+
+
+function converterValorExpedicao(valor){
+
+  if(!valor){
+    return 0;
+  }
+
+  let texto = String(valor)
+    .replace("R$", "")
+    .replace(/\./g, "")
+    .replace(",", ".")
+    .trim();
+
+  const numero = Number(texto);
+
+  return isNaN(numero) ? 0 : numero;
+}
+
+function atualizarTotaisExpedicao(){
+
+  const totalValor = listaNotasExpedicao.reduce(
+    (soma, item) => soma + converterValorExpedicao(item.valorNfe),
+    0
+  );
+
+  const totalPeso = listaNotasExpedicao.reduce(
+    (soma, item) => soma + Number(item.pesoBruto || 0),
+    0
+  );
+
+  const totalVolume = listaNotasExpedicao.reduce(
+    (soma, item) => soma + Number(item.volume || 0),
+    0
+  );
+
+  document.getElementById("expTotalValor").value =
+    totalValor.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL"
+    });
+
+  document.getElementById("expTotalPeso").value = totalPeso;
+  document.getElementById("expTotalVolume").value = totalVolume;
+}
+
+
+
+
+
+
+function enviarOrdemParaExpedicao(){
+
+  const previsaoEmbarque = document.getElementById("expPrevisaoEmbarque").value;
+  const contratoLogistico = document.getElementById("expContratoLogistico").value;
+  const numeroDespacho = document.getElementById("expNumeroDespacho").value.trim();
+
+  const totalValor = document.getElementById("expTotalValor").value.trim();
+  const totalPeso = Number(document.getElementById("expTotalPeso").value);
+  const totalVolume = Number(document.getElementById("expTotalVolume").value);
+
+  const observacaoGeral = document.getElementById("expObservacaoGeral").value.trim();
+  const localRedespacho = document.getElementById("expLocalRedespacho").value.trim();
+
+  if(previsaoEmbarque === ""){
+    alert("Informe a previsão prevista para embarque.");
+    return;
+  }
+
+
+if(contratoLogistico === ""){
+  alert("Informe o contrato logístico.");
+  return;
+}
+
+  if(numeroDespacho === ""){
+    alert("Informe o número do despacho.");
     return;
   }
 
   if(listaNotasExpedicao.length === 0){
-    alert("Adicione pelo menos uma NF-e na ordem.");
+    alert("Adicione pelo menos uma linha na ordem.");
     return;
   }
 
-  const pesoTotal = listaNotasExpedicao.reduce(
+  const pesoCalculado = listaNotasExpedicao.reduce(
     (soma, item) => soma + Number(item.pesoBruto),
     0
   );
 
-  const volumeTotal = listaNotasExpedicao.reduce(
+  const volumeCalculado = listaNotasExpedicao.reduce(
     (soma, item) => soma + Number(item.volume),
     0
   );
 
   const ordem = {
+    previsaoEmbarque,
+    contratoLogistico,
     numeroDespacho,
-    dataEmbarque,
-    transportadora,
-    observacao,
+    totalValor,
+    totalPeso: totalPeso || pesoCalculado,
+    totalVolume: totalVolume || volumeCalculado,
+    observacaoGeral,
+    localRedespacho,
     notas: [...listaNotasExpedicao],
-    pesoTotal,
-    volumeTotal,
+    pesoTotal: totalPeso || pesoCalculado,
+    volumeTotal: totalVolume || volumeCalculado,
     status: "ENVIADA PARA EXPEDIÇÃO"
   };
 
@@ -2625,16 +3037,29 @@ function enviarOrdemParaExpedicao(){
 
   alert("Ordem enviada para Expedição com sucesso.");
 
+  document.getElementById("expPrevisaoEmbarque").value = "";
+  document.getElementById("expContratoLogistico").value = "";
   document.getElementById("expNumeroDespacho").value = "";
-  document.getElementById("expDataEmbarque").value = "";
-  document.getElementById("expTransportadora").value = "";
-  document.getElementById("expObservacao").value = "";
+  document.getElementById("expTotalValor").value = "";
+  document.getElementById("expTotalPeso").value = "";
+  document.getElementById("expTotalVolume").value = "";
+  document.getElementById("expObservacaoGeral").value = "";
+  document.getElementById("expLocalRedespacho").value = "";
 
   listaNotasExpedicao = [];
   renderizarNotasExpedicao();
 
   abrirTelaExpedicao("expedicaoOrdens");
 }
+
+
+
+
+
+
+
+
+
 
 function renderizarOrdensExpedicao(){
 
@@ -2649,7 +3074,7 @@ function renderizarOrdensExpedicao(){
   if(listaOrdensExpedicao.length === 0){
     tabela.innerHTML = `
       <tr>
-        <td colspan="7">Nenhuma ordem enviada ainda.</td>
+<td colspan="8">Nenhuma ordem enviada ainda.</td>
       </tr>
     `;
     return;
@@ -2659,9 +3084,10 @@ function renderizarOrdensExpedicao(){
     tabela.innerHTML += `
       <tr>
         <td>${ordem.numeroDespacho}</td>
-        <td>${formatarDataBR(ordem.dataEmbarque)}</td>
-        <td>${ordem.transportadora || "-"}</td>
-        <td>${ordem.notas.length}</td>
+        <td>${formatarDataBR(ordem.previsaoEmbarque)}</td>
+        <td>${ordem.contratoLogistico || "-"}</td>
+         <td>${ordem.notas.length}</td>
+        <td>${ordem.totalValor || "-"}</td>
         <td>${ordem.pesoTotal}</td>
         <td>${ordem.volumeTotal}</td>
         <td>${ordem.status}</td>
@@ -2669,7 +3095,6 @@ function renderizarOrdensExpedicao(){
     `;
   });
 }
-
 
 
 
