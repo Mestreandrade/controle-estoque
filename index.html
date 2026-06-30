@@ -2758,7 +2758,7 @@ async function verOrdemExpedicao(id){
 
   area.style.display = "block";
   area.innerHTML = `
-    <div class="card-produto">
+    
       <h3>Carregando ordem...</h3>
     </div>
   `;
@@ -2801,7 +2801,7 @@ async function verOrdemExpedicao(id){
   });
 
   area.innerHTML = `
-    <div class="card-produto">
+    <div class="card-produto" id="areaImpressaoOrdemExpedicao">
 
       <h3>👁️ Detalhes da Ordem de Carregamento</h3>
 
@@ -2848,9 +2848,16 @@ async function verOrdemExpedicao(id){
 
       <br>
 
-      <button class="btn-cinza" onclick="fecharDetalheOrdemExpedicao()">
-        Fechar Detalhes
-      </button>
+
+<button class="btn-verde" onclick="imprimirOrdemExpedicao()">
+  🖨️ Imprimir Ordem
+</button>
+
+<button class="btn-cinza" onclick="fecharDetalheOrdemExpedicao()">
+  Fechar Detalhes
+</button>
+
+
 
     </div>
   `;
@@ -2862,6 +2869,126 @@ function fecharDetalheOrdemExpedicao(){
   area.style.display = "none";
   area.innerHTML = "";
 }
+
+
+
+function imprimirOrdemExpedicao(){
+
+  const conteudo = document.getElementById("areaImpressaoOrdemExpedicao");
+
+  if(!conteudo){
+    alert("Abra uma ordem antes de imprimir.");
+    return;
+  }
+
+  const janela = window.open("", "_blank");
+
+  if(!janela){
+    alert("O navegador bloqueou a janela de impressão. Libere pop-ups para este site.");
+    return;
+  }
+
+  janela.document.open();
+
+  janela.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <title>Ordem de Carregamento</title>
+
+        <style>
+          body{
+            font-family: Arial;
+            margin: 25px;
+            color: #111827;
+          }
+
+          h2, h3{
+            margin-bottom: 10px;
+          }
+
+          p{
+            margin: 5px 0;
+            font-size: 13px;
+          }
+
+          table{
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 11px;
+          }
+
+          th{
+            background: #d9ead3;
+            color: #111827;
+            border: 1px solid #999;
+            padding: 6px;
+            text-align: center;
+          }
+
+          td{
+            border: 1px solid #999;
+            padding: 5px;
+            text-align: center;
+          }
+
+          button{
+            display: none !important;
+          }
+
+          .cabecalho-impressao{
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #111827;
+            padding-bottom: 10px;
+          }
+
+          .cabecalho-impressao h2{
+            margin: 0;
+            font-size: 20px;
+          }
+
+          .cabecalho-impressao small{
+            font-size: 12px;
+            color: #475569;
+          }
+
+          .card-produto{
+            border: none;
+            box-shadow: none;
+            padding: 0;
+          }
+
+          @media print{
+            button{
+              display:none !important;
+            }
+          }
+        </style>
+      </head>
+
+      <body>
+
+        <div class="cabecalho-impressao">
+          <h2>ORDEM DE CARREGAMENTO</h2>
+          <small>MontStock - Plataforma de Gestão Operacional</small>
+        </div>
+
+        ${conteudo.innerHTML}
+
+      </body>
+    </html>
+  `);
+
+  janela.document.close();
+
+  setTimeout(() => {
+    janela.focus();
+    janela.print();
+  }, 700);
+}
+
 
 
 
