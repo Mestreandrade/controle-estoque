@@ -2849,6 +2849,10 @@ async function verOrdemExpedicao(id){
       <br>
 
 
+<button class="btn-verde" onclick="iniciarCarregamentoExpedicao('${ordem.id}')">
+  ✅ Iniciar Carregamento
+</button>
+
 <button class="btn-verde" onclick="imprimirOrdemExpedicao()">
   🖨️ Imprimir Ordem
 </button>
@@ -2870,6 +2874,32 @@ function fecharDetalheOrdemExpedicao(){
   area.innerHTML = "";
 }
 
+async function iniciarCarregamentoExpedicao(id){
+
+  const confirmar = confirm("Deseja iniciar o carregamento desta ordem?");
+
+  if(!confirmar){
+    return;
+  }
+
+  const resposta = await fetch(`/expedicao-ordens/${id}/iniciar-carregamento`, {
+    method: "PUT",
+    headers: headersComPerfil()
+  });
+
+  if(!resposta.ok){
+    const erro = await resposta.text();
+    alert(erro || "Erro ao iniciar carregamento.");
+    return;
+  }
+
+  const resultado = await resposta.json();
+
+  alert(resultado.mensagem || "Carregamento iniciado com sucesso.");
+
+  fecharDetalheOrdemExpedicao();
+  renderizarOrdensExpedicao();
+}
 
 
 function imprimirOrdemExpedicao(){
@@ -3355,8 +3385,11 @@ async function renderizarOrdensExpedicao(){
   <button class="btn-azul" onclick="verOrdemExpedicao('${ordem.id}')">
     👁️ Ver
   </button>
-</td>
 
+  <button class="btn-verde" onclick="iniciarCarregamentoExpedicao('${ordem.id}')">
+    ✅ Iniciar
+  </button>
+</td>
       </tr>
     `;
   });

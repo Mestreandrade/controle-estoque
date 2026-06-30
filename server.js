@@ -1633,6 +1633,39 @@ app.get("/expedicao-ordens/:id", (req, res) => {
 
 
 
+app.put("/expedicao-ordens/:id/iniciar-carregamento", adminOuOperador, (req, res) => {
+    const { id } = req.params;
+
+    db.run(
+        `
+        UPDATE expedicao_ordens
+        SET status = ?
+        WHERE id = ?
+        `,
+        ["EM CARREGAMENTO", id],
+        function(err){
+
+            if(err){
+                console.error("Erro ao iniciar carregamento:", err);
+                return res.status(500).send("Erro ao iniciar carregamento.");
+            }
+
+            res.json({
+                mensagem: "Carregamento iniciado com sucesso."
+            });
+        }
+    );
+});
+
+
+
+
+
+
+
+
+
+
 
 /* FUNÇÃO AUXILIAR */
 
