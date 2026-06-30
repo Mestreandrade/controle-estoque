@@ -1371,6 +1371,269 @@ app.post("/inventario/ajustar/:id", somenteAdmin, (req, res) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+/* EXPEDIÇÃO - ORDENS DE CARREGAMENTO */
+
+function numeroBRParaBanco(valor){
+
+    if(valor === null || valor === undefined || valor === ""){
+        return 0;
+    }
+
+    if(typeof valor === "number"){
+        return valor;
+    }
+
+    let texto = String(valor)
+        .replace("R$", "")
+        .replace(/\./g, "")
+        .replace(",", ".")
+        .trim();
+
+    const numero = Number(texto);
+
+    return isNaN(numero) ? 0 : numero;
+}
+
+app.post("/expedicao-ordens", adminOuOperador, (req, res) => {
+
+    const {
+        previsaoEmbarque,
+        contratoLogistico,
+        numeroDespacho,
+        totalValor,
+        totalPeso,
+        totalVolume,
+        observacaoGeral,
+        localRedespacho,
+        notas
+    } = req.body;
+
+    const usuario = req.headers.usuario || "Sistema";
+
+    if(!previsaoEmbarque){
+        return res.status(400).send("Informe a previsão de embarque");
+    }
+
+    if(!contratoLogistico){
+        return res.status(400).send("Informe o contrato logístico");
+    }
+
+    if(!numeroDespacho){
+        return res.status(400).send("Informe o número do despacho");
+    }
+
+    if(!notas || notas.length === 0){
+        return res.status(400).send("Adicione pelo menos uma NF-e");
+    }
+
+    const notasUnicas = new Set();
+
+    for(const nota of notas){
+
+        const nfe = String(nota.nfe || "").replace(/\D/g, "");
+
+        if(nfe.length !== 7){
+            return res.status(400).send("Todas as NF-e devem conter exatamente 7 dígitos");
+        }
+
+        if(notasUnicas.has(nfe)){
+            return res.status(400).send("Existe NF-e duplicada nesta Ordem de Carregamento");
+        }
+
+        notasUnicas.add(nfe);
+    }
+
+    db.get(
+        `
+        INSERT INTO expedicao_ordens
+        (
+            previsao_embarque,
+            contrato_logistico,
+            numero_despacho,
+            total_valor,
+            total_peso,
+            total_volume,
+            observacao_geral,
+            local_redespacho,
+            status,
+            usuario_criacao
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        RETURNING id
+        `,
+        [
+            previsaoEmbarque,
+            contratoLogistico,
+            numeroDespacho,
+            numeroBRParaBanco(totalValor),
+            Number(totalPeso || 0),
+            Number(totalVolume || 0),
+            observacaoGeral || "",
+            localRedespacho || "",
+            "ENVIADA PARA EXPEDIÇÃO",
+            usuario
+        ],
+        (err, ordem) => {
+
+            if(err || !ordem){
+                return res.status(500).send("Erro ao salvar Ordem de Carregamento");
+            }
+
+            let index = 0;
+
+            function inserirProximaNota(){
+
+                if(index >= notas.length){
+                    return res.json({
+                        sucesso: true,
+                        mensagem: "Ordem de Carregamento salva com sucesso",
+                        ordem_id: ordem.id
+                    });
+                }
+
+                const nota = notas[index];
+
+                db.run(
+                    `
+                    INSERT INTO expedicao_ordem_notas
+                    (
+                        ordem_id,
+                        sequencia,
+                        nfe,
+                        cliente,
+                        cidade,
+                        uf,
+                        valor_nfe,
+                        peso_bruto,
+                        volume,
+                        paletizado,
+                        data_agendamento,
+                        obs
+                    )
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    `,
+                    [
+                        ordem.id,
+                        Number(nota.seq || index + 1),
+                        String(nota.nfe || "").replace(/\D/g, ""),
+                        nota.cliente || "",
+                        nota.cidade || "",
+                        nota.uf || "",
+                        numeroBRParaBanco(nota.valorNfe),
+                        Number(nota.pesoBruto || 0),
+                        Number(nota.volume || 0),
+                        nota.paletizado || "",
+                        nota.data || null,
+                        nota.obsLinha || ""
+                    ],
+                    function(err){
+
+                        if(err){
+                            return res.status(500).send("Erro ao salvar NF-e da ordem");
+                        }
+
+                        index++;
+                        inserirProximaNota();
+                    }
+                );
+            }
+
+            inserirProximaNota();
+        }
+    );
+});
+
+
+app.get("/expedicao-ordens", (req, res) => {
+
+    db.all(
+        `
+        SELECT
+            o.id,
+            o.previsao_embarque,
+            o.contrato_logistico,
+            o.numero_despacho,
+            o.total_valor,
+            o.total_peso,
+            o.total_volume,
+            o.status,
+            o.usuario_criacao,
+            o.data_criacao,
+            COUNT(n.id) AS quantidade_notas
+        FROM expedicao_ordens o
+        LEFT JOIN expedicao_ordem_notas n
+            ON n.ordem_id = o.id
+        GROUP BY o.id
+        ORDER BY o.id DESC
+        `,
+        [],
+        (err, rows) => {
+            if(err){
+                return res.status(500).send("Erro ao buscar ordens de carregamento");
+            }
+
+            res.json(rows);
+        }
+    );
+});
+
+
+app.get("/expedicao-ordens/:id", (req, res) => {
+
+    const id = req.params.id;
+
+    db.get(
+        `
+        SELECT *
+        FROM expedicao_ordens
+        WHERE id = ?
+        `,
+        [id],
+        (err, ordem) => {
+
+            if(err || !ordem){
+                return res.status(404).send("Ordem não encontrada");
+            }
+
+            db.all(
+                `
+                SELECT *
+                FROM expedicao_ordem_notas
+                WHERE ordem_id = ?
+                ORDER BY sequencia
+                `,
+                [id],
+                (err, notas) => {
+
+                    if(err){
+                        return res.status(500).send("Erro ao buscar notas da ordem");
+                    }
+
+                    ordem.notas = notas;
+                    res.json(ordem);
+                }
+            );
+        }
+    );
+});
+
+
+
+
+
+
+
+
 /* FUNÇÃO AUXILIAR */
 
 function registrarMovimentacao(produto_id, lote, rack, tipo, quantidade, usuario){
