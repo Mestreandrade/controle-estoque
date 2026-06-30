@@ -2974,7 +2974,7 @@ function atualizarTotaisExpedicao(){
 
 
 
-function enviarOrdemParaExpedicao(){
+async function enviarOrdemParaExpedicao(){
 
   const previsaoEmbarque = document.getElementById("expPrevisaoEmbarque").value;
   const contratoLogistico = document.getElementById("expContratoLogistico").value;
@@ -2988,15 +2988,14 @@ function enviarOrdemParaExpedicao(){
   const localRedespacho = document.getElementById("expLocalRedespacho").value.trim();
 
   if(previsaoEmbarque === ""){
-    alert("Informe a previsão prevista para embarque.");
+    alert("Informe a previsão de embarque.");
     return;
   }
 
-
-if(contratoLogistico === ""){
-  alert("Informe o contrato logístico.");
-  return;
-}
+  if(contratoLogistico === ""){
+    alert("Informe o contrato logístico.");
+    return;
+  }
 
   if(numeroDespacho === ""){
     alert("Informe o número do despacho.");
@@ -3004,38 +3003,37 @@ if(contratoLogistico === ""){
   }
 
   if(listaNotasExpedicao.length === 0){
-    alert("Adicione pelo menos uma linha na ordem.");
+    alert("Adicione pelo menos uma NF-e na ordem.");
     return;
   }
-
-  const pesoCalculado = listaNotasExpedicao.reduce(
-    (soma, item) => soma + Number(item.pesoBruto),
-    0
-  );
-
-  const volumeCalculado = listaNotasExpedicao.reduce(
-    (soma, item) => soma + Number(item.volume),
-    0
-  );
 
   const ordem = {
     previsaoEmbarque,
     contratoLogistico,
     numeroDespacho,
     totalValor,
-    totalPeso: totalPeso || pesoCalculado,
-    totalVolume: totalVolume || volumeCalculado,
+    totalPeso,
+    totalVolume,
     observacaoGeral,
     localRedespacho,
-    notas: [...listaNotasExpedicao],
-    pesoTotal: totalPeso || pesoCalculado,
-    volumeTotal: totalVolume || volumeCalculado,
-    status: "ENVIADA PARA EXPEDIÇÃO"
+    notas: listaNotasExpedicao
   };
 
-  listaOrdensExpedicao.push(ordem);
+  const resposta = await fetch("/expedicao-ordens", {
+    method: "POST",
+    headers: headersComPerfil(),
+    body: JSON.stringify(ordem)
+  });
 
-  alert("Ordem enviada para Expedição com sucesso.");
+  if(!resposta.ok){
+    const erro = await resposta.text();
+    alert(erro);
+    return;
+  }
+
+  const resultado = await resposta.json();
+
+  alert(resultado.mensagem || "Ordem enviada para Expedição com sucesso.");
 
   document.getElementById("expPrevisaoEmbarque").value = "";
   document.getElementById("expContratoLogistico").value = "";
@@ -3048,6 +3046,7 @@ if(contratoLogistico === ""){
 
   listaNotasExpedicao = [];
   renderizarNotasExpedicao();
+  atualizarTotaisExpedicao();
 
   abrirTelaExpedicao("expedicaoOrdens");
 }
@@ -3059,9 +3058,7 @@ if(contratoLogistico === ""){
 
 
 
-
-
-function renderizarOrdensExpedicao(){
+async function renderizarOrdensExpedicao(){
 
   const tabela = document.getElementById("tabelaOrdensExpedicao");
 
@@ -3069,34 +3066,54 @@ function renderizarOrdensExpedicao(){
     return;
   }
 
-  tabela.innerHTML = "";
+  tabela.innerHTML = `
+    <tr>
+      <td colspan="8">Carregando ordens...</td>
+    </tr>
+  `;
 
-  if(listaOrdensExpedicao.length === 0){
+  const resposta = await fetch("/expedicao-ordens");
+
+  if(!resposta.ok){
     tabela.innerHTML = `
       <tr>
-<td colspan="8">Nenhuma ordem enviada ainda.</td>
+        <td colspan="8">Erro ao carregar ordens.</td>
       </tr>
     `;
     return;
   }
 
-  listaOrdensExpedicao.forEach(ordem => {
+  const ordens = await resposta.json();
+
+  tabela.innerHTML = "";
+
+  if(ordens.length === 0){
+    tabela.innerHTML = `
+      <tr>
+        <td colspan="8">Nenhuma ordem enviada ainda.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  ordens.forEach(ordem => {
     tabela.innerHTML += `
       <tr>
-        <td>${ordem.numeroDespacho}</td>
-        <td>${formatarDataBR(ordem.previsaoEmbarque)}</td>
-        <td>${ordem.contratoLogistico || "-"}</td>
-         <td>${ordem.notas.length}</td>
-        <td>${ordem.totalValor || "-"}</td>
-        <td>${ordem.pesoTotal}</td>
-        <td>${ordem.volumeTotal}</td>
+        <td>${ordem.numero_despacho}</td>
+        <td>${formatarDataBR(ordem.previsao_embarque)}</td>
+        <td>${ordem.contrato_logistico || "-"}</td>
+        <td>${ordem.quantidade_notas}</td>
+        <td>${Number(ordem.total_valor || 0).toLocaleString("pt-BR", {
+          style: "currency",
+          currency: "BRL"
+        })}</td>
+        <td>${ordem.total_peso}</td>
+        <td>${ordem.total_volume}</td>
         <td>${ordem.status}</td>
       </tr>
     `;
   });
 }
-
-
 
 
 
@@ -5631,28 +5648,29 @@ function filtrarHistorico(){
 }
 
 
+
+
+
 function formatarDataBR(dataISO){
 
   if(!dataISO){
-    return "";
+    return "-";
   }
 
-  if(!isNaN(dataISO)){
-    const data = new Date((Number(dataISO) - 25569) * 86400 * 1000);
+  const data = new Date(dataISO);
 
-    return data.toLocaleDateString("pt-BR", {
-      timeZone: "UTC"
-    });
+  if(isNaN(data.getTime())){
+    return "-";
   }
 
-  const partes = dataISO.split("-");
-
-  if(partes.length !== 3){
-    return dataISO;
-  }
-
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+  return data.toLocaleDateString("pt-BR", {
+    timeZone: "UTC"
+  });
 }
+
+
+
+
 
 
 function calcularDiasFabricacao(dataISO){
